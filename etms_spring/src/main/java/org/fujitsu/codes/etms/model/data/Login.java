@@ -2,6 +2,8 @@ package org.fujitsu.codes.etms.model.data;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -17,11 +19,12 @@ public class Login {
     @Column(name = "password", nullable = false, length = 255)
     private String password;
 
-    @Transient
-    private Long loginId;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, length = 20)
+    private UserRole role;
 
     @Transient
-    private String role;
+    private Long loginId;
 
     public Long getLoginId() {
         return loginId;
@@ -47,11 +50,11 @@ public class Login {
         this.password = password;
     }
 
-    public String getRole() {
+    public UserRole getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(UserRole role) {
         this.role = role;
     }
 }
