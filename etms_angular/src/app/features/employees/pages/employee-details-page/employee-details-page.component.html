@@ -1,0 +1,20 @@
+<h2>Employee Details</h2>
+
+<p *ngIf="loading">Loading...</p>
+<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+
+<div *ngIf="employee && !loading">
+  <p><strong>ID:</strong> {{ employee.employeeId }}</p>
+  <p><strong>Code:</strong> {{ employee.employeeCode }}</p>
+  <p><strong>Name:</strong> {{ employee.firstName }} {{ employee.lastName }}</p>
+  <p><strong>Email:</strong> {{ employee.email }}</p>
+  <p><strong>Hire Date:</strong> {{ employee.hireDate || '-' }}</p>
+  <p><strong>Active:</strong> {{ employee.active ? 'Yes' : 'No' }}</p>
+  <p><strong>Created At:</strong> {{ employee.createdAt || '-' }}</p>
+  <p><strong>Updated At:</strong> {{ employee.updatedAt || '-' }}</p>
+
+  <p>
+    <a routerLink="/employees">Back</a> |
+    <a [routerLink]="['/employees', employee.employeeId, 'edit']">Edit</a>
+  </p>
+</div>

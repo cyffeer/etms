@@ -1,0 +1,13 @@
+<h2>Department Member Details</h2>
+<p *ngIf="loading">Loading...</p>
+<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+
+<div *ngIf="!loading && item">
+  <p><strong>ID:</strong> {{ item.deptMemberId }}</p>
+  <p><strong>Department Code:</strong> {{ item.departmentCode }}</p>
+  <p><strong>Employee Number:</strong> {{ item.employeeNumber }}</p>
+  <p><strong>Member Start:</strong> {{ item.memberStart | date:'yyyy-MM-dd' }}</p>
+  <p><strong>Member End:</strong> {{ item.memberEnd ? (item.memberEnd | date:'yyyy-MM-dd') : '-' }}</p>
+  <a routerLink="/department-members">Back</a> |
+  <a [routerLink]="['/department-members', item.deptMemberId, 'edit']">Edit</a>
+</div>

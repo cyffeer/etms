@@ -1,0 +1,92 @@
+.hrms-page {
+  background: #eef5fb;
+}
+
+.hrms-page-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f4f75;
+  margin-bottom: 10px;
+}
+
+.hrms-section {
+  border: 1px solid #b7c7d8;
+  background: #fff;
+  border-radius: 0;
+}
+
+.hrms-section-header {
+  background: linear-gradient(#3f7ead, #2f6791);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-bottom: 1px solid #b7c7d8;
+}
+
+.hrms-section-body {
+  padding: 12px;
+  background: #f9fcff;
+}
+
+.form-label {
+  font-size: 12px;
+  margin-bottom: 4px;
+  color: #334;
+}
+
+.form-control,
+.form-select {
+  border-radius: 0;
+  border-color: #9fb3c7;
+  font-size: 12px;
+}
+
+.hrms-table {
+  font-size: 12px;
+}
+
+.hrms-table th {
+  background: #dceaf6;
+  color: #234c6e;
+  border-color: #b7c7d8;
+  font-weight: 600;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.hrms-table td {
+  background: #fff;
+  border-color: #c7d7e5;
+  vertical-align: middle;
+}
+
+.hrms-btn {
+  background: #f39c12;
+  border: 1px solid #e08e0b;
+  color: #fff;
+  border-radius: 0;
+  min-width: 80px;
+}
+
+.attendance-legend {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 12px;
+  color: #234c6e;
+}
+
+.attendance-legend .box {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  border: 1px solid #8aa4ba;
+  vertical-align: middle;
+}
+
+.present { background: #9be29b; }
+.absent { background: #ef9a9a; }
+.holiday { background: #f3d57a; }
+.today { background: #8dc6ff; }

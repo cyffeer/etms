@@ -1,0 +1,22 @@
+<h2>{{ isEdit ? 'Edit Attendance' : 'Create Attendance' }}</h2>
+<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <label>Employee Number</label><br />
+  <input type="text" formControlName="employeeNumber" /><br /><br />
+
+  <label>Attendance Date</label><br />
+  <input type="date" formControlName="attendanceDate" /><br /><br />
+
+  <label>Time In</label><br />
+  <input type="time" formControlName="timeIn" /><br /><br />
+
+  <label>Time Out</label><br />
+  <input type="time" formControlName="timeOut" /><br /><br />
+
+  <label>Status</label><br />
+  <input type="text" formControlName="status" /><br /><br />
+
+  <button type="submit" [disabled]="loading">{{ loading ? 'Saving...' : 'Save' }}</button>
+  <a routerLink="/attendance" style="margin-left:8px;">Cancel</a>
+</form>

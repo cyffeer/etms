@@ -1,0 +1,17 @@
+<h2>NP Level Info Details</h2>
+<p *ngIf="loading">Loading...</p>
+<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+
+<div *ngIf="!loading && item">
+  <p><strong>ID:</strong> {{ item.npLvlInfoId }}</p>
+  <p><strong>Code:</strong> {{ item.npLvlInfoCode }}</p>
+  <p><strong>Name:</strong> {{ item.npLvlInfoName }}</p>
+  <p><strong>NP Type Code:</strong> {{ item.npTypeCode }}</p>
+  <p><strong>Valid From:</strong> {{ item.validFrom ? (item.validFrom | date:'yyyy-MM-dd') : '-' }}</p>
+  <p><strong>Valid To:</strong> {{ item.validTo ? (item.validTo | date:'yyyy-MM-dd') : '-' }}</p>
+  <p><strong>Allowance Amount:</strong> {{ item.allowanceAmount ?? '-' }}</p>
+  <p><strong>Allowance Currency:</strong> {{ item.allowanceCurrency || '-' }}</p>
+  <p><strong>Active:</strong> {{ item.active ? 'Yes' : 'No' }}</p>
+  <a routerLink="/np-lvl-info">Back</a> |
+  <a [routerLink]="['/np-lvl-info', item.npLvlInfoId, 'edit']">Edit</a>
+</div>

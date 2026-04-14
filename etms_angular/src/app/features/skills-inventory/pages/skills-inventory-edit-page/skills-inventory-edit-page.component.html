@@ -1,0 +1,23 @@
+<h2>Edit Skills Inventory</h2>
+<p *ngIf="loading">Loading...</p>
+<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+
+<form *ngIf="!loading" [formGroup]="form" (ngSubmit)="submit()">
+  <label>Employee Number *</label><br />
+  <input type="text" formControlName="employeeNumber" /><br /><br />
+
+  <label>Skill *</label><br />
+  <select formControlName="skillId" (change)="onSkillChange()">
+    <option [ngValue]="null">-- Select skill --</option>
+    <option *ngFor="let s of skills" [ngValue]="s.skillId">{{ s.skillName }} ({{ s.skillCode }})</option>
+  </select><br /><br />
+
+  <label>Skill Level *</label><br />
+  <select formControlName="skillLvlId">
+    <option [ngValue]="null">-- Select level --</option>
+    <option *ngFor="let l of levels" [ngValue]="l.skillLvlId">{{ l.lvlName }} ({{ l.lvlCode }})</option>
+  </select><br /><br />
+
+  <button type="submit">Update</button>
+  <a routerLink="/skills-inventory" style="margin-left:8px;">Cancel</a>
+</form>

@@ -1,0 +1,18 @@
+<h2>Department Details</h2>
+
+<p *ngIf="loading">Loading...</p>
+<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+
+<div *ngIf="department && !loading">
+  <p><strong>ID:</strong> {{ department.departmentId }}</p>
+  <p><strong>Code:</strong> {{ department.departmentCode }}</p>
+  <p><strong>Name:</strong> {{ department.departmentName }}</p>
+  <p><strong>Active:</strong> {{ department.active ? 'Yes' : 'No' }}</p>
+  <p><strong>Created At:</strong> {{ department.createdAt || '-' }}</p>
+  <p><strong>Updated At:</strong> {{ department.updatedAt || '-' }}</p>
+
+  <p>
+    <a routerLink="/departments">Back</a> |
+    <a [routerLink]="['/departments', department.departmentId, 'edit']">Edit</a>
+  </p>
+</div>

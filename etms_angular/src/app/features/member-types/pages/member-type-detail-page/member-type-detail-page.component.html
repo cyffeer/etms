@@ -1,0 +1,12 @@
+<h2>Member Type Details</h2>
+<p *ngIf="loading">Loading...</p>
+<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+
+<div *ngIf="!loading && memberType">
+  <p><strong>ID:</strong> {{ memberType.memberTypeId }}</p>
+  <p><strong>Code:</strong> {{ memberType.memberTypeCode }}</p>
+  <p><strong>Name:</strong> {{ memberType.memberTypeName }}</p>
+  <p><strong>Active:</strong> {{ memberType.active ? 'Yes' : 'No' }}</p>
+  <a routerLink="/member-types">Back</a> |
+  <a [routerLink]="['/member-types', memberType.memberTypeId, 'edit']">Edit</a>
+</div>

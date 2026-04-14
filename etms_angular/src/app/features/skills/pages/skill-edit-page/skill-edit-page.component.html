@@ -1,0 +1,12 @@
+<h2>Edit Skill</h2>
+<p *ngIf="loading">Loading...</p>
+<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+
+<form *ngIf="!loading" [formGroup]="form" (ngSubmit)="submit()">
+  <label>Skill Code *</label><br /><input type="text" formControlName="skillCode" /><br /><br />
+  <label>Skill Name *</label><br /><input type="text" formControlName="skillName" /><br /><br />
+  <label>Description</label><br /><input type="text" formControlName="description" /><br /><br />
+  <label><input type="checkbox" formControlName="active" /> Active</label><br /><br />
+  <button type="submit">Update</button>
+  <a routerLink="/skills" style="margin-left:8px;">Cancel</a>
+</form>

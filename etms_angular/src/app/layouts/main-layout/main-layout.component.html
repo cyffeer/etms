@@ -1,0 +1,39 @@
+<div class="etms-shell">
+  <header class="etms-topbar">
+    <div>
+      <p class="etms-kicker mb-1">Administration • Monitoring and Management • Nihongo Proficiency</p>
+      <h1 class="etms-title mb-0">Employee Training Management System</h1>
+    </div>
+
+    <div class="etms-userpanel" *ngIf="user$ | async as user">
+      <div class="small text-uppercase text-secondary">Logged In</div>
+      <div class="fw-semibold">{{ user.username }}</div>
+      <div class="text-muted small">{{ user.role || 'ETMS User' }}</div>
+      <button class="btn btn-warning btn-sm mt-2" type="button" (click)="logout()">Logout</button>
+    </div>
+  </header>
+
+  <div class="etms-body">
+    <aside class="etms-sidebar">
+      <div class="etms-sidebar-heading">Modules</div>
+
+      <nav class="nav flex-column gap-2">
+        <a
+          *ngFor="let item of navItems"
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          class="etms-nav-link"
+        >
+          <span class="etms-nav-label">{{ item.label }}</span>
+          <small class="etms-nav-meta">{{ item.description || 'ETMS Module' }}</small>
+        </a>
+      </nav>
+    </aside>
+
+    <main class="etms-content">
+      <div class="etms-page-frame">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+  </div>
+</div>

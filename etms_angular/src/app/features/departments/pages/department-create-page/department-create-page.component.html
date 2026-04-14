@@ -1,0 +1,27 @@
+<h2>Create Department</h2>
+
+<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <label>Department Code *</label><br />
+  <input type="text" formControlName="departmentCode" />
+  <small *ngIf="form.controls.departmentCode.touched && form.controls.departmentCode.invalid" style="color:#b91c1c">
+    Required (max 30).
+  </small>
+  <br /><br />
+
+  <label>Department Name *</label><br />
+  <input type="text" formControlName="departmentName" />
+  <small *ngIf="form.controls.departmentName.touched && form.controls.departmentName.invalid" style="color:#b91c1c">
+    Required (max 150).
+  </small>
+  <br /><br />
+
+  <label><input type="checkbox" formControlName="active" /> Active</label>
+  <br /><br />
+
+  <button type="submit" [disabled]="loading">Save</button>
+  <a routerLink="/departments" style="margin-left:8px;">Cancel</a>
+</form>
+
+<p *ngIf="loading">Saving...</p>

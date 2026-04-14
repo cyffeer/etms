@@ -1,0 +1,30 @@
+<section class="page-hero mb-4">
+  <span class="page-hero__eyebrow">ETMS Overview</span>
+  <h2 class="page-hero__title">Administration And Monitoring Dashboard</h2>
+  <p class="page-hero__copy">
+    This dashboard is now reading live counts from the Spring backend so the Angular shell reflects the current ETMS records.
+  </p>
+</section>
+
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+<div *ngIf="loading" class="alert alert-info">Loading ETMS summary...</div>
+
+<div class="row g-3 mb-4" *ngIf="!loading">
+  <div class="col-12 col-md-6 col-xl-4" *ngFor="let card of cards">
+    <a [routerLink]="card.route" class="dashboard-card text-decoration-none">
+      <div class="dashboard-card__count">{{ card.count }}</div>
+      <div class="dashboard-card__label">{{ card.label }}</div>
+      <div class="dashboard-card__note">{{ card.note }}</div>
+    </a>
+  </div>
+</div>
+
+<div class="dashboard-banner">
+  <div>
+    <h3 class="h5 mb-2">Current Scope</h3>
+    <p class="mb-0 text-muted">
+      Administration, Monitoring and Management, Nihongo Proficiency Monitoring, Leave and Attendance Monitoring,
+      Travelling Information, and Skills Inventory modules can now be wired from this shell.
+    </p>
+  </div>
+</div>

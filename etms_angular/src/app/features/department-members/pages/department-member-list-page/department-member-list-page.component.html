@@ -1,0 +1,59 @@
+<section class="page-hero mb-4">
+  <span class="page-hero__eyebrow">Administration</span>
+  <h2 class="page-hero__title">Department Membership Search</h2>
+  <p class="page-hero__copy">Track employee-to-department assignments by department code or employee number.</p>
+</section>
+
+<div class="page-toolbar">
+  <div>
+    <label class="form-label">Department Code</label>
+    <input class="form-control" [(ngModel)]="filters.departmentCode" name="departmentCodeFilter" />
+  </div>
+  <div>
+    <label class="form-label">Employee Number</label>
+    <input class="form-control" [(ngModel)]="filters.employeeNumber" name="departmentMemberEmployeeFilter" />
+  </div>
+  <div class="page-actions ms-auto">
+    <button class="btn btn-primary" type="button" (click)="load()">Search</button>
+    <button class="btn btn-outline-secondary" type="button" (click)="resetFilters()">Reset</button>
+    <a class="btn btn-warning" routerLink="/department-members/new">Add Membership</a>
+  </div>
+</div>
+
+<div *ngIf="loading" class="alert alert-info">Loading department memberships...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<div class="table-responsive" *ngIf="!loading && !error && rows.length > 0">
+  <table class="table align-middle mb-0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Department Code</th>
+        <th>Employee #</th>
+        <th>Start</th>
+        <th>End</th>
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of rows">
+        <td>{{ row.deptMemberId }}</td>
+        <td>{{ row.departmentCode }}</td>
+        <td>{{ row.employeeNumber }}</td>
+        <td>{{ row.memberStart | date:'yyyy-MM-dd' }}</td>
+        <td>{{ row.memberEnd ? (row.memberEnd | date:'yyyy-MM-dd') : '-' }}</td>
+        <td class="text-end">
+          <div class="page-actions justify-content-end">
+            <a class="btn btn-sm btn-outline-primary" [routerLink]="['/department-members', row.deptMemberId]">View</a>
+            <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/department-members', row.deptMemberId, 'edit']">Edit</a>
+            <button class="btn btn-sm btn-outline-danger" type="button" (click)="onDelete(row.deptMemberId)">Delete</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="empty-state" *ngIf="!loading && !error && rows.length === 0">
+  No department membership records matched the current search.
+</div>

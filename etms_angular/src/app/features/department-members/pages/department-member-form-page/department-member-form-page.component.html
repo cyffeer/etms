@@ -1,0 +1,19 @@
+<h2>{{ isEdit ? 'Edit Department Member' : 'Create Department Member' }}</h2>
+<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <label>Department Code</label><br />
+  <input type="text" formControlName="departmentCode" /><br /><br />
+
+  <label>Employee Number</label><br />
+  <input type="text" formControlName="employeeNumber" /><br /><br />
+
+  <label>Member Start</label><br />
+  <input type="date" formControlName="memberStart" /><br /><br />
+
+  <label>Member End</label><br />
+  <input type="date" formControlName="memberEnd" /><br /><br />
+
+  <button type="submit" [disabled]="loading">{{ loading ? 'Saving...' : 'Save' }}</button>
+  <a routerLink="/department-members" style="margin-left:8px;">Cancel</a>
+</form>

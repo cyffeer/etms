@@ -1,0 +1,80 @@
+.hrms-page {
+  background: #eef5fb;
+}
+
+.hrms-page-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f4f75;
+  margin-bottom: 10px;
+}
+
+.hrms-card {
+  border: 1px solid #b7c7d8;
+  border-radius: 0;
+  background: #fff;
+  min-height: 120px;
+}
+
+.hrms-card-header {
+  background: linear-gradient(#3f7ead, #2f6791);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-bottom: 1px solid #b7c7d8;
+}
+
+.hrms-card-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2f6791;
+  line-height: 1.1;
+}
+
+.hrms-card-subtitle {
+  font-size: 12px;
+  color: #5b6b7a;
+}
+
+.hrms-section {
+  border: 1px solid #b7c7d8;
+  background: #fff;
+  border-radius: 0;
+}
+
+.hrms-section-header {
+  background: linear-gradient(#3f7ead, #2f6791);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-bottom: 1px solid #b7c7d8;
+}
+
+.hrms-section-body {
+  padding: 12px;
+  background: #f9fcff;
+}
+
+.hrms-table {
+  font-size: 12px;
+}
+
+.hrms-table th {
+  background: #dceaf6;
+  color: #234c6e;
+  border-color: #b7c7d8;
+  font-weight: 600;
+}
+
+.hrms-table td {
+  border-color: #c7d7e5;
+}
+
+.hrms-links .list-group-item {
+  border-color: #c7d7e5;
+  border-radius: 0;
+  font-size: 12px;
+  background: #fff;
+}

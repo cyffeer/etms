@@ -1,0 +1,17 @@
+<div class="page-container">
+  <h2>Leave Details</h2>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  <div *ngIf="loading">Loading...</div>
+
+  <div *ngIf="!loading && item">
+    <p><b>ID:</b> {{ item.leaveRecordId }}</p>
+    <p><b>Employee #:</b> {{ item.employeeNumber }}</p>
+    <p><b>Leave Type:</b> {{ item.leaveType }}</p>
+    <p><b>Start Date:</b> {{ item.startDate | date:'yyyy-MM-dd' }}</p>
+    <p><b>End Date:</b> {{ item.endDate | date:'yyyy-MM-dd' }}</p>
+    <p><b>Status:</b> {{ item.status || '-' }}</p>
+    <p><b>Remarks:</b> {{ item.remarks || '-' }}</p>
+    <button class="btn btn-secondary" (click)="back()">Back</button>
+  </div>
+</div>

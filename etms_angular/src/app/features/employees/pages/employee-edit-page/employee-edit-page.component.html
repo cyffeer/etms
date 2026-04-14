@@ -1,0 +1,32 @@
+<h2>Edit Employee</h2>
+
+<p *ngIf="loading">Loading...</p>
+<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+
+<form *ngIf="!loading" [formGroup]="form" (ngSubmit)="submit()">
+  <label>Employee Code *</label><br />
+  <input type="text" formControlName="employeeCode" />
+  <br /><br />
+
+  <label>First Name *</label><br />
+  <input type="text" formControlName="firstName" />
+  <br /><br />
+
+  <label>Last Name *</label><br />
+  <input type="text" formControlName="lastName" />
+  <br /><br />
+
+  <label>Email *</label><br />
+  <input type="email" formControlName="email" />
+  <br /><br />
+
+  <label>Hire Date</label><br />
+  <input type="date" formControlName="hireDate" />
+  <br /><br />
+
+  <label><input type="checkbox" formControlName="active" /> Active</label>
+  <br /><br />
+
+  <button type="submit">Update</button>
+  <a routerLink="/employees" style="margin-left:8px;">Cancel</a>
+</form>

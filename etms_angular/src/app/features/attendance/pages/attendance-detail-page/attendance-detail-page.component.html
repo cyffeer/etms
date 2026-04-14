@@ -1,0 +1,14 @@
+<h2>Attendance Details</h2>
+<p *ngIf="loading">Loading...</p>
+<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+
+<div *ngIf="!loading && item">
+  <p><strong>ID:</strong> {{ item.attendanceRecordId }}</p>
+  <p><strong>Employee Number:</strong> {{ item.employeeNumber }}</p>
+  <p><strong>Date:</strong> {{ item.attendanceDate | date:'yyyy-MM-dd' }}</p>
+  <p><strong>Time In:</strong> {{ item.timeIn || '-' }}</p>
+  <p><strong>Time Out:</strong> {{ item.timeOut || '-' }}</p>
+  <p><strong>Status:</strong> {{ item.status || '-' }}</p>
+  <a routerLink="/attendance">Back</a> |
+  <a [routerLink]="['/attendance', item.attendanceRecordId, 'edit']">Edit</a>
+</div>

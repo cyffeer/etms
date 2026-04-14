@@ -1,0 +1,51 @@
+<section class="page-hero mb-4">
+  <span class="page-hero__eyebrow">Nihongo Proficiency</span>
+  <h2 class="page-hero__title">Nihongo Level Master Data</h2>
+  <p class="page-hero__copy">Maintain proficiency levels, allowances, and validity ranges for Nihongo monitoring.</p>
+</section>
+
+<div class="page-actions mb-3">
+  <a class="btn btn-warning" routerLink="/np-lvl-info/new">Add Nihongo Level</a>
+</div>
+
+<div *ngIf="loading" class="alert alert-info">Loading Nihongo levels...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<div class="table-responsive" *ngIf="!loading && !error && rows.length > 0">
+  <table class="table align-middle mb-0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Code</th>
+        <th>Name</th>
+        <th>NP Type</th>
+        <th>Status</th>
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of rows">
+        <td>{{ row.npLvlInfoId }}</td>
+        <td>{{ row.npLvlInfoCode }}</td>
+        <td>{{ row.npLvlInfoName }}</td>
+        <td>{{ row.npTypeCode }}</td>
+        <td>
+          <span class="status-pill" [ngClass]="row.active ? 'status-pill--active' : 'status-pill--inactive'">
+            {{ row.active ? 'Active' : 'Inactive' }}
+          </span>
+        </td>
+        <td class="text-end">
+          <div class="page-actions justify-content-end">
+            <a class="btn btn-sm btn-outline-primary" [routerLink]="['/np-lvl-info', row.npLvlInfoId]">View</a>
+            <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/np-lvl-info', row.npLvlInfoId, 'edit']">Edit</a>
+            <button class="btn btn-sm btn-outline-danger" type="button" (click)="onDelete(row.npLvlInfoId)">Delete</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="empty-state" *ngIf="!loading && !error && rows.length === 0">
+  No Nihongo level records are currently registered.
+</div>

@@ -1,0 +1,65 @@
+<section class="page-hero mb-4">
+  <span class="page-hero__eyebrow">Attendance Monitoring</span>
+  <h2 class="page-hero__title">Attendance Search</h2>
+  <p class="page-hero__copy">Filter ETMS attendance records by employee number, year, and month.</p>
+</section>
+
+<div class="page-toolbar">
+  <div>
+    <label class="form-label">Employee Number</label>
+    <input class="form-control" [(ngModel)]="filters.employeeNumber" name="attendanceEmployeeFilter" />
+  </div>
+  <div>
+    <label class="form-label">Year</label>
+    <input type="number" class="form-control" [(ngModel)]="filters.year" name="attendanceYearFilter" />
+  </div>
+  <div>
+    <label class="form-label">Month</label>
+    <input type="number" min="1" max="12" class="form-control" [(ngModel)]="filters.month" name="attendanceMonthFilter" />
+  </div>
+  <div class="page-actions ms-auto">
+    <button class="btn btn-primary" type="button" (click)="load()">Search</button>
+    <button class="btn btn-outline-secondary" type="button" (click)="resetFilters()">Reset</button>
+    <a class="btn btn-warning" routerLink="/attendance/new">Add Attendance</a>
+  </div>
+</div>
+
+<div *ngIf="loading" class="alert alert-info">Loading attendance records...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<div class="table-responsive" *ngIf="!loading && !error && rows.length > 0">
+  <table class="table align-middle mb-0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Employee #</th>
+        <th>Date</th>
+        <th>Time In</th>
+        <th>Time Out</th>
+        <th>Status</th>
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of rows">
+        <td>{{ row.attendanceRecordId }}</td>
+        <td>{{ row.employeeNumber }}</td>
+        <td>{{ row.attendanceDate | date:'yyyy-MM-dd' }}</td>
+        <td>{{ row.timeIn || '-' }}</td>
+        <td>{{ row.timeOut || '-' }}</td>
+        <td>{{ row.status || '-' }}</td>
+        <td class="text-end">
+          <div class="page-actions justify-content-end">
+            <a class="btn btn-sm btn-outline-primary" [routerLink]="['/attendance', row.attendanceRecordId]">View</a>
+            <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/attendance', row.attendanceRecordId, 'edit']">Edit</a>
+            <button class="btn btn-sm btn-outline-danger" type="button" (click)="onDelete(row.attendanceRecordId)">Delete</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="empty-state" *ngIf="!loading && !error && rows.length === 0">
+  No attendance records matched the current search.
+</div>

@@ -1,0 +1,49 @@
+<section class="page-hero mb-4">
+  <span class="page-hero__eyebrow">Administration</span>
+  <h2 class="page-hero__title">Member Types</h2>
+  <p class="page-hero__copy">Manage department membership classifications required by the ETMS master data screens.</p>
+</section>
+
+<div class="page-actions mb-3">
+  <a class="btn btn-warning" routerLink="/member-types/new">Add Member Type</a>
+</div>
+
+<div *ngIf="loading" class="alert alert-info">Loading member types...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<div class="table-responsive" *ngIf="!loading && !error && memberTypes.length > 0">
+  <table class="table align-middle mb-0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Code</th>
+        <th>Name</th>
+        <th>Status</th>
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of memberTypes">
+        <td>{{ item.memberTypeId }}</td>
+        <td>{{ item.memberTypeCode }}</td>
+        <td>{{ item.memberTypeName }}</td>
+        <td>
+          <span class="status-pill" [ngClass]="item.active ? 'status-pill--active' : 'status-pill--inactive'">
+            {{ item.active ? 'Active' : 'Inactive' }}
+          </span>
+        </td>
+        <td class="text-end">
+          <div class="page-actions justify-content-end">
+            <a class="btn btn-sm btn-outline-primary" [routerLink]="['/member-types', item.memberTypeId]">View</a>
+            <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/member-types', item.memberTypeId, 'edit']">Edit</a>
+            <button class="btn btn-sm btn-outline-danger" type="button" (click)="onDelete(item.memberTypeId)">Delete</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="empty-state" *ngIf="!loading && !error && memberTypes.length === 0">
+  No member types are currently registered.
+</div>

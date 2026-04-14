@@ -1,0 +1,26 @@
+<section class="page-hero mb-4">
+  <span class="page-hero__eyebrow">Monitoring And Management</span>
+  <h2 class="page-hero__title">Assign Training</h2>
+  <p class="page-hero__copy">Create a training history assignment using the real ETMS backend key pair: employee number and training ID.</p>
+</section>
+
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<form [formGroup]="form" (ngSubmit)="submit()" class="row g-3">
+  <div class="col-md-6">
+    <label class="form-label">Employee Number *</label>
+    <input formControlName="employeeNumber" class="form-control" />
+  </div>
+
+  <div class="col-md-6">
+    <label class="form-label">Training ID *</label>
+    <input type="number" formControlName="trngId" class="form-control" />
+  </div>
+
+  <div class="col-12 d-flex gap-2">
+    <button type="submit" [disabled]="form.invalid || saving" class="btn btn-primary">
+      {{ saving ? 'Saving...' : 'Assign Training' }}
+    </button>
+    <button type="button" (click)="cancel()" class="btn btn-outline-secondary">Cancel</button>
+  </div>
+</form>

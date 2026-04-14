@@ -1,0 +1,68 @@
+<section class="page-hero mb-4">
+  <span class="page-hero__eyebrow">Leave Monitoring</span>
+  <h2 class="page-hero__title">Leave Search</h2>
+  <p class="page-hero__copy">Track leave applications by employee number, leave type, and approval status.</p>
+</section>
+
+<div class="page-toolbar">
+  <div>
+    <label class="form-label">Employee Number</label>
+    <input class="form-control" [(ngModel)]="filters.employeeNumber" name="leaveEmployeeFilter" />
+  </div>
+  <div>
+    <label class="form-label">Leave Type</label>
+    <input class="form-control" [(ngModel)]="filters.leaveType" name="leaveTypeFilter" />
+  </div>
+  <div>
+    <label class="form-label">Status</label>
+    <select class="form-select" [(ngModel)]="filters.status" name="leaveStatusFilter">
+      <option value="">All</option>
+      <option *ngFor="let status of statusOptions" [value]="status">{{ status }}</option>
+    </select>
+  </div>
+  <div class="page-actions ms-auto">
+    <button class="btn btn-primary" type="button" (click)="loadData()">Search</button>
+    <button class="btn btn-outline-secondary" type="button" (click)="resetFilters()">Reset</button>
+    <button class="btn btn-warning" type="button" (click)="create()">New Leave</button>
+  </div>
+</div>
+
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+<div *ngIf="loading" class="alert alert-info">Loading leave records...</div>
+
+<div class="table-responsive" *ngIf="!loading && items.length">
+  <table class="table align-middle mb-0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Employee #</th>
+        <th>Type</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Status</th>
+        <th class="text-end"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of items">
+        <td>{{ item.leaveRecordId }}</td>
+        <td>{{ item.employeeNumber }}</td>
+        <td>{{ item.leaveType }}</td>
+        <td>{{ item.startDate | date:'yyyy-MM-dd' }}</td>
+        <td>{{ item.endDate | date:'yyyy-MM-dd' }}</td>
+        <td>{{ item.status || '-' }}</td>
+        <td class="text-end">
+          <div class="page-actions justify-content-end">
+            <button class="btn btn-sm btn-outline-primary" type="button" (click)="view(item.leaveRecordId)">View</button>
+            <button class="btn btn-sm btn-outline-secondary" type="button" (click)="edit(item.leaveRecordId)">Edit</button>
+            <button class="btn btn-sm btn-outline-danger" type="button" (click)="remove(item.leaveRecordId)">Delete</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="empty-state" *ngIf="!loading && !items.length">
+  No leave records matched the current search.
+</div>

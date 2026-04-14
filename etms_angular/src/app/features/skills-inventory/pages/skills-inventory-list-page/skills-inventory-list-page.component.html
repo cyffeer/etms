@@ -1,0 +1,52 @@
+<section class="page-hero mb-4">
+  <span class="page-hero__eyebrow">Skills Inventory</span>
+  <h2 class="page-hero__title">Employee Skills Search</h2>
+  <p class="page-hero__copy">Review skill assignments per employee and maintain the ETMS skills inventory registry.</p>
+</section>
+
+<div class="page-toolbar">
+  <div>
+    <label class="form-label">Employee Number</label>
+    <input class="form-control" [(ngModel)]="employeeNumberFilter" name="skillsInventoryEmployeeFilter" />
+  </div>
+  <div class="page-actions ms-auto">
+    <button class="btn btn-primary" type="button" (click)="load()">Search</button>
+    <button class="btn btn-outline-secondary" type="button" (click)="resetFilters()">Reset</button>
+    <a class="btn btn-warning" routerLink="/skills-inventory/new">Assign Skill</a>
+  </div>
+</div>
+
+<div *ngIf="loading" class="alert alert-info">Loading skill assignments...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<div class="table-responsive" *ngIf="!loading && !error && rows.length > 0">
+  <table class="table align-middle mb-0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Employee #</th>
+        <th>Skill</th>
+        <th>Level</th>
+        <th class="text-end">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let r of rows">
+        <td>{{ r.skillsInventoryId }}</td>
+        <td>{{ r.employeeNumber }}</td>
+        <td>{{ getSkillName(r.skillId) }}</td>
+        <td>{{ getLevelName(r.skillLvlId) }}</td>
+        <td class="text-end">
+          <div class="page-actions justify-content-end">
+            <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/skills-inventory', r.skillsInventoryId, 'edit']">Edit</a>
+            <button class="btn btn-sm btn-outline-danger" type="button" (click)="onDelete(r.skillsInventoryId)">Delete</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="empty-state" *ngIf="!loading && !error && rows.length === 0">
+  No skill assignment records matched the current search.
+</div>
