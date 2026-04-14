@@ -5,7 +5,9 @@ import java.util.List;
 
 import org.fujitsu.codes.etms.model.dao.EmployeesDao;
 import org.fujitsu.codes.etms.model.dao.LeaveDao;
+import org.fujitsu.codes.etms.model.dao.LeaveTypeDao;
 import org.fujitsu.codes.etms.model.data.LeaveRecord;
+import org.fujitsu.codes.etms.model.data.LeaveType;
 import org.fujitsu.codes.etms.model.dto.ApiResponse;
 import org.fujitsu.codes.etms.model.dto.LeaveRequest;
 import org.fujitsu.codes.etms.model.dto.LeaveResponse;
@@ -29,10 +31,12 @@ public class LeaveRestController {
 
     private final LeaveDao leaveDao;
     private final EmployeesDao employeesDao;
+    private final LeaveTypeDao leaveTypeDao;
 
-    public LeaveRestController(LeaveDao leaveDao, EmployeesDao employeesDao) {
+    public LeaveRestController(LeaveDao leaveDao, EmployeesDao employeesDao, LeaveTypeDao leaveTypeDao) {
         this.leaveDao = leaveDao;
         this.employeesDao = employeesDao;
+        this.leaveTypeDao = leaveTypeDao;
     }
 
     @GetMapping("/{leaveRecordId}")
@@ -92,7 +96,13 @@ public class LeaveRestController {
                     List.of("Employee number does not exist")));
         }
 
-        LeaveRecord entity = toEntity(request);
+        LeaveType leaveType = resolveLeaveType(request.getLeaveType());
+        if (leaveType == null) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("Validation failed",
+                    List.of("Leave type does not exist")));
+        }
+
+        LeaveRecord entity = toEntity(request, leaveType);
         LeaveRecord saved = leaveDao.save(entity);
         return ResponseEntity.created(URI.create("/api/leaves/" + saved.getLeaveRecordId()))
                 .body(ApiResponse.success("Leave created successfully", toResponse(saved)));
@@ -112,7 +122,13 @@ public class LeaveRestController {
             return ResponseEntity.badRequest().body(ApiResponse.error("Validation failed", errors));
         }
 
-        LeaveRecord entity = toEntity(request);
+        LeaveType leaveType = resolveLeaveType(request.getLeaveType());
+        if (leaveType == null) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("Validation failed",
+                    List.of("Leave type does not exist")));
+        }
+
+        LeaveRecord entity = toEntity(request, leaveType);
         return leaveDao.update(leaveRecordId, entity)
                 .<ResponseEntity<ApiResponse<?>>>map(l ->
                         ResponseEntity.ok(ApiResponse.success("Leave updated successfully", toResponse(l))))
@@ -129,10 +145,17 @@ public class LeaveRestController {
         return ResponseEntity.ok(ApiResponse.success("Leave deleted successfully", null));
     }
 
-    private LeaveRecord toEntity(LeaveRequest request) {
+    private LeaveType resolveLeaveType(String leaveTypeValue) {
+        if (leaveTypeValue == null || leaveTypeValue.isBlank()) {
+            return null;
+        }
+        return leaveTypeDao.findByCodeOrName(leaveTypeValue.trim()).orElse(null);
+    }
+
+    private LeaveRecord toEntity(LeaveRequest request, LeaveType leaveType) {
         LeaveRecord leave = new LeaveRecord();
         leave.setEmployeeNumber(request.getEmployeeNumber());
-        leave.setLeaveType(request.getLeaveType());
+        leave.setLeaveType(leaveType.getLeaveTypeCode());
         leave.setStartDate(request.getStartDate());
         leave.setEndDate(request.getEndDate());
         leave.setStatus(request.getStatus());
