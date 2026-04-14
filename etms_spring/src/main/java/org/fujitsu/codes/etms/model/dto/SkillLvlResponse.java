@@ -1,0 +1,79 @@
+package org.fujitsu.codes.etms.model.dto;
+
+import java.time.LocalDateTime;
+
+public class SkillLvlResponse {
+
+    private Long skillLvlId;
+    private Long skillId;
+    private String lvlCode;
+    private String lvlName;
+    private Integer lvlRank;
+    private Boolean active;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    public Long getSkillLvlId() {
+        return skillLvlId;
+    }
+
+    public void setSkillLvlId(Long skillLvlId) {
+        this.skillLvlId = skillLvlId;
+    }
+
+    public Long getSkillId() {
+        return skillId;
+    }
+
+    public void setSkillId(Long skillId) {
+        this.skillId = skillId;
+    }
+
+    public String getLvlCode() {
+        return lvlCode;
+    }
+
+    public void setLvlCode(String lvlCode) {
+        this.lvlCode = lvlCode;
+    }
+
+    public String getLvlName() {
+        return lvlName;
+    }
+
+    public void setLvlName(String lvlName) {
+        this.lvlName = lvlName;
+    }
+
+    public Integer getLvlRank() {
+        return lvlRank;
+    }
+
+    public void setLvlRank(Integer lvlRank) {
+        this.lvlRank = lvlRank;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+}
