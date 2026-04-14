@@ -1,0 +1,32 @@
+# Spring / Maven
+**/target/
+**/build/
+**/*.log
+**/logs/
+
+# Angular / Node
+**/node_modules/
+**/dist/
+**/.angular/cache/
+**/.angular/
+**/coverage/
+
+# IDE / workspace files
+**/.classpath
+**/.project
+**/.settings/
+**/.factorypath
+**/.idea/
+**/*.iml
+**/.vscode/*
+!**/.vscode/extensions.json
+!**/.vscode/launch.json
+!**/.vscode/tasks.json
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Environment files
+**/.env
+**/.env.*
