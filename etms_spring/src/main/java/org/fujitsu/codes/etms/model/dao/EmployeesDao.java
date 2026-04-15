@@ -221,9 +221,11 @@ public class EmployeesDao {
         }
     }
 
-    public List<Employees> search(String employeeNumber, String nameKeyword) {
+    public List<Employees> search(String employeeNumber, String nameKeyword, LocalDate startDate, LocalDate endDate) {
         if ((employeeNumber == null || employeeNumber.isBlank())
-                && (nameKeyword == null || nameKeyword.isBlank())) {
+                && (nameKeyword == null || nameKeyword.isBlank())
+                && startDate == null
+                && endDate == null) {
             return findAll();
         }
 
@@ -238,7 +240,14 @@ public class EmployeesDao {
                 hql.append(" and (lower(e.employeeCode) like :nameKeyword or lower(e.firstName) like :nameKeyword or lower(e.lastName) like :nameKeyword)");
             }
 
-            hql.append(" order by e.employeeId desc");
+            if (startDate != null) {
+                hql.append(" and e.hireDate >= :startDate");
+            }
+            if (endDate != null) {
+                hql.append(" and e.hireDate <= :endDate");
+            }
+
+            hql.append(" order by e.employeeId asc");
 
             Query<Employees> query = session.createQuery(hql.toString(), Employees.class);
 
@@ -248,6 +257,12 @@ public class EmployeesDao {
 
             if (nameKeyword != null && !nameKeyword.isBlank()) {
                 query.setParameter("nameKeyword", "%" + nameKeyword.trim().toLowerCase() + "%");
+            }
+            if (startDate != null) {
+                query.setParameter("startDate", startDate);
+            }
+            if (endDate != null) {
+                query.setParameter("endDate", endDate);
             }
 
             return query.getResultList();

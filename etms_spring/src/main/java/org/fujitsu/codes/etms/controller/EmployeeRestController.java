@@ -1,6 +1,7 @@
 package org.fujitsu.codes.etms.controller;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -98,9 +99,11 @@ public class EmployeeRestController {
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<?>> searchEmployees(
             @RequestParam(name = "employeeNumber", required = false) String employeeNumber,
-            @RequestParam(name = "nameKeyword", required = false) String nameKeyword) {
+            @RequestParam(name = "nameKeyword", required = false) String nameKeyword,
+            @RequestParam(name = "startDate", required = false) LocalDate startDate,
+            @RequestParam(name = "endDate", required = false) LocalDate endDate) {
 
-        var data = employeesDao.search(employeeNumber, nameKeyword).stream()
+        var data = employeesDao.search(employeeNumber, nameKeyword, startDate, endDate).stream()
                 .map(this::toResponse)
                 .toList();
         return ResponseEntity.ok(ApiResponse.success("Employees fetched successfully", data));
