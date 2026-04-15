@@ -40,7 +40,7 @@ class TestTrngTypeDao {
         TrngType type = org.mockito.Mockito.mock(TrngType.class);
 
         when(sessionFactory.openSession()).thenReturn(session);
-        when(session.get(TrngType.class, 1L)).thenReturn(type);
+        when(session.find(TrngType.class, 1L)).thenReturn(type);
 
         Optional<TrngType> result = trngTypeDao.findById(1L);
 

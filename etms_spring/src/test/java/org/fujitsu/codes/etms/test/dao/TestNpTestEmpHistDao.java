@@ -2,12 +2,15 @@ package org.fujitsu.codes.etms.test.dao;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
 
 import org.fujitsu.codes.etms.model.dao.NpTestEmpHistDao;
+import org.fujitsu.codes.etms.model.data.NpTestEmpHist;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -46,7 +49,13 @@ class TestNpTestEmpHistDao {
         if (method == null) method = getMethodOrNull(NpTestEmpHistDao.class, "findById", long.class);
         Assumptions.assumeTrue(method != null);
 
+        NpTestEmpHist row = org.mockito.Mockito.mock(NpTestEmpHist.class);
         when(sessionFactory.openSession()).thenReturn(session);
+        when(session.createQuery(anyString(), org.mockito.ArgumentMatchers.<Class<NpTestEmpHist>>eq(NpTestEmpHist.class)))
+                .thenReturn((Query) query);
+        when(query.setParameter(anyString(), eq(1L))).thenReturn((Query) query);
+        when(query.setMaxResults(1)).thenReturn((Query) query);
+        when(((Query<NpTestEmpHist>) query).uniqueResultOptional()).thenReturn(Optional.of(row));
         Object result = method.invoke(npTestEmpHistDao, 1L);
         assertNotNull(result);
     }

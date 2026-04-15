@@ -40,7 +40,10 @@ class TestVisaInfoDao {
         VisaInfo visa = org.mockito.Mockito.mock(VisaInfo.class);
 
         when(sessionFactory.openSession()).thenReturn(session);
-        when(session.get(VisaInfo.class, 1L)).thenReturn(visa);
+        when(session.createQuery(anyString(), eq(VisaInfo.class))).thenReturn(query);
+        when(query.setParameter(anyString(), eq(1L))).thenReturn(query);
+        when(query.setMaxResults(1)).thenReturn(query);
+        when(query.uniqueResultOptional()).thenReturn(Optional.of(visa));
 
         Optional<VisaInfo> result = visaInfoDao.findById(1L);
 

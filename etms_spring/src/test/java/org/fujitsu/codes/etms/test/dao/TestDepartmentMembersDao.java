@@ -67,7 +67,10 @@ class TestDepartmentMembersDao {
         DeptMembers member = org.mockito.Mockito.mock(DeptMembers.class);
 
         when(sessionFactory.openSession()).thenReturn(session);
-        when(session.get(DeptMembers.class, 1L)).thenReturn(member);
+        when(session.createQuery(anyString(), eq(DeptMembers.class))).thenReturn(query);
+        when(query.setParameter(anyString(), eq(1L))).thenReturn(query);
+        when(query.setMaxResults(1)).thenReturn(query);
+        when(query.uniqueResultOptional()).thenReturn(Optional.of(member));
 
         Optional<DeptMembers> result = deptMembersDao.findById(1L);
 

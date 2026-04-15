@@ -1,6 +1,5 @@
 package org.fujitsu.codes.etms.test.dao;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -8,7 +7,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.fujitsu.codes.etms.exception.InvalidInputException;
 import org.fujitsu.codes.etms.model.dao.LoginDao;
 import org.fujitsu.codes.etms.model.data.Login;
 import org.hibernate.Session;
@@ -50,16 +48,14 @@ class TestLoginDao {
     }
 
     @Test
-    void authenticateShouldThrowWhenCredentialsAreInvalid() {
+    void findByUsernameShouldReturnEmptyWhenMissing() {
         when(sessionFactory.openSession()).thenReturn(session);
         when(session.createQuery(anyString(), eq(Login.class))).thenReturn(query);
         when(query.setParameter(anyString(), anyString())).thenReturn(query);
         when(query.uniqueResultOptional()).thenReturn(Optional.empty());
 
-        try {
-            loginDao.authenticate("admin", "badpass");
-        } catch (InvalidInputException ex) {
-            assertEquals("Invalid username or password", ex.getMessage());
-        }
+        Optional<Login> result = loginDao.findByUsername("missing");
+
+        assertTrue(result.isEmpty());
     }
 }

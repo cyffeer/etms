@@ -13,6 +13,7 @@ import java.util.Optional;
 import org.fujitsu.codes.etms.controller.LeaveRestController;
 import org.fujitsu.codes.etms.model.dao.EmployeesDao;
 import org.fujitsu.codes.etms.model.dao.LeaveDao;
+import org.fujitsu.codes.etms.model.dao.LeaveTypeDao;
 import org.fujitsu.codes.etms.model.data.LeaveRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,11 +32,14 @@ class TestLeaveRestController {
     @Mock
     private EmployeesDao employeesDao;
 
+    @Mock
+    private LeaveTypeDao leaveTypeDao;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        LeaveRestController controller = new LeaveRestController(leaveDao, employeesDao);
+        LeaveRestController controller = new LeaveRestController(leaveDao, employeesDao, leaveTypeDao);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
@@ -66,6 +70,6 @@ class TestLeaveRestController {
         when(leaveDao.deleteById(1L)).thenReturn(true);
 
         mockMvc.perform(delete("/api/leaves/1"))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
     }
 }

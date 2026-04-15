@@ -40,7 +40,10 @@ class TestSkillsInventoryDao {
         SkillsInventory skill = org.mockito.Mockito.mock(SkillsInventory.class);
 
         when(sessionFactory.openSession()).thenReturn(session);
-        when(session.get(SkillsInventory.class, 1L)).thenReturn(skill);
+        when(session.createQuery(anyString(), eq(SkillsInventory.class))).thenReturn(query);
+        when(query.setParameter(anyString(), eq(1L))).thenReturn(query);
+        when(query.setMaxResults(1)).thenReturn(query);
+        when(query.uniqueResultOptional()).thenReturn(Optional.of(skill));
 
         Optional<SkillsInventory> result = skillsInventoryDao.findById(1L);
 
@@ -69,7 +72,7 @@ class TestSkillsInventoryDao {
 
         when(sessionFactory.openSession()).thenReturn(session);
         when(session.createQuery(anyString(), eq(SkillsInventory.class))).thenReturn(query);
-        when(query.getResultList()).thenReturn(List.of(skill1, skill2));
+        when(query.list()).thenReturn(List.of(skill1, skill2));
 
         List<SkillsInventory> result = skillsInventoryDao.findAll();
 
