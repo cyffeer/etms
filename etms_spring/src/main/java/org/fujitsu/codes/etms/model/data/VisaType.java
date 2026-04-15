@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "visa_type")
@@ -19,22 +18,22 @@ public class VisaType {
     @Column(name = "visa_type_id")
     private Long visaTypeId;
 
-    @Column(name = "visa_type_nm", nullable = false, unique = true, length = 30)
+    @Column(name = "visa_type_code", nullable = false, unique = true, length = 30)
     private String visaTypeCode;
 
-    @Transient
+    @Column(name = "visa_type_nm", nullable = false, length = 150)
     private String visaTypeName;
 
     @Column(name = "description", length = 255)
     private String description;
 
-    @Transient
+    @Column(name = "is_active")
     private Boolean active = Boolean.TRUE;
 
-    @Transient
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Transient
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     public Long getVisaTypeId() {
@@ -54,14 +53,11 @@ public class VisaType {
     }
 
     public String getVisaTypeName() {
-        return visaTypeName != null ? visaTypeName : visaTypeCode;
+        return visaTypeName;
     }
 
     public void setVisaTypeName(String visaTypeName) {
         this.visaTypeName = visaTypeName;
-        if (this.visaTypeCode == null) {
-            this.visaTypeCode = visaTypeName;
-        }
     }
 
     public String getDescription() {

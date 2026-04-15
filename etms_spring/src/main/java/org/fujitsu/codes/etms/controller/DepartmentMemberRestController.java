@@ -5,11 +5,17 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.fujitsu.codes.etms.model.dao.DepartmentDao;
 import org.fujitsu.codes.etms.model.dao.DeptMembersDao;
 import org.fujitsu.codes.etms.model.dao.EmployeesDao;
+import org.fujitsu.codes.etms.model.dao.MemberTypeDao;
+import org.fujitsu.codes.etms.model.data.Department;
 import org.fujitsu.codes.etms.model.data.DeptMembers;
+import org.fujitsu.codes.etms.model.data.Employees;
+import org.fujitsu.codes.etms.model.data.MemberType;
 import org.fujitsu.codes.etms.model.dto.DeptMembersRequest;
 import org.fujitsu.codes.etms.model.dto.DeptMembersResponse;
 import org.springframework.http.ResponseEntity;
@@ -33,54 +39,87 @@ public class DepartmentMemberRestController {
     private final DeptMembersDao deptMembersDao;
     private final DepartmentDao departmentDao;
     private final EmployeesDao employeesDao;
+    private final MemberTypeDao memberTypeDao;
 
     public DepartmentMemberRestController(
             DeptMembersDao deptMembersDao,
             DepartmentDao departmentDao,
-            EmployeesDao employeesDao) {
+            EmployeesDao employeesDao,
+            MemberTypeDao memberTypeDao) {
         this.deptMembersDao = deptMembersDao;
         this.departmentDao = departmentDao;
         this.employeesDao = employeesDao;
+        this.memberTypeDao = memberTypeDao;
     }
 
     @GetMapping("/{deptMemberId}")
     public ResponseEntity<?> getById(@PathVariable Long deptMemberId) {
+        Map<String, Department> departmentsByCode = buildDepartmentsByCode();
+        Map<Long, MemberType> memberTypesById = buildMemberTypesById();
+        Map<String, Employees> employeesByCode = buildEmployeesByCode();
         return deptMembersDao.findById(deptMemberId)
-                .<ResponseEntity<?>>map(item -> ResponseEntity.ok(toResponse(item)))
+                .<ResponseEntity<?>>map(item -> ResponseEntity.ok(toResponse(item, departmentsByCode, memberTypesById, employeesByCode)))
                 .orElseGet(() -> ResponseEntity.status(404).body(Map.of("message", "Department member not found")));
     }
 
     @GetMapping
     public ResponseEntity<List<DeptMembersResponse>> getAll() {
+        Map<String, Department> departmentsByCode = buildDepartmentsByCode();
+        Map<Long, MemberType> memberTypesById = buildMemberTypesById();
+        Map<String, Employees> employeesByCode = buildEmployeesByCode();
         List<DeptMembersResponse> data = deptMembersDao.findAll().stream()
-                .map(this::toResponse)
+                .map(item -> toResponse(item, departmentsByCode, memberTypesById, employeesByCode))
                 .toList();
         return ResponseEntity.ok(data);
     }
 
     @GetMapping("/by-employee/{employeeNumber}")
     public ResponseEntity<List<DeptMembersResponse>> getByEmployeeNumber(@PathVariable String employeeNumber) {
+        Map<String, Department> departmentsByCode = buildDepartmentsByCode();
+        Map<Long, MemberType> memberTypesById = buildMemberTypesById();
+        Map<String, Employees> employeesByCode = buildEmployeesByCode();
         List<DeptMembersResponse> data = deptMembersDao.findByEmployeeNumber(employeeNumber).stream()
-                .map(this::toResponse)
+                .map(item -> toResponse(item, departmentsByCode, memberTypesById, employeesByCode))
                 .toList();
         return ResponseEntity.ok(data);
     }
 
     @GetMapping("/by-department/{departmentCode}")
     public ResponseEntity<List<DeptMembersResponse>> getByDepartmentCode(@PathVariable String departmentCode) {
+        Map<String, Department> departmentsByCode = buildDepartmentsByCode();
+        Map<Long, MemberType> memberTypesById = buildMemberTypesById();
+        Map<String, Employees> employeesByCode = buildEmployeesByCode();
         List<DeptMembersResponse> data = deptMembersDao.findByDepartmentCode(departmentCode).stream()
-                .map(this::toResponse)
+                .map(item -> toResponse(item, departmentsByCode, memberTypesById, employeesByCode))
                 .toList();
         return ResponseEntity.ok(data);
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<DeptMembersResponse>> search(
+            @RequestParam(required = false) String departmentKeyword,
             @RequestParam(required = false) String departmentCode,
-            @RequestParam(required = false) String employeeNumber) {
+            @RequestParam(required = false) String employeeNumber,
+            @RequestParam(required = false) Long memberTypeId,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate) {
+        String effectiveDepartmentKeyword = departmentKeyword;
+        if ((effectiveDepartmentKeyword == null || effectiveDepartmentKeyword.isBlank())
+                && departmentCode != null && !departmentCode.isBlank()) {
+            effectiveDepartmentKeyword = departmentCode;
+        }
 
-        List<DeptMembersResponse> data = deptMembersDao.search(departmentCode, employeeNumber).stream()
-                .map(this::toResponse)
+        Map<String, Department> departmentsByCode = buildDepartmentsByCode();
+        Map<Long, MemberType> memberTypesById = buildMemberTypesById();
+        Map<String, Employees> employeesByCode = buildEmployeesByCode();
+        List<DeptMembersResponse> data = deptMembersDao.search(
+                        effectiveDepartmentKeyword,
+                        employeeNumber,
+                        memberTypeId,
+                        startDate,
+                        endDate)
+                .stream()
+                .map(item -> toResponse(item, departmentsByCode, memberTypesById, employeesByCode))
                 .toList();
         return ResponseEntity.ok(data);
     }
@@ -90,7 +129,7 @@ public class DepartmentMemberRestController {
         normalize(request);
 
         List<String> errors = validateRequest(request);
-        if (!deptMembersDao.search(request.getDepartmentCode(), request.getEmployeeNumber()).isEmpty()) {
+        if (deptMembersDao.existsByDepartmentCodeAndEmployeeNumber(request.getDepartmentCode(), request.getEmployeeNumber())) {
             errors.add("Department member already exists");
         }
         if (!errors.isEmpty()) {
@@ -105,7 +144,11 @@ public class DepartmentMemberRestController {
         DeptMembers saved = deptMembersDao.save(entity);
         return ResponseEntity
                 .created(URI.create("/api/dept-members/" + saved.getDeptMemberId()))
-                .body(toResponse(saved));
+                .body(toResponse(
+                        saved,
+                        buildDepartmentsByCode(),
+                        buildMemberTypesById(),
+                        buildEmployeesByCode()));
     }
 
     @PutMapping("/{deptMemberId}")
@@ -124,11 +167,15 @@ public class DepartmentMemberRestController {
 
         DeptMembers existing = optional.get();
         DeptMembers source = toEntity(request);
-        source.setMemberTypeId(existing.getMemberTypeId());
+        source.setMemberTypeId(request.getMemberTypeId() == null ? existing.getMemberTypeId() : request.getMemberTypeId());
         source.setUpdatedAt(LocalDateTime.now());
 
         return deptMembersDao.update(deptMemberId, source)
-                .<ResponseEntity<?>>map(item -> ResponseEntity.ok(toResponse(item)))
+                .<ResponseEntity<?>>map(item -> ResponseEntity.ok(toResponse(
+                        item,
+                        buildDepartmentsByCode(),
+                        buildMemberTypesById(),
+                        buildEmployeesByCode())))
                 .orElseGet(() -> ResponseEntity.status(404).body(Map.of("message", "Department member not found")));
     }
 
@@ -155,15 +202,20 @@ public class DepartmentMemberRestController {
         DeptMembersRequest request = new DeptMembersRequest();
         request.setDepartmentCode(existing.getDepartmentCode());
         request.setEmployeeNumber(existing.getEmployeeNumber());
+        request.setMemberTypeId(existing.getMemberTypeId());
         request.setMemberStart(existing.getMemberStart());
         request.setMemberEnd(memberEnd);
 
         DeptMembers source = toEntity(request);
-        source.setMemberTypeId(existing.getMemberTypeId());
+        source.setMemberTypeId(request.getMemberTypeId());
         source.setUpdatedAt(LocalDateTime.now());
 
         return deptMembersDao.update(deptMemberId, source)
-                .<ResponseEntity<?>>map(item -> ResponseEntity.ok(toResponse(item)))
+                .<ResponseEntity<?>>map(item -> ResponseEntity.ok(toResponse(
+                        item,
+                        buildDepartmentsByCode(),
+                        buildMemberTypesById(),
+                        buildEmployeesByCode())))
                 .orElseGet(() -> ResponseEntity.status(404).body(Map.of("message", "Department member not found")));
     }
 
@@ -187,6 +239,10 @@ public class DepartmentMemberRestController {
             errors.add("Employee number does not exist");
         }
 
+        if (request.getMemberTypeId() != null && memberTypeDao.findById(request.getMemberTypeId()).isEmpty()) {
+            errors.add("Member type does not exist");
+        }
+
         if (request.getMemberEnd() != null && request.getMemberEnd().isBefore(request.getMemberStart())) {
             errors.add("Member end date cannot be before member start date");
         }
@@ -207,20 +263,57 @@ public class DepartmentMemberRestController {
         DeptMembers item = new DeptMembers();
         item.setDepartmentCode(request.getDepartmentCode());
         item.setEmployeeNumber(request.getEmployeeNumber());
+        item.setMemberTypeId(request.getMemberTypeId());
         item.setMemberStart(request.getMemberStart());
         item.setMemberEnd(request.getMemberEnd());
         return item;
     }
 
-    private DeptMembersResponse toResponse(DeptMembers item) {
+    private DeptMembersResponse toResponse(
+            DeptMembers item,
+            Map<String, Department> departmentsByCode,
+            Map<Long, MemberType> memberTypesById,
+            Map<String, Employees> employeesByCode) {
         DeptMembersResponse response = new DeptMembersResponse();
         response.setDeptMemberId(item.getDeptMemberId());
         response.setDepartmentCode(item.getDepartmentCode());
         response.setEmployeeNumber(item.getEmployeeNumber());
+        response.setMemberTypeId(item.getMemberTypeId());
         response.setMemberStart(item.getMemberStart());
         response.setMemberEnd(item.getMemberEnd());
         response.setCreatedAt(item.getCreatedAt());
         response.setUpdatedAt(item.getUpdatedAt());
+
+        Department department = departmentsByCode.get(item.getDepartmentCode());
+        if (department != null) {
+            response.setDepartmentName(department.getDepartmentName());
+        }
+
+        MemberType memberType = memberTypesById.get(item.getMemberTypeId());
+        if (memberType != null) {
+            response.setMemberTypeCode(memberType.getMemberTypeCode());
+            response.setMemberTypeName(memberType.getMemberTypeName());
+        }
+
+        Employees employee = employeesByCode.get(item.getEmployeeNumber());
+        if (employee != null) {
+            response.setEmployeeName((employee.getFirstName() + " " + employee.getLastName()).trim());
+        }
         return response;
+    }
+
+    private Map<String, Department> buildDepartmentsByCode() {
+        return departmentDao.findAll().stream()
+                .collect(Collectors.toMap(Department::getDepartmentCode, Function.identity(), (left, right) -> left));
+    }
+
+    private Map<Long, MemberType> buildMemberTypesById() {
+        return memberTypeDao.findAll().stream()
+                .collect(Collectors.toMap(MemberType::getMemberTypeId, Function.identity(), (left, right) -> left));
+    }
+
+    private Map<String, Employees> buildEmployeesByCode() {
+        return employeesDao.findAll().stream()
+                .collect(Collectors.toMap(Employees::getEmployeeCode, Function.identity(), (left, right) -> left));
     }
 }

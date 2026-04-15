@@ -9,7 +9,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "trng_info")
@@ -29,31 +28,31 @@ public class TrngInfo {
     @Column(name = "description", length = 150)
     private String trngName;
 
-    @Transient
+    @Column(name = "trng_code", length = 30)
     private String trngCode;
 
-    @Transient
+    @Column(name = "trng_type_code", length = 30)
     private String trngTypeCode;
 
-    @Transient
+    @Column(name = "vendor_code", length = 30)
     private String vendorCode;
 
-    @Transient
+    @Column(name = "start_date")
     private LocalDate startDate;
 
-    @Transient
+    @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Transient
+    @Column(name = "location", length = 150)
     private String location;
 
-    @Transient
+    @Column(name = "is_active")
     private Boolean active = Boolean.TRUE;
 
-    @Transient
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Transient
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     public Long getTrngInfoId() {

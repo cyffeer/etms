@@ -7,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import org.hibernate.annotations.ColumnTransformer;
 
 @Entity
@@ -39,13 +38,13 @@ public class NpTestEmpHist {
     @Column(name = "points")
     private Integer points;
 
-    @Transient
+    @Column(name = "np_test_emp_hist_id", insertable = false, updatable = false)
     private Long npTestEmpHistId;
 
-    @Transient
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Transient
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     public Long getNpTestEmpHistId() {

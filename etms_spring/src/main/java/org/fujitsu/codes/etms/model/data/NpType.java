@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "np_type")
@@ -19,19 +18,19 @@ public class NpType {
     @Column(name = "np_type_id")
     private Long npTypeId;
 
-    @Column(name = "np_type_nm", nullable = false, unique = true, length = 30)
+    @Column(name = "np_type_code", nullable = false, unique = true, length = 30)
     private String npTypeCode;
 
-    @Transient
+    @Column(name = "np_type_nm", nullable = false, length = 150)
     private String npTypeName;
 
-    @Transient
+    @Column(name = "is_active")
     private Boolean active = Boolean.TRUE;
 
-    @Transient
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Transient
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     public Long getNpTypeId() {
@@ -51,14 +50,11 @@ public class NpType {
     }
 
     public String getNpTypeName() {
-        return npTypeName != null ? npTypeName : npTypeCode;
+        return npTypeName;
     }
 
     public void setNpTypeName(String npTypeName) {
         this.npTypeName = npTypeName;
-        if (this.npTypeCode == null) {
-            this.npTypeCode = npTypeName;
-        }
     }
 
     public Boolean getActive() {

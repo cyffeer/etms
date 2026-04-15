@@ -7,6 +7,7 @@ import org.fujitsu.codes.etms.model.data.Login;
 import org.fujitsu.codes.etms.model.dto.ApiResponse;
 import org.fujitsu.codes.etms.model.dto.LoginRequest;
 import org.fujitsu.codes.etms.model.dto.LoginResponse;
+import org.fujitsu.codes.etms.service.AuditTrailService;
 import org.fujitsu.codes.etms.service.AuthService;
 import org.fujitsu.codes.etms.validator.LoginValidator;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class LoginRestController {
 
     private final AuthService authService;
+    private final AuditTrailService auditTrailService;
 
-    public LoginRestController(AuthService authService) {
+    public LoginRestController(AuthService authService, AuditTrailService auditTrailService) {
         this.authService = authService;
+        this.auditTrailService = auditTrailService;
     }
 
     @PostMapping
@@ -39,6 +42,10 @@ public class LoginRestController {
             response.setLoginId(login.getLoginId());
             response.setUsername(login.getUsername());
             response.setRole(login.getRole() == null ? null : login.getRole().name());
+            response.setAccessToken(authService.issueToken(login));
+            response.setTokenType("Bearer");
+            response.setExpiresInSeconds(authService.getTokenExpirationSeconds());
+            auditTrailService.log(login, "LOGIN", "AUTH", login.getUsername(), "User logged in successfully", null);
 
             return ResponseEntity.ok(ApiResponse.success("Login successful", response));
         } catch (InvalidInputException ex) {

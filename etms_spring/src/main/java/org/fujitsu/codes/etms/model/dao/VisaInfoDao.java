@@ -35,7 +35,15 @@ public class VisaInfoDao {
 
     public Optional<VisaInfo> findById(Long visaInfoId) {
         try (Session session = sessionFactory.openSession()) {
-            return Optional.empty();
+            if (visaInfoId == null) {
+                return Optional.empty();
+            }
+            return session.createQuery(
+                    "from VisaInfo v where v.visaInfoId = :visaInfoId",
+                    VisaInfo.class
+            ).setParameter("visaInfoId", visaInfoId)
+             .setMaxResults(1)
+             .uniqueResultOptional();
         }
     }
 
@@ -80,6 +88,7 @@ public class VisaInfoDao {
 
             target.setIssuedDate(source.getIssuedDate());
             target.setExpiryDate(source.getExpiryDate());
+            target.setCancelFlag(source.getCancelFlag());
             target.setUpdatedAt(source.getUpdatedAt());
 
             session.merge(target);
@@ -92,7 +101,25 @@ public class VisaInfoDao {
     }
 
     public Optional<VisaInfo> updateCancelFlag(Long visaInfoId, Boolean cancelFlag, LocalDateTime updatedAt) {
-        return Optional.empty();
+        Transaction tx = null;
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
+
+            VisaInfo target = findById(visaInfoId).orElse(null);
+            if (target == null) {
+                tx.commit();
+                return Optional.empty();
+            }
+
+            target.setCancelFlag(cancelFlag == null ? Boolean.FALSE : cancelFlag);
+            target.setUpdatedAt(updatedAt);
+            session.merge(target);
+            tx.commit();
+            return Optional.of(target);
+        } catch (RuntimeException ex) {
+            rollback(tx);
+            throw ex;
+        }
     }
 
     public List<VisaInfo> findExpiringWithinDays(int days) {
@@ -130,7 +157,23 @@ public class VisaInfoDao {
     }
 
     public boolean deleteById(Long visaInfoId) {
-        return false;
+        Transaction tx = null;
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
+
+            VisaInfo target = findById(visaInfoId).orElse(null);
+            if (target == null) {
+                tx.commit();
+                return false;
+            }
+
+            session.remove(target);
+            tx.commit();
+            return true;
+        } catch (RuntimeException ex) {
+            rollback(tx);
+            throw ex;
+        }
     }
 
     public boolean deleteByEmployeeNumberAndVisaTypeId(String employeeNumber, Long visaTypeId) {

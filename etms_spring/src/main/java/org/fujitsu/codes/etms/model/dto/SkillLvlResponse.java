@@ -6,6 +6,8 @@ public class SkillLvlResponse {
 
     private Long skillLvlId;
     private Long skillId;
+    private String skillCode;
+    private String skillName;
     private String lvlCode;
     private String lvlName;
     private Integer lvlRank;
@@ -27,6 +29,22 @@ public class SkillLvlResponse {
 
     public void setSkillId(Long skillId) {
         this.skillId = skillId;
+    }
+
+    public String getSkillCode() {
+        return skillCode;
+    }
+
+    public void setSkillCode(String skillCode) {
+        this.skillCode = skillCode;
+    }
+
+    public String getSkillName() {
+        return skillName;
+    }
+
+    public void setSkillName(String skillName) {
+        this.skillName = skillName;
     }
 
     public String getLvlCode() {

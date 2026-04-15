@@ -57,6 +57,41 @@ public class SkillLvlDao {
         }
     }
 
+    public List<SkillLvl> search(Long skillLvlId, Long skillId, String keyword) {
+        if (skillLvlId == null && skillId == null && (keyword == null || keyword.isBlank())) {
+            return findAll();
+        }
+
+        try (Session session = sessionFactory.openSession()) {
+            StringBuilder hql = new StringBuilder("from SkillLvl sl where 1=1");
+
+            if (skillLvlId != null) {
+                hql.append(" and sl.skillLvlId = :skillLvlId");
+            }
+            if (skillId != null) {
+                hql.append(" and sl.skillId = :skillId");
+            }
+            if (keyword != null && !keyword.isBlank()) {
+                hql.append(" and (lower(sl.lvlCode) like :keyword or lower(sl.lvlName) like :keyword)");
+            }
+
+            hql.append(" order by sl.skillId asc, sl.lvlRank asc, sl.skillLvlId asc");
+
+            var query = session.createQuery(hql.toString(), SkillLvl.class);
+            if (skillLvlId != null) {
+                query.setParameter("skillLvlId", skillLvlId);
+            }
+            if (skillId != null) {
+                query.setParameter("skillId", skillId);
+            }
+            if (keyword != null && !keyword.isBlank()) {
+                query.setParameter("keyword", "%" + keyword.trim().toLowerCase() + "%");
+            }
+
+            return query.getResultList();
+        }
+    }
+
     public Optional<SkillLvl> update(Long skillLvlId, SkillLvl source) {
         Transaction tx = null;
         try (Session session = sessionFactory.openSession()) {

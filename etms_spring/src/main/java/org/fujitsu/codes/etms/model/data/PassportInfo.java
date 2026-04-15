@@ -7,7 +7,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import org.hibernate.annotations.ColumnTransformer;
 
 @Entity
@@ -28,13 +27,13 @@ public class PassportInfo {
     @Column(name = "expiry")
     private LocalDate expiryDate;
 
-    @Transient
+    @Column(name = "passport_info_id", insertable = false, updatable = false)
     private Long passportInfoId;
 
-    @Transient
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Transient
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     public Long getPassportInfoId() {

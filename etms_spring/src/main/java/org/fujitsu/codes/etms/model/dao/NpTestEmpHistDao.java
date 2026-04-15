@@ -25,7 +25,9 @@ public class NpTestEmpHistDao {
             tx = session.beginTransaction();
             session.persist(entity);
             tx.commit();
-            entity.setNpTestEmpHistId(entity.getNpTestHistId());
+            findByCompositeKey(entity.getNpTestHistId(), entity.getEmployeeNumber())
+                    .map(NpTestEmpHist::getNpTestEmpHistId)
+                    .ifPresent(entity::setNpTestEmpHistId);
             return entity;
         } catch (RuntimeException ex) {
             rollback(tx);
@@ -35,7 +37,7 @@ public class NpTestEmpHistDao {
 
     public Optional<NpTestEmpHist> findById(Long npTestEmpHistId) {
         try (Session session = sessionFactory.openSession()) {
-            return findByTestId(session, npTestEmpHistId);
+            return findBySurrogateId(session, npTestEmpHistId);
         }
     }
 
@@ -89,11 +91,16 @@ public class NpTestEmpHistDao {
                 query.setParameter("employeeNumber", employeeNumber.trim());
             }
 
-            if (Boolean.TRUE.equals(mostRecentOnly)) {
-                query.setMaxResults(1);
+            List<NpTestEmpHist> rows = query.getResultList();
+            if (!Boolean.TRUE.equals(mostRecentOnly)) {
+                return rows;
             }
 
-            return query.getResultList();
+            java.util.LinkedHashMap<String, NpTestEmpHist> mostRecentByEmployee = new java.util.LinkedHashMap<>();
+            for (NpTestEmpHist row : rows) {
+                mostRecentByEmployee.putIfAbsent(row.getEmployeeNumber(), row);
+            }
+            return java.util.List.copyOf(mostRecentByEmployee.values());
         }
     }
 
@@ -127,7 +134,7 @@ public class NpTestEmpHistDao {
         try (Session session = sessionFactory.openSession()) {
             tx = session.beginTransaction();
 
-            NpTestEmpHist target = findByTestId(session, npTestEmpHistId).orElse(null);
+            NpTestEmpHist target = findBySurrogateId(session, npTestEmpHistId).orElse(null);
             if (target == null) {
                 tx.commit();
                 return false;
@@ -156,6 +163,12 @@ public class NpTestEmpHistDao {
                 .uniqueResultOptional();
     }
 
+    private Optional<NpTestEmpHist> findByCompositeKey(Long npTestHistId, String employeeNumber) {
+        try (Session session = sessionFactory.openSession()) {
+            return findByTestId(session, npTestHistId, employeeNumber);
+        }
+    }
+
     private Optional<NpTestEmpHist> findByTestId(Session session, Long npTestHistId, String employeeNumber) {
         if (npTestHistId == null || employeeNumber == null || employeeNumber.isBlank()) {
             return Optional.empty();
@@ -167,6 +180,20 @@ public class NpTestEmpHistDao {
                 )
                 .setParameter("npTestHistId", npTestHistId)
                 .setParameter("employeeNumber", employeeNumber.trim())
+                .setMaxResults(1)
+                .uniqueResultOptional();
+    }
+
+    private Optional<NpTestEmpHist> findBySurrogateId(Session session, Long npTestEmpHistId) {
+        if (npTestEmpHistId == null) {
+            return Optional.empty();
+        }
+
+        return session.createQuery(
+                        "from NpTestEmpHist n where n.npTestEmpHistId = :npTestEmpHistId",
+                        NpTestEmpHist.class
+                )
+                .setParameter("npTestEmpHistId", npTestEmpHistId)
                 .setMaxResults(1)
                 .uniqueResultOptional();
     }

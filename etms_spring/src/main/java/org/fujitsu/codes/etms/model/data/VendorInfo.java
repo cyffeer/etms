@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
 import org.hibernate.annotations.ColumnTransformer;
 
@@ -21,22 +20,22 @@ public class VendorInfo {
     @Column(name = "vendor_id")
     private Long vendorId;
 
-    @Column(name = "vendor_nm", nullable = false, unique = true, length = 150)
+    @Column(name = "vendor_code", nullable = false, unique = true, length = 30)
     private String vendorCode;
 
-    @Transient
+    @Column(name = "vendor_nm", nullable = false, length = 150)
     private String vendorName;
 
-    @Transient
+    @Column(name = "vendor_type_code", length = 30)
     private String vendorTypeCode;
 
-    @Transient
+    @Column(name = "contact_email", length = 150)
     private String contactEmail;
 
-    @Transient
+    @Column(name = "contact_phone", length = 30)
     private String contactPhone;
 
-    @Transient
+    @Column(name = "address_line", length = 255)
     private String addressLine;
 
     @Column(name = "active_flag", length = 1)
@@ -45,10 +44,10 @@ public class VendorInfo {
             write = "CASE WHEN ? THEN 'Y' ELSE 'N' END")
     private Boolean active = Boolean.TRUE;
 
-    @Transient
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Transient
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     public Long getVendorId() {
@@ -65,20 +64,14 @@ public class VendorInfo {
 
     public void setVendorCode(String vendorCode) {
         this.vendorCode = vendorCode;
-        if (this.vendorName == null) {
-            this.vendorName = vendorCode;
-        }
     }
 
     public String getVendorName() {
-        return vendorName != null ? vendorName : vendorCode;
+        return vendorName;
     }
 
     public void setVendorName(String vendorName) {
         this.vendorName = vendorName;
-        if (this.vendorCode == null) {
-            this.vendorCode = vendorName;
-        }
     }
 
     public String getVendorTypeCode() {

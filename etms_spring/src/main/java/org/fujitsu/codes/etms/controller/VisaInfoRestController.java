@@ -87,10 +87,15 @@ public class VisaInfoRestController {
             @PathVariable String employeeNumber,
             @PathVariable Long visaTypeId,
             @RequestBody Map<String, Boolean> payload) {
+        Boolean cancelFlag = payload.get("cancelFlag");
+        var current = visaInfoDao.findByEmployeeNumberAndVisaTypeId(employeeNumber, visaTypeId);
+        if (current.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("message", "Visa info not found"));
+        }
 
-        return ResponseEntity.badRequest().body(Map.of(
-                "message",
-                "cancelFlag is not supported by the current schema for visa_info"));
+        return visaInfoDao.updateCancelFlag(current.get().getVisaInfoId(), cancelFlag, LocalDateTime.now())
+                .<ResponseEntity<?>>map(v -> ResponseEntity.ok(toResponse(v)))
+                .orElseGet(() -> ResponseEntity.status(404).body(Map.of("message", "Visa info not found")));
     }
 
     @PostMapping
@@ -185,6 +190,7 @@ public class VisaInfoRestController {
         v.setVisaTypeId(request.getVisaTypeId());
         v.setIssuedDate(request.getIssuedDate());
         v.setExpiryDate(request.getExpiryDate());
+        v.setCancelFlag(request.getCancelFlag() == null ? Boolean.FALSE : request.getCancelFlag());
         return v;
     }
 
@@ -195,7 +201,7 @@ public class VisaInfoRestController {
         r.setVisaTypeId(v.getVisaTypeId());
         r.setIssuedDate(v.getIssuedDate());
         r.setExpiryDate(v.getExpiryDate());
-        r.setCancelFlag(null);
+        r.setCancelFlag(v.getCancelFlag());
         r.setCreatedAt(v.getCreatedAt());
         r.setUpdatedAt(v.getUpdatedAt());
         return r;

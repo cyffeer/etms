@@ -8,7 +8,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import org.hibernate.annotations.ColumnTransformer;
 
 @Entity
@@ -31,16 +30,19 @@ public class VisaInfo {
     @Column(name = "expiry")
     private LocalDate expiryDate;
 
-    @Transient
+    @Column(name = "visa_info_id", insertable = false, updatable = false)
     private Long visaInfoId;
 
-    @Transient
+    @Column(name = "cancel_flag", length = 3)
+    @ColumnTransformer(
+            read = "CASE WHEN upper(cancel_flag) = 'YES' THEN true WHEN upper(cancel_flag) = 'NO' THEN false ELSE null END",
+            write = "CASE WHEN ? THEN 'YES' ELSE 'NO' END")
     private Boolean cancelFlag = Boolean.FALSE;
 
-    @Transient
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Transient
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     public Long getVisaInfoId() {

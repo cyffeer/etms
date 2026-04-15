@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "vendor_type")
@@ -19,19 +18,19 @@ public class VendorType {
     @Column(name = "vendor_type_id")
     private Long vendorTypeId;
 
-    @Column(name = "vendor_type_nm", nullable = false, unique = true, length = 30)
+    @Column(name = "vendor_type_code", nullable = false, unique = true, length = 30)
     private String vendorTypeCode;
 
-    @Transient
+    @Column(name = "vendor_type_nm", nullable = false, length = 150)
     private String vendorTypeName;
 
-    @Transient
+    @Column(name = "is_active")
     private Boolean active = Boolean.TRUE;
 
-    @Transient
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Transient
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     public Long getVendorTypeId() {
@@ -51,14 +50,11 @@ public class VendorType {
     }
 
     public String getVendorTypeName() {
-        return vendorTypeName != null ? vendorTypeName : vendorTypeCode;
+        return vendorTypeName;
     }
 
     public void setVendorTypeName(String vendorTypeName) {
         this.vendorTypeName = vendorTypeName;
-        if (this.vendorTypeCode == null) {
-            this.vendorTypeCode = vendorTypeName;
-        }
     }
 
     public Boolean getActive() {

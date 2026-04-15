@@ -16,6 +16,8 @@ public class DeptMembersRequest {
     @Size(max = 30, message = "Employee number must be at most 30 characters")
     private String employeeNumber;
 
+    private Long memberTypeId;
+
     @NotNull(message = "Member start date is required")
     private LocalDate memberStart;
 
@@ -35,6 +37,14 @@ public class DeptMembersRequest {
 
     public void setEmployeeNumber(String employeeNumber) {
         this.employeeNumber = employeeNumber;
+    }
+
+    public Long getMemberTypeId() {
+        return memberTypeId;
+    }
+
+    public void setMemberTypeId(Long memberTypeId) {
+        this.memberTypeId = memberTypeId;
     }
 
     public LocalDate getMemberStart() {

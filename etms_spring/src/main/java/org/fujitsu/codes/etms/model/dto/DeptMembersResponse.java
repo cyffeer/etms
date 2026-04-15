@@ -7,7 +7,12 @@ public class DeptMembersResponse {
 
     private Long deptMemberId;
     private String departmentCode;
+    private String departmentName;
     private String employeeNumber;
+    private String employeeName;
+    private Long memberTypeId;
+    private String memberTypeCode;
+    private String memberTypeName;
     private LocalDate memberStart;
     private LocalDate memberEnd;
     private LocalDateTime createdAt;
@@ -29,12 +34,52 @@ public class DeptMembersResponse {
         this.departmentCode = departmentCode;
     }
 
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
+
     public String getEmployeeNumber() {
         return employeeNumber;
     }
 
     public void setEmployeeNumber(String employeeNumber) {
         this.employeeNumber = employeeNumber;
+    }
+
+    public String getEmployeeName() {
+        return employeeName;
+    }
+
+    public void setEmployeeName(String employeeName) {
+        this.employeeName = employeeName;
+    }
+
+    public Long getMemberTypeId() {
+        return memberTypeId;
+    }
+
+    public void setMemberTypeId(Long memberTypeId) {
+        this.memberTypeId = memberTypeId;
+    }
+
+    public String getMemberTypeCode() {
+        return memberTypeCode;
+    }
+
+    public void setMemberTypeCode(String memberTypeCode) {
+        this.memberTypeCode = memberTypeCode;
+    }
+
+    public String getMemberTypeName() {
+        return memberTypeName;
+    }
+
+    public void setMemberTypeName(String memberTypeName) {
+        this.memberTypeName = memberTypeName;
     }
 
     public LocalDate getMemberStart() {

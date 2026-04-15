@@ -9,7 +9,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "np_test_hist")
@@ -23,31 +22,31 @@ public class NpTestHist {
     @Column(name = "np_lvl_id")
     private Long npLvlId;
 
-    @Transient
+    @Column(name = "np_lvl_info_code", length = 30)
     private String npLvlInfoCode;
 
     @Column(name = "test_date")
     private LocalDate testDate;
 
-    @Transient
+    @Column(name = "test_center", length = 150)
     private String testCenter;
 
-    @Transient
+    @Column(name = "test_level", length = 50)
     private String testLevel;
 
-    @Transient
+    @Column(name = "score")
     private Integer score;
 
-    @Transient
+    @Column(name = "passed")
     private Boolean passed;
 
-    @Transient
+    @Column(name = "remarks", length = 255)
     private String remarks;
 
-    @Transient
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Transient
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     public Long getNpTestHistId() {

@@ -1,6 +1,5 @@
 package org.fujitsu.codes.etms.model.data;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -8,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import org.hibernate.annotations.ColumnTransformer;
 
 @Entity
@@ -25,25 +23,10 @@ public class TrngHist {
     @ColumnTransformer(read = "cast(emp_no as varchar)", write = "?::integer")
     private String employeeNumber;
 
-    @Transient
-    private String trngCode;
-
-    @Transient
-    private LocalDate completedDate;
-
-    @Transient
-    private LocalDate expiryDate;
-
-    @Transient
-    private String result;
-
-    @Transient
-    private String remarks;
-
-    @Transient
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Transient
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     public Long getTrngHistId() {
@@ -60,46 +43,6 @@ public class TrngHist {
 
     public void setEmployeeNumber(String employeeNumber) {
         this.employeeNumber = employeeNumber;
-    }
-
-    public String getTrngCode() {
-        return trngCode;
-    }
-
-    public void setTrngCode(String trngCode) {
-        this.trngCode = trngCode;
-    }
-
-    public LocalDate getCompletedDate() {
-        return completedDate;
-    }
-
-    public void setCompletedDate(LocalDate completedDate) {
-        this.completedDate = completedDate;
-    }
-
-    public LocalDate getExpiryDate() {
-        return expiryDate;
-    }
-
-    public void setExpiryDate(LocalDate expiryDate) {
-        this.expiryDate = expiryDate;
-    }
-
-    public String getResult() {
-        return result;
-    }
-
-    public void setResult(String result) {
-        this.result = result;
-    }
-
-    public String getRemarks() {
-        return remarks;
-    }
-
-    public void setRemarks(String remarks) {
-        this.remarks = remarks;
     }
 
     public LocalDateTime getCreatedAt() {

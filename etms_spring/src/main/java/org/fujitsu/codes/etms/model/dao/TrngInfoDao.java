@@ -105,7 +105,7 @@ public class TrngInfoDao {
     public boolean existsByCode(String trngCode) {
         try (Session session = sessionFactory.openSession()) {
             Long count = session.createQuery(
-                    "select count(t) from TrngInfo t where lower(t.trngName) = lower(:code)",
+                    "select count(t) from TrngInfo t where lower(t.trngCode) = lower(:code)",
                     Long.class
             ).setParameter("code", trngCode).uniqueResult();
             return count != null && count > 0;
@@ -116,7 +116,7 @@ public class TrngInfoDao {
         try (Session session = sessionFactory.openSession()) {
             Long count = session.createQuery(
                     "select count(t) from TrngInfo t " +
-                    "where lower(t.trngName) = lower(:code) and t.trngInfoId <> :id",
+                    "where lower(t.trngCode) = lower(:code) and t.trngInfoId <> :id",
                     Long.class
             )
             .setParameter("code", trngCode)
