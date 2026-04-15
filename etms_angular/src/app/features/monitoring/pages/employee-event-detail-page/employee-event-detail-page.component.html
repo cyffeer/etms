@@ -1,0 +1,60 @@
+<section class="page-hero page-hero--compact mb-4">
+  <span class="page-hero__eyebrow">Monitoring &amp; Management</span>
+  <h2 class="page-hero__title">Employee Event Details</h2>
+</section>
+
+<div *ngIf="loading" class="alert alert-info">Loading employee event...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<div class="hrms-profile-shell" *ngIf="!loading && item">
+  <section class="hrms-section-card">
+    <header class="hrms-section-card__header">
+      <span>{{ item.eventType }} #{{ item.employeeEventId }}</span>
+    </header>
+    <div class="hrms-section-card__body">
+      <div class="hrms-details-grid">
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Employee</span>
+          <span class="hrms-detail-item__value">{{ item.employeeName || item.employeeNumber }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Employee Number</span>
+          <span class="hrms-detail-item__value">{{ item.employeeNumber }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Title</span>
+          <span class="hrms-detail-item__value">{{ item.title }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Department</span>
+          <span class="hrms-detail-item__value">{{ item.departmentName || item.departmentCode || '-' }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Reference Code</span>
+          <span class="hrms-detail-item__value">{{ item.referenceCode || '-' }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Effective Date</span>
+          <span class="hrms-detail-item__value">{{ item.effectiveDate | date:'yyyy-MM-dd' }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">End Date</span>
+          <span class="hrms-detail-item__value">{{ item.endDate ? (item.endDate | date:'yyyy-MM-dd') : '-' }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Status</span>
+          <span class="hrms-detail-item__value">{{ item.status }}</span>
+        </div>
+        <div class="hrms-detail-item hrms-detail-item--wide">
+          <span class="hrms-detail-item__label">Description</span>
+          <span class="hrms-detail-item__value">{{ item.description || '-' }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="hrms-form-actions">
+    <a class="btn btn-outline-secondary" routerLink="/monitoring">Back</a>
+    <a class="btn btn-primary" [routerLink]="['/monitoring', item.employeeEventId, 'edit']" *ngIf="canEdit">Edit</a>
+  </div>
+</div>

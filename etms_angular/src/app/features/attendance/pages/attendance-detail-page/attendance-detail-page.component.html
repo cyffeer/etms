@@ -1,14 +1,44 @@
-<h2>Attendance Details</h2>
-<p *ngIf="loading">Loading...</p>
-<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+<section class="page-hero page-hero--compact mb-4">
+  <span class="page-hero__eyebrow">Attendance Monitoring</span>
+  <h2 class="page-hero__title">Attendance Details</h2>
+</section>
 
-<div *ngIf="!loading && item">
-  <p><strong>ID:</strong> {{ item.attendanceRecordId }}</p>
-  <p><strong>Employee Number:</strong> {{ item.employeeNumber }}</p>
-  <p><strong>Date:</strong> {{ item.attendanceDate | date:'yyyy-MM-dd' }}</p>
-  <p><strong>Time In:</strong> {{ item.timeIn || '-' }}</p>
-  <p><strong>Time Out:</strong> {{ item.timeOut || '-' }}</p>
-  <p><strong>Status:</strong> {{ item.status || '-' }}</p>
-  <a routerLink="/attendance">Back</a> |
-  <a [routerLink]="['/attendance', item.attendanceRecordId, 'edit']">Edit</a>
+<div *ngIf="loading" class="alert alert-info">Loading attendance details...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<div class="hrms-profile-shell" *ngIf="!loading && item">
+  <section class="hrms-section-card">
+    <header class="hrms-section-card__header">
+      <span>Record #{{ item.attendanceRecordId }}</span>
+    </header>
+    <div class="hrms-section-card__body">
+      <div class="hrms-details-grid">
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Employee Number</span>
+          <span class="hrms-detail-item__value">{{ item.employeeNumber }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Attendance Date</span>
+          <span class="hrms-detail-item__value">{{ item.attendanceDate | date:'yyyy-MM-dd' }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Time In</span>
+          <span class="hrms-detail-item__value">{{ item.timeIn || '-' }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Time Out</span>
+          <span class="hrms-detail-item__value">{{ item.timeOut || '-' }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Status</span>
+          <span class="hrms-detail-item__value">{{ item.status || '-' }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="hrms-form-actions">
+    <a class="btn btn-outline-secondary" routerLink="/attendance">Back</a>
+    <a class="btn btn-primary" [routerLink]="['/attendance', item.attendanceRecordId, 'edit']" *ngIf="canEdit">Edit</a>
+  </div>
 </div>

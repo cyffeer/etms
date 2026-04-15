@@ -3,6 +3,8 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DepartmentMemberRequest } from '../../department-member.model';
 import { DepartmentMemberService } from '../../services/department-member.service';
+import { MemberType } from '../../../member-types/models/member-type.models';
+import { MemberTypeService } from '../../../member-types/services/member-type.service';
 
 @Component({
   selector: 'app-department-member-form-page',
@@ -13,11 +15,13 @@ export class DepartmentMemberFormPageComponent implements OnInit {
   loading = false;
   error = '';
   isEdit = false;
+  memberTypes: MemberType[] = [];
   private deptMemberId = 0;
 
   form = this.fb.group({
     departmentCode: ['', [Validators.required, Validators.maxLength(30)]],
     employeeNumber: ['', [Validators.required, Validators.maxLength(30)]],
+    memberTypeId: [null as number | null],
     memberStart: ['', Validators.required],
     memberEnd: ['']
   });
@@ -26,10 +30,17 @@ export class DepartmentMemberFormPageComponent implements OnInit {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private service: DepartmentMemberService
+    private service: DepartmentMemberService,
+    private memberTypeService: MemberTypeService
   ) {}
 
   ngOnInit(): void {
+    this.memberTypeService.getAll().subscribe({
+      next: (rows) => {
+        this.memberTypes = rows;
+      }
+    });
+
     this.deptMemberId = Number(this.route.snapshot.paramMap.get('deptMemberId'));
     this.isEdit = !!this.deptMemberId;
 
@@ -43,9 +54,12 @@ export class DepartmentMemberFormPageComponent implements OnInit {
         this.form.patchValue({
           departmentCode: item.departmentCode,
           employeeNumber: item.employeeNumber,
+          memberTypeId: item.memberTypeId ?? null,
           memberStart: item.memberStart?.slice(0, 10),
           memberEnd: item.memberEnd?.slice(0, 10) ?? ''
         });
+        this.form.controls.departmentCode.disable();
+        this.form.controls.employeeNumber.disable();
         this.loading = false;
       },
       error: (err) => {
@@ -65,6 +79,7 @@ export class DepartmentMemberFormPageComponent implements OnInit {
     const payload: DepartmentMemberRequest = {
       departmentCode: raw.departmentCode!,
       employeeNumber: raw.employeeNumber!,
+      memberTypeId: raw.memberTypeId ?? null,
       memberStart: raw.memberStart!,
       memberEnd: raw.memberEnd || null
     };

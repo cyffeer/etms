@@ -1,0 +1,59 @@
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { map, Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
+import { ApiResponse } from '../../../models/api-response.model';
+import { SkillLevelRequest, SkillLevelResponse } from '../models/skill-level.model';
+
+@Injectable({ providedIn: 'root' })
+export class SkillLevelsService {
+  private readonly baseUrl = `${environment.apiBaseUrl}/skill-levels`;
+
+  constructor(private http: HttpClient) {}
+
+  getSkillLevels(filters?: {
+    skillLvlId?: number | null;
+    skillId?: number | null;
+    keyword?: string | null;
+  }): Observable<SkillLevelResponse[]> {
+    let params = new HttpParams();
+
+    if (filters?.skillLvlId != null) {
+      params = params.set('skillLvlId', filters.skillLvlId);
+    }
+    if (filters?.skillId != null) {
+      params = params.set('skillId', filters.skillId);
+    }
+    if (filters?.keyword?.trim()) {
+      params = params.set('keyword', filters.keyword.trim());
+    }
+
+    return this.http
+      .get<ApiResponse<SkillLevelResponse[]>>(this.baseUrl, { params })
+      .pipe(map((res) => res.data ?? []));
+  }
+
+  getSkillLevelById(skillLvlId: number): Observable<SkillLevelResponse> {
+    return this.http
+      .get<ApiResponse<SkillLevelResponse>>(`${this.baseUrl}/${skillLvlId}`)
+      .pipe(map((res) => res.data));
+  }
+
+  createSkillLevel(payload: SkillLevelRequest): Observable<SkillLevelResponse> {
+    return this.http
+      .post<ApiResponse<SkillLevelResponse>>(this.baseUrl, payload)
+      .pipe(map((res) => res.data));
+  }
+
+  updateSkillLevel(skillLvlId: number, payload: SkillLevelRequest): Observable<SkillLevelResponse> {
+    return this.http
+      .put<ApiResponse<SkillLevelResponse>>(`${this.baseUrl}/${skillLvlId}`, payload)
+      .pipe(map((res) => res.data));
+  }
+
+  deleteSkillLevel(skillLvlId: number): Observable<void> {
+    return this.http
+      .delete<ApiResponse<void>>(`${this.baseUrl}/${skillLvlId}`)
+      .pipe(map(() => void 0));
+  }
+}

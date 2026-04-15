@@ -4,6 +4,7 @@ import { SkillLvlResponse, SkillsInventoryResponse } from '../../models/skills-i
 import { SkillsInventoryService } from '../../services/skills-inventory.service';
 import { SkillsResponse } from '../../../skills/models/skill.model';
 import { forkJoin } from 'rxjs';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-skills-inventory-list-page',
@@ -16,8 +17,13 @@ export class SkillsInventoryListPageComponent implements OnInit {
   loading = false;
   error = '';
   employeeNumberFilter = '';
+  readonly canManage = this.authService.hasAnyRole(['ADMIN', 'HR', 'MANAGER']);
 
-  constructor(private service: SkillsInventoryService, private skillsService: SkillsService) {}
+  constructor(
+    private service: SkillsInventoryService,
+    private skillsService: SkillsService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     this.load();
@@ -69,6 +75,9 @@ export class SkillsInventoryListPageComponent implements OnInit {
   }
 
   onDelete(id: number): void {
+    if (!this.canManage) {
+      return;
+    }
     if (!confirm('Delete this record?')) return;
     this.service.deleteSkillsInventory(id).subscribe({
       next: () => this.load(),

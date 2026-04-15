@@ -1,0 +1,43 @@
+<section class="page-hero page-hero--compact mb-4">
+  <span class="page-hero__eyebrow">Master Data</span>
+  <h2 class="page-hero__title">{{ isEdit ? 'Edit Leave Type' : 'New Leave Type' }}</h2>
+</section>
+
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+<div *ngIf="loading" class="alert alert-info">Loading leave type...</div>
+
+<form *ngIf="!loading" [formGroup]="form" (ngSubmit)="submit()" class="hrms-form-shell">
+  <section class="hrms-section-card">
+    <div class="hrms-section-card__header">
+      <span>Leave Type Details</span>
+    </div>
+    <div class="hrms-section-card__body">
+      <div class="hrms-form-grid hrms-form-grid--wide">
+        <div class="hrms-form-field">
+          <label class="form-label">Code</label>
+          <input class="form-control" formControlName="leaveTypeCode" />
+        </div>
+        <div class="hrms-form-field">
+          <label class="form-label">Name</label>
+          <input class="form-control" formControlName="leaveTypeName" />
+        </div>
+        <div class="hrms-form-field hrms-form-field--full">
+          <label class="form-label">Description</label>
+          <textarea rows="3" class="form-control" formControlName="description"></textarea>
+        </div>
+        <div class="hrms-form-field">
+          <label class="form-label">Status</label>
+          <select class="form-select" formControlName="active">
+            <option [ngValue]="true">Active</option>
+            <option [ngValue]="false">Inactive</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="hrms-form-actions">
+    <button class="btn btn-primary" type="submit" [disabled]="form.invalid || loading">Save</button>
+    <a class="btn btn-outline-secondary" routerLink="/leave-types">Cancel</a>
+  </div>
+</form>

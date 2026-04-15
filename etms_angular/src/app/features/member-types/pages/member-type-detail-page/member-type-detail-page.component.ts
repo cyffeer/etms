@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MemberType } from '../../models/member-type.models';
 import { MemberTypeService } from '../../services/member-type.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-member-type-detail-page',
@@ -12,8 +13,13 @@ export class MemberTypeDetailPageComponent implements OnInit {
   memberType?: MemberType;
   loading = false;
   error = '';
+  readonly canManage = this.authService.hasAnyRole(['ADMIN']);
 
-  constructor(private route: ActivatedRoute, private service: MemberTypeService) {}
+  constructor(
+    private route: ActivatedRoute,
+    private service: MemberTypeService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('memberTypeId'));

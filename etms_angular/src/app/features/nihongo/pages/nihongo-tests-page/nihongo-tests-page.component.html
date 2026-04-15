@@ -1,0 +1,71 @@
+<nav class="module-subnav mb-4">
+  <a routerLink="/nihongo/results" routerLinkActive="active" class="module-subnav__link">Employee Results</a>
+  <a routerLink="/nihongo/tests" routerLinkActive="active" class="module-subnav__link">Test Schedule</a>
+  <a routerLink="/nihongo/types" routerLinkActive="active" class="module-subnav__link">Type Master</a>
+  <a routerLink="/np-lvl-info" class="module-subnav__link">Level Rules</a>
+</nav>
+
+<section class="page-hero mb-4">
+  <span class="page-hero__eyebrow">Nihongo Proficiency Monitoring</span>
+  <h2 class="page-hero__title">Nihongo Test Schedule</h2>
+  <p class="page-hero__copy">
+    Review scheduled and recorded Nihongo tests, mapped level rules, location details, and high-level results directly
+    from the backend.
+  </p>
+</section>
+
+<div class="page-toolbar">
+  <div>
+    <label class="form-label">Type Code</label>
+    <select class="form-select" [(ngModel)]="filters.typeCode" name="nihongoTestTypeCodeFilter">
+      <option value="">All</option>
+      <option *ngFor="let code of availableTypeCodes" [value]="code">{{ code }}</option>
+    </select>
+  </div>
+  <div>
+    <label class="form-label">Keyword</label>
+    <input class="form-control" [(ngModel)]="filters.keyword" name="nihongoTestKeywordFilter" />
+  </div>
+  <div class="page-actions ms-auto">
+    <button class="btn btn-primary" type="button" (click)="load()">Search</button>
+    <button class="btn btn-outline-secondary" type="button" (click)="resetFilters()">Reset</button>
+  </div>
+</div>
+
+<div *ngIf="loading" class="alert alert-info">Loading Nihongo test schedules...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<div class="table-responsive" *ngIf="!loading && !error && rows.length > 0">
+  <table class="table hrms-responsive-table align-middle mb-0">
+    <thead>
+      <tr>
+        <th>Test ID</th>
+        <th>Type</th>
+        <th>Level</th>
+        <th>Test Date</th>
+        <th>Location</th>
+        <th>Requested Level</th>
+        <th>Result</th>
+        <th>Score</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of rows">
+        <td data-label="Test ID">{{ row.npTestHistId }}</td>
+        <td data-label="Type">{{ row.typeLabel }}</td>
+        <td data-label="Level">{{ row.levelLabel }}</td>
+        <td data-label="Test Date">{{ row.testDate ? (row.testDate | date:'yyyy-MM-dd') : '-' }}</td>
+        <td data-label="Location">{{ row.testCenter || '-' }}</td>
+        <td data-label="Requested Level">{{ row.testLevel || '-' }}</td>
+        <td data-label="Result">
+          <span class="status-pill" [ngClass]="resultClass(row)">{{ resultLabel(row) }}</span>
+        </td>
+        <td data-label="Score">{{ row.score != null ? row.score : '-' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="empty-state" *ngIf="!loading && !error && rows.length === 0">
+  No Nihongo test schedules matched the current filters.
+</div>

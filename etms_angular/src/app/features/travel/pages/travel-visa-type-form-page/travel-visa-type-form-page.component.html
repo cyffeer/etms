@@ -1,0 +1,47 @@
+<nav class="module-subnav mb-4">
+  <a routerLink="/travel/passports" routerLinkActive="active" class="module-subnav__link">Passport Registry</a>
+  <a routerLink="/travel/visas" routerLinkActive="active" class="module-subnav__link">Visa Registry</a>
+  <a routerLink="/travel/visa-types" routerLinkActive="active" class="module-subnav__link">Visa Types</a>
+</nav>
+
+<section class="page-hero page-hero--compact mb-4">
+  <span class="page-hero__eyebrow">Master Data</span>
+  <h2 class="page-hero__title">{{ isEdit ? 'Edit' : 'Add' }} Visa Type</h2>
+</section>
+
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+<div *ngIf="loading" class="alert alert-info">Loading visa type...</div>
+
+<form *ngIf="!loading" [formGroup]="form" (ngSubmit)="submit()" class="hrms-form-shell">
+  <section class="hrms-section-card">
+    <div class="hrms-section-card__header">Visa Type Information</div>
+    <div class="hrms-section-card__body">
+      <div class="hrms-form-grid">
+        <div class="hrms-form-field">
+          <label class="form-label">Type Code *</label>
+          <input class="form-control" formControlName="visaTypeCode" />
+        </div>
+        <div class="hrms-form-field">
+          <label class="form-label">Type Name *</label>
+          <input class="form-control" formControlName="visaTypeName" />
+        </div>
+        <div class="hrms-form-field hrms-form-field--full">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" rows="3" formControlName="description"></textarea>
+        </div>
+        <div class="hrms-form-field">
+          <label class="form-label">Status</label>
+          <select class="form-select" formControlName="active">
+            <option [ngValue]="true">Active</option>
+            <option [ngValue]="false">Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="hrms-form-actions mt-3">
+        <button class="btn btn-primary" type="submit" [disabled]="form.invalid || loading">Save</button>
+        <a class="btn btn-outline-secondary" routerLink="/travel/visa-types">Cancel</a>
+      </div>
+    </div>
+  </section>
+</form>

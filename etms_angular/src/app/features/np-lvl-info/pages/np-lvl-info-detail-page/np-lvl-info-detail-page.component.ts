@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NpLvlInfoResponse } from '../../np-lvl-info.model';
 import { NpLvlInfoService } from '../../services/np-lvl-info.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-np-lvl-info-detail-page',
@@ -12,8 +13,13 @@ export class NpLvlInfoDetailPageComponent implements OnInit {
   item?: NpLvlInfoResponse;
   loading = false;
   error = '';
+  readonly canManage = this.authService.hasAnyRole(['ADMIN']);
 
-  constructor(private route: ActivatedRoute, private service: NpLvlInfoService) {}
+  constructor(
+    private route: ActivatedRoute,
+    private service: NpLvlInfoService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('npLvlInfoId'));

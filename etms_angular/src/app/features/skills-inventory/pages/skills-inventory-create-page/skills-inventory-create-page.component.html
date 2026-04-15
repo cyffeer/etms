@@ -1,22 +1,53 @@
-<h2>Assign Skill</h2>
-<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+<section class="page-hero page-hero--compact mb-4">
+  <span class="page-hero__eyebrow">Skills Inventory</span>
+  <h2 class="page-hero__title">Assign Skill</h2>
+</section>
 
-<form [formGroup]="form" (ngSubmit)="submit()">
-  <label>Employee Number *</label><br />
-  <input type="text" formControlName="employeeNumber" /><br /><br />
+<div *ngIf="loading" class="alert alert-info">Saving skill assignment...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
-  <label>Skill *</label><br />
-  <select formControlName="skillId" (change)="onSkillChange()">
-    <option [ngValue]="null">-- Select skill --</option>
-    <option *ngFor="let s of skills" [ngValue]="s.skillId">{{ s.skillName }} ({{ s.skillCode }})</option>
-  </select><br /><br />
+<form class="hrms-form-shell" [formGroup]="form" (ngSubmit)="submit()">
+  <section class="hrms-section-card">
+    <header class="hrms-section-card__header">
+      <span>Assignment Details</span>
+    </header>
+    <div class="hrms-section-card__body">
+      <div class="hrms-form-grid hrms-form-grid--wide">
+        <div class="hrms-form-field">
+          <label class="form-label" for="skillInventoryCreateEmployee">Employee Number</label>
+          <input id="skillInventoryCreateEmployee" type="text" class="form-control" formControlName="employeeNumber" />
+          <small class="hrms-error" *ngIf="form.controls.employeeNumber.touched && form.controls.employeeNumber.invalid">
+            Employee number is required.
+          </small>
+        </div>
 
-  <label>Skill Level *</label><br />
-  <select formControlName="skillLvlId">
-    <option [ngValue]="null">-- Select level --</option>
-    <option *ngFor="let l of levels" [ngValue]="l.skillLvlId">{{ l.lvlName }} ({{ l.lvlCode }})</option>
-  </select><br /><br />
+        <div class="hrms-form-field">
+          <label class="form-label" for="skillInventoryCreateSkill">Skill</label>
+          <select id="skillInventoryCreateSkill" class="form-select" formControlName="skillId" (change)="onSkillChange()">
+            <option [ngValue]="null">Select Skill</option>
+            <option *ngFor="let s of skills" [ngValue]="s.skillId">{{ s.skillName }} ({{ s.skillCode }})</option>
+          </select>
+          <small class="hrms-error" *ngIf="form.controls.skillId.touched && form.controls.skillId.invalid">
+            Skill is required.
+          </small>
+        </div>
 
-  <button type="submit" [disabled]="loading">Save</button>
-  <a routerLink="/skills-inventory" style="margin-left:8px;">Cancel</a>
+        <div class="hrms-form-field">
+          <label class="form-label" for="skillInventoryCreateLevel">Skill Level</label>
+          <select id="skillInventoryCreateLevel" class="form-select" formControlName="skillLvlId">
+            <option [ngValue]="null">Select Skill Level</option>
+            <option *ngFor="let l of levels" [ngValue]="l.skillLvlId">{{ l.lvlName }} ({{ l.lvlCode }})</option>
+          </select>
+          <small class="hrms-error" *ngIf="form.controls.skillLvlId.touched && form.controls.skillLvlId.invalid">
+            Skill level is required.
+          </small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="hrms-form-actions">
+    <button type="submit" class="btn btn-primary" [disabled]="loading">Save</button>
+    <a class="btn btn-outline-secondary" routerLink="/skills-inventory">Cancel</a>
+  </div>
 </form>

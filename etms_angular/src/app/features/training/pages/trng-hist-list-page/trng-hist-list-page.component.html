@@ -1,7 +1,13 @@
+<nav class="module-subnav mb-4">
+  <a routerLink="/training/types" routerLinkActive="active" class="module-subnav__link">Training Types</a>
+  <a routerLink="/training/info" routerLinkActive="active" class="module-subnav__link">Training Info</a>
+  <a routerLink="/training/history" routerLinkActive="active" class="module-subnav__link">Training History</a>
+  <a routerLink="/training/vendors" routerLinkActive="active" class="module-subnav__link">Vendors</a>
+</nav>
+
 <section class="page-hero mb-4">
   <span class="page-hero__eyebrow">Monitoring And Management</span>
   <h2 class="page-hero__title">Training History Search</h2>
-  <p class="page-hero__copy">Review employee training assignments and filter the current history by employee number.</p>
 </section>
 
 <div class="page-toolbar">
@@ -12,7 +18,7 @@
   <div class="page-actions ms-auto">
     <button class="btn btn-primary" type="button" (click)="loadData()">Search</button>
     <button class="btn btn-outline-secondary" type="button" (click)="resetFilters()">Reset</button>
-    <button class="btn btn-warning" type="button" (click)="assign()">Assign Training</button>
+    <button *ngIf="canManage" class="btn btn-warning" type="button" (click)="assign()">Assign Training</button>
   </div>
 </div>
 
@@ -20,23 +26,23 @@
 <div *ngIf="loading" class="alert alert-info">Loading training history...</div>
 
 <div class="table-responsive" *ngIf="!loading && items.length > 0">
-  <table class="table align-middle mb-0">
+  <table class="table hrms-responsive-table align-middle mb-0">
     <thead>
       <tr>
         <th>Employee</th>
         <th>Training ID</th>
         <th>Assigned At</th>
         <th>Updated At</th>
-        <th class="text-end">Actions</th>
+        <th class="text-end" *ngIf="canManage">Actions</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let item of items">
-        <td>{{ item.employeeNumber }}</td>
-        <td>{{ item.trngId }}</td>
-        <td>{{ item.createdAt ? (item.createdAt | date:'yyyy-MM-dd HH:mm') : '-' }}</td>
-        <td>{{ item.updatedAt ? (item.updatedAt | date:'yyyy-MM-dd HH:mm') : '-' }}</td>
-        <td class="text-end">
+        <td data-label="Employee">{{ item.employeeNumber }}</td>
+        <td data-label="Training ID">{{ item.trngId }}</td>
+        <td data-label="Assigned At">{{ item.createdAt ? (item.createdAt | date:'yyyy-MM-dd HH:mm') : '-' }}</td>
+        <td data-label="Updated At">{{ item.updatedAt ? (item.updatedAt | date:'yyyy-MM-dd HH:mm') : '-' }}</td>
+        <td class="text-end" data-label="Actions" *ngIf="canManage">
           <button (click)="delete(item)" class="btn btn-sm btn-outline-danger">Delete</button>
         </td>
       </tr>

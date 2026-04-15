@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { SkillsResponse } from '../../models/skill.model';
 import { SkillsService } from '../../services/skills.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-skill-list-page',
@@ -10,8 +11,9 @@ export class SkillListPageComponent implements OnInit {
   skills: SkillsResponse[] = [];
   loading = false;
   error = '';
+  readonly canManage = this.authService.hasAnyRole(['ADMIN']);
 
-  constructor(private skillsService: SkillsService) {}
+  constructor(private skillsService: SkillsService, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.load();
@@ -33,6 +35,9 @@ export class SkillListPageComponent implements OnInit {
   }
 
   onDelete(skillId: number): void {
+    if (!this.canManage) {
+      return;
+    }
     if (!confirm('Delete this skill?')) return;
     this.skillsService.deleteSkill(skillId).subscribe({
       next: () => this.load(),

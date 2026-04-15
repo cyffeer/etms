@@ -1,26 +1,46 @@
-<h2>Edit Department</h2>
+<section class="page-hero page-hero--compact mb-4">
+  <span class="page-hero__eyebrow">Administration</span>
+  <h2 class="page-hero__title">Edit Department</h2>
+</section>
 
-<p *ngIf="loading">Loading...</p>
-<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+<div *ngIf="loading" class="alert alert-info">Loading department details...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
-<form *ngIf="!loading" [formGroup]="form" (ngSubmit)="submit()">
-  <label>Department Code *</label><br />
-  <input type="text" formControlName="departmentCode" />
-  <small *ngIf="form.controls.departmentCode.touched && form.controls.departmentCode.invalid" style="color:#b91c1c">
-    Required (max 30).
-  </small>
-  <br /><br />
+<form class="hrms-form-shell" *ngIf="!loading" [formGroup]="form" (ngSubmit)="submit()">
+  <section class="hrms-section-card">
+    <header class="hrms-section-card__header">
+      <span>Department Details</span>
+    </header>
+    <div class="hrms-section-card__body">
+      <div class="hrms-form-grid hrms-form-grid--wide">
+        <div class="hrms-form-field">
+          <label class="form-label" for="editDepartmentCode">Department Code</label>
+          <input id="editDepartmentCode" type="text" class="form-control" formControlName="departmentCode" />
+          <small class="hrms-error" *ngIf="form.controls.departmentCode.touched && form.controls.departmentCode.invalid">
+            Department code is required (max 30).
+          </small>
+        </div>
 
-  <label>Department Name *</label><br />
-  <input type="text" formControlName="departmentName" />
-  <small *ngIf="form.controls.departmentName.touched && form.controls.departmentName.invalid" style="color:#b91c1c">
-    Required (max 150).
-  </small>
-  <br /><br />
+        <div class="hrms-form-field">
+          <label class="form-label" for="editDepartmentName">Department Name</label>
+          <input id="editDepartmentName" type="text" class="form-control" formControlName="departmentName" />
+          <small class="hrms-error" *ngIf="form.controls.departmentName.touched && form.controls.departmentName.invalid">
+            Department name is required (max 150).
+          </small>
+        </div>
 
-  <label><input type="checkbox" formControlName="active" /> Active</label>
-  <br /><br />
+        <div class="hrms-form-field hrms-form-field--full">
+          <div class="form-check mt-2">
+            <input id="editDepartmentActive" class="form-check-input" type="checkbox" formControlName="active" />
+            <label class="form-check-label" for="editDepartmentActive">Active</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <button type="submit">Update</button>
-  <a routerLink="/departments" style="margin-left:8px;">Cancel</a>
+  <div class="hrms-form-actions">
+    <button type="submit" class="btn btn-primary" [disabled]="loading">Update</button>
+    <a class="btn btn-outline-secondary" routerLink="/departments">Cancel</a>
+  </div>
 </form>

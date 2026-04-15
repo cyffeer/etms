@@ -54,6 +54,10 @@ export interface Vendor {
   vendorId: number;
   vendorCode: string;
   vendorName: string;
+  vendorTypeCode: string;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  addressLine?: string | null;
   description?: string | null;
   active: boolean;
   createdAt?: string | null;
@@ -63,6 +67,10 @@ export interface Vendor {
 export interface VendorRequest {
   vendorCode: string;
   vendorName: string;
+  vendorTypeCode: string;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  addressLine?: string | null;
   description?: string | null;
   active?: boolean;
 }

@@ -8,6 +8,8 @@ import { TrngInfoListPageComponent } from './pages/trng-info-list-page/trng-info
 import { TrngInfoFormPageComponent } from './pages/trng-info-form-page/trng-info-form-page.component';
 import { TrngHistListPageComponent } from './pages/trng-hist-list-page/trng-hist-list-page.component';
 import { TrngHistFormPageComponent } from './pages/trng-hist-form-page/trng-hist-form-page.component';
+import { VendorListPageComponent } from './pages/vendor-list-page/vendor-list-page.component';
+import { VendorFormPageComponent } from './pages/vendor-form-page/vendor-form-page.component';
 
 @NgModule({
   declarations: [
@@ -17,6 +19,8 @@ import { TrngHistFormPageComponent } from './pages/trng-hist-form-page/trng-hist
     TrngInfoFormPageComponent,
     TrngHistListPageComponent,
     TrngHistFormPageComponent,
+    VendorListPageComponent,
+    VendorFormPageComponent,
   ],
   imports: [CommonModule, ReactiveFormsModule, FormsModule, TrainingRoutingModule],
 })

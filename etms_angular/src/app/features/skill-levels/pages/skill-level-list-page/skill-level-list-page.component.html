@@ -1,0 +1,78 @@
+<section class="page-hero mb-4">
+  <span class="page-hero__eyebrow">Master Data</span>
+  <h2 class="page-hero__title">Skill Levels</h2>
+</section>
+
+<div class="page-toolbar">
+  <div>
+    <label class="form-label">Level ID</label>
+    <input
+      class="form-control"
+      type="number"
+      [(ngModel)]="filters.skillLvlId"
+      name="skillLevelIdFilter"
+      min="1"
+    />
+  </div>
+  <div>
+    <label class="form-label">Skill</label>
+    <select class="form-select" [(ngModel)]="filters.skillId" name="skillLevelSkillFilter">
+      <option [ngValue]="null">All Skills</option>
+      <option *ngFor="let skill of skills" [ngValue]="skill.skillId">
+        {{ skill.skillName }}
+      </option>
+    </select>
+  </div>
+  <div>
+    <label class="form-label">Name Or Code</label>
+    <input class="form-control" [(ngModel)]="filters.keyword" name="skillLevelKeywordFilter" />
+  </div>
+  <div class="page-actions ms-auto">
+    <button class="btn btn-primary" type="button" (click)="load()">Search</button>
+    <button class="btn btn-outline-secondary" type="button" (click)="resetFilters()">Reset</button>
+    <a class="btn btn-warning" routerLink="/skill-levels/new" *ngIf="canManage">Add Skill Level</a>
+  </div>
+</div>
+
+<div *ngIf="loading" class="alert alert-info">Loading skill levels...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<div class="table-responsive" *ngIf="!loading && !error && rows.length > 0">
+  <table class="table hrms-responsive-table align-middle mb-0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Skill</th>
+        <th>Code</th>
+        <th>Name</th>
+        <th>Rank</th>
+        <th>Status</th>
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of rows">
+        <td data-label="ID">{{ row.skillLvlId }}</td>
+        <td data-label="Skill">{{ row.skillName || row.skillCode || row.skillId }}</td>
+        <td data-label="Code">{{ row.lvlCode }}</td>
+        <td data-label="Name">{{ row.lvlName }}</td>
+        <td data-label="Rank">{{ row.lvlRank ?? '-' }}</td>
+        <td data-label="Status">
+          <span class="status-pill" [ngClass]="row.active ? 'status-pill--active' : 'status-pill--inactive'">
+            {{ row.active ? 'Active' : 'Inactive' }}
+          </span>
+        </td>
+        <td class="text-end" data-label="Actions">
+          <div class="page-actions justify-content-end" *ngIf="canManage">
+            <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/skill-levels', row.skillLvlId, 'edit']">Edit</a>
+            <button class="btn btn-sm btn-outline-danger" type="button" (click)="onDelete(row.skillLvlId)">Delete</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="empty-state" *ngIf="!loading && !error && rows.length === 0">
+  No skill levels matched the current search.
+</div>

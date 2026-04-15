@@ -5,14 +5,20 @@ import {
   HttpInterceptor,
   HttpRequest
 } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ApiError } from '../../models/api-error.model';
+import { AuthService } from '../services/auth.service';
 import { ErrorService } from '../services/error/error.service';
 
 @Injectable()
 export class ApiErrorInterceptor implements HttpInterceptor {
-  constructor(private errorService: ErrorService) {}
+  constructor(
+    private readonly errorService: ErrorService,
+    private readonly authService: AuthService,
+    private readonly router: Router
+  ) {}
 
   intercept(req: HttpRequest<unknown>, next: import('@angular/common/http').HttpHandler): Observable<HttpEvent<unknown>> {
     return next.handle(req).pipe(
@@ -23,6 +29,11 @@ export class ApiErrorInterceptor implements HttpInterceptor {
           details: error.error,
           timestamp: new Date().toISOString()
         };
+
+        if (error.status === 401 && !req.url.endsWith('/login')) {
+          this.authService.logout();
+          this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+        }
 
         this.errorService.notify(normalized);
         return throwError(() => normalized);

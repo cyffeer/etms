@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DepartmentResponse } from '../../models/department.model';
 import { DepartmentsService } from '../../services/departments.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-department-details-page',
@@ -11,10 +12,12 @@ export class DepartmentDetailsPageComponent implements OnInit {
   department?: DepartmentResponse;
   loading = false;
   error = '';
+  readonly canManage = this.authService.hasAnyRole(['ADMIN']);
 
   constructor(
     private route: ActivatedRoute,
-    private departmentsService: DepartmentsService
+    private departmentsService: DepartmentsService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {

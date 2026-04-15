@@ -1,15 +1,46 @@
-<h2>{{ isEdit ? 'Edit Member Type' : 'Create Member Type' }}</h2>
-<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+<section class="page-hero page-hero--compact mb-4">
+  <span class="page-hero__eyebrow">Administration</span>
+  <h2 class="page-hero__title">{{ isEdit ? 'Edit Member Type' : 'Create Member Type' }}</h2>
+</section>
 
-<form [formGroup]="form" (ngSubmit)="submit()">
-  <label>Member Type Code</label><br />
-  <input type="text" formControlName="memberTypeCode" /><br /><br />
+<div *ngIf="loading && isEdit" class="alert alert-info">Loading member type...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
-  <label>Member Type Name</label><br />
-  <input type="text" formControlName="memberTypeName" /><br /><br />
+<form class="hrms-form-shell" [formGroup]="form" (ngSubmit)="submit()">
+  <section class="hrms-section-card">
+    <header class="hrms-section-card__header">
+      <span>Member Type Details</span>
+    </header>
+    <div class="hrms-section-card__body">
+      <div class="hrms-form-grid hrms-form-grid--wide">
+        <div class="hrms-form-field">
+          <label class="form-label" for="memberTypeCode">Member Type Code</label>
+          <input id="memberTypeCode" type="text" class="form-control" formControlName="memberTypeCode" />
+          <small class="hrms-error" *ngIf="form.controls.memberTypeCode.touched && form.controls.memberTypeCode.invalid">
+            Member type code is required.
+          </small>
+        </div>
 
-  <label><input type="checkbox" formControlName="active" /> Active</label><br /><br />
+        <div class="hrms-form-field">
+          <label class="form-label" for="memberTypeName">Member Type Name</label>
+          <input id="memberTypeName" type="text" class="form-control" formControlName="memberTypeName" />
+          <small class="hrms-error" *ngIf="form.controls.memberTypeName.touched && form.controls.memberTypeName.invalid">
+            Member type name is required.
+          </small>
+        </div>
 
-  <button type="submit" [disabled]="loading">{{ loading ? 'Saving...' : 'Save' }}</button>
-  <a routerLink="/member-types" style="margin-left:8px;">Cancel</a>
+        <div class="hrms-form-field hrms-form-field--full">
+          <div class="form-check mt-2">
+            <input id="memberTypeActive" class="form-check-input" type="checkbox" formControlName="active" />
+            <label class="form-check-label" for="memberTypeActive">Active</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="hrms-form-actions">
+    <button type="submit" class="btn btn-primary" [disabled]="loading">{{ loading ? 'Saving...' : 'Save' }}</button>
+    <a class="btn btn-outline-secondary" routerLink="/member-types">Cancel</a>
+  </div>
 </form>

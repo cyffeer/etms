@@ -1,41 +1,21 @@
 import { Component, OnInit } from '@angular/core';
-import { forkJoin } from 'rxjs';
-import { AttendanceService } from '../../attendance/services/attendance.service';
-import { DepartmentsService } from '../../departments/services/departments.service';
-import { EmployeesService } from '../../employees/services/employees.service';
-import { LeaveService } from '../../leaves/services/leave.service';
-import { SkillsService } from '../../skills/services/skills.service';
-
-type DashboardCard = {
-  label: string;
-  count: number;
-  route: string;
-  note: string;
-};
+import { DashboardCard, DashboardNotification, DashboardTrendPoint } from '../models/dashboard.model';
+import { DashboardService } from '../services/dashboard.service';
 
 @Component({
   selector: 'app-dashboard-page',
-  templateUrl: './dashboard-page.component.html'
+  templateUrl: './dashboard-page.component.html',
+  styleUrls: ['./dashboard-page.component.css']
 })
 export class DashboardPageComponent implements OnInit {
   loading = false;
   error = '';
+  cards: DashboardCard[] = [];
+  trainingsPerMonth: DashboardTrendPoint[] = [];
+  attendanceTrends: DashboardTrendPoint[] = [];
+  notifications: DashboardNotification[] = [];
 
-  cards: DashboardCard[] = [
-    { label: 'Employees', count: 0, route: '/employees', note: 'Administration records' },
-    { label: 'Departments', count: 0, route: '/departments', note: 'Org structure' },
-    { label: 'Skills', count: 0, route: '/skills', note: 'Skills master data' },
-    { label: 'Attendance', count: 0, route: '/attendance', note: 'Attendance monitoring' },
-    { label: 'Leaves', count: 0, route: '/leaves', note: 'Leave monitoring' }
-  ];
-
-  constructor(
-    private employeesService: EmployeesService,
-    private departmentsService: DepartmentsService,
-    private skillsService: SkillsService,
-    private attendanceService: AttendanceService,
-    private leaveService: LeaveService
-  ) {}
+  constructor(private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
     this.loadDashboard();
@@ -45,21 +25,12 @@ export class DashboardPageComponent implements OnInit {
     this.loading = true;
     this.error = '';
 
-    forkJoin({
-      employees: this.employeesService.getEmployees(),
-      departments: this.departmentsService.getDepartments(),
-      skills: this.skillsService.getSkills(),
-      attendance: this.attendanceService.getAll(),
-      leaves: this.leaveService.getAll()
-    }).subscribe({
-      next: ({ employees, departments, skills, attendance, leaves }) => {
-        this.cards = [
-          { label: 'Employees', count: employees.items.length, route: '/employees', note: 'Administration records' },
-          { label: 'Departments', count: departments.length, route: '/departments', note: 'Org structure' },
-          { label: 'Skills', count: skills.length, route: '/skills', note: 'Skills master data' },
-          { label: 'Attendance', count: attendance.length, route: '/attendance', note: 'Attendance monitoring' },
-          { label: 'Leaves', count: leaves.length, route: '/leaves', note: 'Leave monitoring' }
-        ];
+    this.dashboardService.getSummary().subscribe({
+      next: (summary) => {
+        this.cards = summary.cards ?? [];
+        this.trainingsPerMonth = summary.trainingsPerMonth ?? [];
+        this.attendanceTrends = summary.attendanceTrends ?? [];
+        this.notifications = summary.notifications ?? [];
         this.loading = false;
       },
       error: (err) => {
@@ -67,5 +38,9 @@ export class DashboardPageComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  maxValue(points: DashboardTrendPoint[]): number {
+    return Math.max(...points.map((point) => point.value), 1);
   }
 }

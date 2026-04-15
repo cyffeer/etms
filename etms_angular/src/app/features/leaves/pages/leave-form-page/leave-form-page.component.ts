@@ -3,6 +3,8 @@ import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/fo
 import { ActivatedRoute, Router } from '@angular/router';
 import { LeaveRequest } from '../../models/leave.models';
 import { LeaveService } from '../../services/leave.service';
+import { LeaveType } from '../../../leave-types/models/leave-type.models';
+import { LeaveTypeService } from '../../../leave-types/services/leave-type.service';
 
 @Component({
   selector: 'app-leave-form-page',
@@ -15,10 +17,12 @@ export class LeaveFormPageComponent implements OnInit {
   error = '';
   isEdit = false;
   id?: number;
+  leaveTypes: LeaveType[] = [];
 
   constructor(
     private fb: FormBuilder,
     private service: LeaveService,
+    private leaveTypeService: LeaveTypeService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
@@ -34,6 +38,7 @@ export class LeaveFormPageComponent implements OnInit {
     }, { validators: [this.dateRangeValidator] });
 
     const raw = this.route.snapshot.params['leaveId'];
+    this.loadLeaveTypes();
     if (raw) {
       this.id = Number(raw);
       this.isEdit = true;
@@ -90,6 +95,17 @@ export class LeaveFormPageComponent implements OnInit {
 
   cancel(): void {
     this.router.navigate(['leaves']);
+  }
+
+  private loadLeaveTypes(): void {
+    this.leaveTypeService.getAll().subscribe({
+      next: (rows) => {
+        this.leaveTypes = rows.filter((row) => row.active);
+      },
+      error: () => {
+        this.leaveTypes = [];
+      }
+    });
   }
 
   private dateRangeValidator(ctrl: AbstractControl) {

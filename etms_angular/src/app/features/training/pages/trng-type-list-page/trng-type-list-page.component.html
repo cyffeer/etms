@@ -1,10 +1,16 @@
+<nav class="module-subnav mb-4">
+  <a routerLink="/training/types" routerLinkActive="active" class="module-subnav__link">Training Types</a>
+  <a routerLink="/training/info" routerLinkActive="active" class="module-subnav__link">Training Info</a>
+  <a routerLink="/training/history" routerLinkActive="active" class="module-subnav__link">Training History</a>
+  <a routerLink="/training/vendors" routerLinkActive="active" class="module-subnav__link">Vendors</a>
+</nav>
+
 <section class="page-hero mb-4">
   <span class="page-hero__eyebrow">Monitoring And Management</span>
   <h2 class="page-hero__title">Training Types</h2>
-  <p class="page-hero__copy">Maintain the master list of training categories used across ETMS training schedules and history.</p>
 </section>
 
-<div class="page-actions mb-3">
+<div class="page-actions mb-3" *ngIf="canManage">
   <button (click)="create()" class="btn btn-warning">New Training Type</button>
 </div>
 
@@ -12,21 +18,21 @@
 <div *ngIf="loading" class="alert alert-info">Loading training types...</div>
 
 <div class="table-responsive" *ngIf="!loading && items.length > 0">
-  <table class="table align-middle mb-0">
+  <table class="table hrms-responsive-table align-middle mb-0">
     <thead>
       <tr>
         <th>ID</th>
         <th>Name</th>
         <th>Description</th>
-        <th class="text-end">Actions</th>
+        <th class="text-end" *ngIf="canManage">Actions</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let item of items">
-        <td>{{ item.trngTypeId }}</td>
-        <td>{{ item.trngTypeNm }}</td>
-        <td>{{ item.description || '-' }}</td>
-        <td class="text-end">
+        <td data-label="ID">{{ item.trngTypeId }}</td>
+        <td data-label="Name">{{ item.trngTypeNm }}</td>
+        <td data-label="Description">{{ item.description || '-' }}</td>
+        <td class="text-end" data-label="Actions" *ngIf="canManage">
           <div class="page-actions justify-content-end">
             <button (click)="edit(item.trngTypeId)" class="btn btn-sm btn-outline-secondary">Edit</button>
             <button (click)="delete(item.trngTypeId)" class="btn btn-sm btn-outline-danger">Delete</button>

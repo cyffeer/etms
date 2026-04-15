@@ -1,9 +1,6 @@
 <section class="page-hero mb-4">
-  <span class="page-hero__eyebrow">ETMS Overview</span>
-  <h2 class="page-hero__title">Administration And Monitoring Dashboard</h2>
-  <p class="page-hero__copy">
-    This dashboard is now reading live counts from the Spring backend so the Angular shell reflects the current ETMS records.
-  </p>
+  <span class="page-hero__eyebrow">ETMS</span>
+  <h2 class="page-hero__title">Dashboard</h2>
 </section>
 
 <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
@@ -14,17 +11,78 @@
     <a [routerLink]="card.route" class="dashboard-card text-decoration-none">
       <div class="dashboard-card__count">{{ card.count }}</div>
       <div class="dashboard-card__label">{{ card.label }}</div>
-      <div class="dashboard-card__note">{{ card.note }}</div>
     </a>
   </div>
 </div>
 
-<div class="dashboard-banner">
-  <div>
-    <h3 class="h5 mb-2">Current Scope</h3>
-    <p class="mb-0 text-muted">
-      Administration, Monitoring and Management, Nihongo Proficiency Monitoring, Leave and Attendance Monitoring,
-      Travelling Information, and Skills Inventory modules can now be wired from this shell.
-    </p>
+<div class="row g-4" *ngIf="!loading">
+  <div class="col-12 col-xl-6">
+    <section class="hrms-section-card h-100">
+      <div class="hrms-section-card__header">Trainings Per Month</div>
+      <div class="hrms-section-card__body">
+        <div class="chart-list" *ngIf="trainingsPerMonth.length; else noTrainingTrend">
+          <div class="chart-list__row" *ngFor="let point of trainingsPerMonth">
+            <div class="chart-list__label">{{ point.label }}</div>
+            <div class="chart-list__bar">
+              <div
+                class="chart-list__fill chart-list__fill--primary"
+                [style.width.%]="(point.value / maxValue(trainingsPerMonth)) * 100"
+              ></div>
+            </div>
+            <div class="chart-list__value">{{ point.value }}</div>
+          </div>
+        </div>
+        <ng-template #noTrainingTrend>
+          <div class="empty-state">No training trend data available.</div>
+        </ng-template>
+      </div>
+    </section>
+  </div>
+
+  <div class="col-12 col-xl-6">
+    <section class="hrms-section-card h-100">
+      <div class="hrms-section-card__header">Attendance Trends</div>
+      <div class="hrms-section-card__body">
+        <div class="chart-list" *ngIf="attendanceTrends.length; else noAttendanceTrend">
+          <div class="chart-list__row" *ngFor="let point of attendanceTrends">
+            <div class="chart-list__label">{{ point.label }}</div>
+            <div class="chart-list__bar">
+              <div
+                class="chart-list__fill chart-list__fill--success"
+                [style.width.%]="(point.value / maxValue(attendanceTrends)) * 100"
+              ></div>
+            </div>
+            <div class="chart-list__value">{{ point.value }}</div>
+          </div>
+        </div>
+        <ng-template #noAttendanceTrend>
+          <div class="empty-state">No attendance trend data available.</div>
+        </ng-template>
+      </div>
+    </section>
+  </div>
+
+  <div class="col-12">
+    <section class="hrms-section-card">
+      <div class="hrms-section-card__header">Notifications</div>
+      <div class="hrms-section-card__body">
+        <div class="notification-list" *ngIf="notifications.length; else noNotifications">
+          <a class="notification-list__item" *ngFor="let item of notifications" [routerLink]="item.route">
+            <div class="notification-list__title-row">
+              <span class="notification-list__title">{{ item.title }}</span>
+              <span class="status-pill" [ngClass]="{
+                'status-pill--active': item.severity === 'info',
+                'status-pill--warning': item.severity === 'warning',
+                'status-pill--inactive': item.severity === 'danger'
+              }">{{ item.severity | titlecase }}</span>
+            </div>
+            <div class="notification-list__message">{{ item.message }}</div>
+          </a>
+        </div>
+        <ng-template #noNotifications>
+          <div class="empty-state">No active notifications.</div>
+        </ng-template>
+      </div>
+    </section>
   </div>
 </div>

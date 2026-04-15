@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { DepartmentMemberResponse } from '../../department-member.model';
 import { DepartmentMemberService } from '../../services/department-member.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { MemberType } from '../../../member-types/models/member-type.models';
+import { MemberTypeService } from '../../../member-types/services/member-type.service';
 
 @Component({
   selector: 'app-department-member-list-page',
@@ -9,23 +12,43 @@ import { DepartmentMemberService } from '../../services/department-member.servic
 })
 export class DepartmentMemberListPageComponent implements OnInit {
   rows: DepartmentMemberResponse[] = [];
+  memberTypes: MemberType[] = [];
   loading = false;
   error = '';
   filters = {
-    departmentCode: '',
+    departmentKeyword: '',
     employeeNumber: '',
+    memberTypeId: null as number | null,
+    startDate: '',
+    endDate: ''
   };
+  readonly canCreateOrEdit = this.authService.hasAnyRole(['ADMIN', 'MANAGER']);
+  readonly canDelete = this.authService.hasAnyRole(['ADMIN']);
 
-  constructor(private service: DepartmentMemberService) {}
+  constructor(
+    private service: DepartmentMemberService,
+    private authService: AuthService,
+    private memberTypeService: MemberTypeService
+  ) {}
 
   ngOnInit(): void {
+    this.memberTypeService.getAll().subscribe({
+      next: (rows) => {
+        this.memberTypes = rows;
+      }
+    });
     this.load();
   }
 
   load(): void {
     this.loading = true;
     this.error = '';
-    const hasFilters = !!this.filters.departmentCode.trim() || !!this.filters.employeeNumber.trim();
+    const hasFilters =
+      !!this.filters.departmentKeyword.trim() ||
+      !!this.filters.employeeNumber.trim() ||
+      this.filters.memberTypeId != null ||
+      !!this.filters.startDate.trim() ||
+      !!this.filters.endDate.trim();
     const request$ = hasFilters ? this.service.search(this.filters) : this.service.getAll();
 
     request$.subscribe({
@@ -41,6 +64,9 @@ export class DepartmentMemberListPageComponent implements OnInit {
   }
 
   onDelete(id: number): void {
+    if (!this.canDelete) {
+      return;
+    }
     if (!confirm('Delete this department member record?')) return;
     this.service.delete(id).subscribe({
       next: () => this.load(),
@@ -50,8 +76,11 @@ export class DepartmentMemberListPageComponent implements OnInit {
 
   resetFilters(): void {
     this.filters = {
-      departmentCode: '',
+      departmentKeyword: '',
       employeeNumber: '',
+      memberTypeId: null,
+      startDate: '',
+      endDate: ''
     };
     this.load();
   }

@@ -1,37 +1,62 @@
-<h2>Create Employee</h2>
+<section class="page-hero mb-4">
+  <span class="page-hero__eyebrow">Administration</span>
+  <h2 class="page-hero__title">Register New Employee</h2>
+  <p class="page-hero__copy">Create an employee 201 record using the live ETMS Spring API.</p>
+</section>
 
-<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+<div *ngIf="loading" class="alert alert-info">Saving employee record...</div>
 
-<form [formGroup]="form" (ngSubmit)="submit()">
-  <label>Employee Code *</label><br />
-  <input type="text" formControlName="employeeCode" />
-  <small *ngIf="form.controls.employeeCode.touched && form.controls.employeeCode.invalid" style="color:#b91c1c">Required (max 30).</small>
-  <br /><br />
+<form [formGroup]="form" (ngSubmit)="submit()" class="hrms-form-shell">
+  <section class="hrms-section-card">
+    <div class="hrms-section-card__header">
+      <span>Personal Details</span>
+      <span class="hrms-meta-note">Fields marked with * are required</span>
+    </div>
+    <div class="hrms-section-card__body">
+      <div class="hrms-form-grid hrms-form-grid--wide">
+        <div class="hrms-form-field">
+          <label class="form-label">Employee Code *</label>
+          <input class="form-control" type="text" formControlName="employeeCode" />
+          <small class="hrms-error" *ngIf="form.controls.employeeCode.touched && form.controls.employeeCode.invalid">Required, max 30 characters.</small>
+        </div>
 
-  <label>First Name *</label><br />
-  <input type="text" formControlName="firstName" />
-  <small *ngIf="form.controls.firstName.touched && form.controls.firstName.invalid" style="color:#b91c1c">Required (max 100).</small>
-  <br /><br />
+        <div class="hrms-form-field">
+          <label class="form-label">First Name *</label>
+          <input class="form-control" type="text" formControlName="firstName" />
+          <small class="hrms-error" *ngIf="form.controls.firstName.touched && form.controls.firstName.invalid">Required, max 100 characters.</small>
+        </div>
 
-  <label>Last Name *</label><br />
-  <input type="text" formControlName="lastName" />
-  <small *ngIf="form.controls.lastName.touched && form.controls.lastName.invalid" style="color:#b91c1c">Required (max 100).</small>
-  <br /><br />
+        <div class="hrms-form-field">
+          <label class="form-label">Last Name *</label>
+          <input class="form-control" type="text" formControlName="lastName" />
+          <small class="hrms-error" *ngIf="form.controls.lastName.touched && form.controls.lastName.invalid">Required, max 100 characters.</small>
+        </div>
 
-  <label>Email *</label><br />
-  <input type="email" formControlName="email" />
-  <small *ngIf="form.controls.email.touched && form.controls.email.invalid" style="color:#b91c1c">Valid email required (max 150).</small>
-  <br /><br />
+        <div class="hrms-form-field">
+          <label class="form-label">Email Address *</label>
+          <input class="form-control" type="email" formControlName="email" />
+          <small class="hrms-error" *ngIf="form.controls.email.touched && form.controls.email.invalid">Valid email required.</small>
+        </div>
 
-  <label>Hire Date</label><br />
-  <input type="date" formControlName="hireDate" />
-  <br /><br />
+        <div class="hrms-form-field">
+          <label class="form-label">Hire Date</label>
+          <input class="form-control" type="date" formControlName="hireDate" />
+        </div>
 
-  <label><input type="checkbox" formControlName="active" /> Active</label>
-  <br /><br />
+        <div class="hrms-form-field">
+          <label class="form-label">Employment Status</label>
+          <div class="form-check mt-2">
+            <input class="form-check-input" id="employeeActive" type="checkbox" formControlName="active" />
+            <label class="form-check-label" for="employeeActive">Active employee</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <button type="submit" [disabled]="loading">Save</button>
-  <a routerLink="/employees" style="margin-left:8px;">Cancel</a>
+  <div class="hrms-form-actions">
+    <button class="btn btn-primary" type="submit" [disabled]="loading">Save Employee</button>
+    <a class="btn btn-outline-secondary" routerLink="/employees">Cancel</a>
+  </div>
 </form>
-
-<p *ngIf="loading">Saving...</p>

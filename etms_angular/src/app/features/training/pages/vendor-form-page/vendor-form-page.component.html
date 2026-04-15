@@ -1,0 +1,59 @@
+<nav class="module-subnav mb-4">
+  <a routerLink="/training/types" routerLinkActive="active" class="module-subnav__link">Training Types</a>
+  <a routerLink="/training/info" routerLinkActive="active" class="module-subnav__link">Training Info</a>
+  <a routerLink="/training/history" routerLinkActive="active" class="module-subnav__link">Training History</a>
+  <a routerLink="/training/vendors" routerLinkActive="active" class="module-subnav__link">Vendors</a>
+</nav>
+
+<section class="page-hero page-hero--compact mb-4">
+  <span class="page-hero__eyebrow">Master Data</span>
+  <h2 class="page-hero__title">{{ isEdit ? 'Edit' : 'Add' }} Vendor</h2>
+</section>
+
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+<div *ngIf="loading" class="alert alert-info">Loading vendor...</div>
+
+<form *ngIf="!loading" [formGroup]="form" (ngSubmit)="submit()" class="hrms-form-shell">
+  <section class="hrms-section-card">
+    <div class="hrms-section-card__header">Vendor Information</div>
+    <div class="hrms-section-card__body">
+      <div class="hrms-form-grid hrms-form-grid--wide">
+        <div class="hrms-form-field">
+          <label class="form-label">Vendor Code *</label>
+          <input class="form-control" formControlName="vendorCode" />
+        </div>
+        <div class="hrms-form-field">
+          <label class="form-label">Vendor Name *</label>
+          <input class="form-control" formControlName="vendorName" />
+        </div>
+        <div class="hrms-form-field">
+          <label class="form-label">Vendor Type Code *</label>
+          <input class="form-control" formControlName="vendorTypeCode" />
+        </div>
+        <div class="hrms-form-field">
+          <label class="form-label">Contact Email</label>
+          <input class="form-control" formControlName="contactEmail" />
+        </div>
+        <div class="hrms-form-field">
+          <label class="form-label">Contact Phone</label>
+          <input class="form-control" formControlName="contactPhone" />
+        </div>
+        <div class="hrms-form-field hrms-form-field--full">
+          <label class="form-label">Address</label>
+          <textarea class="form-control" rows="2" formControlName="addressLine"></textarea>
+        </div>
+        <div class="hrms-form-field">
+          <label class="form-label">Status</label>
+          <select class="form-select" formControlName="active">
+            <option [ngValue]="true">Active</option>
+            <option [ngValue]="false">Inactive</option>
+          </select>
+        </div>
+      </div>
+      <div class="hrms-form-actions mt-3">
+        <button class="btn btn-primary" type="submit" [disabled]="form.invalid || loading">Save</button>
+        <a class="btn btn-outline-secondary" routerLink="/training/vendors">Cancel</a>
+      </div>
+    </div>
+  </section>
+</form>

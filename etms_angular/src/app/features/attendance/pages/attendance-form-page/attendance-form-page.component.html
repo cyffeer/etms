@@ -1,22 +1,54 @@
-<h2>{{ isEdit ? 'Edit Attendance' : 'Create Attendance' }}</h2>
-<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+<section class="page-hero page-hero--compact mb-4">
+  <span class="page-hero__eyebrow">Attendance Monitoring</span>
+  <h2 class="page-hero__title">{{ isEdit ? 'Edit Attendance Record' : 'Create Attendance Record' }}</h2>
+</section>
 
-<form [formGroup]="form" (ngSubmit)="submit()">
-  <label>Employee Number</label><br />
-  <input type="text" formControlName="employeeNumber" /><br /><br />
+<div *ngIf="loading && isEdit" class="alert alert-info">Loading attendance record...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
-  <label>Attendance Date</label><br />
-  <input type="date" formControlName="attendanceDate" /><br /><br />
+<form class="hrms-form-shell" [formGroup]="form" (ngSubmit)="submit()">
+  <section class="hrms-section-card">
+    <header class="hrms-section-card__header">
+      <span>Attendance Details</span>
+    </header>
+    <div class="hrms-section-card__body">
+      <div class="hrms-form-grid hrms-form-grid--wide">
+        <div class="hrms-form-field">
+          <label class="form-label" for="attendanceEmployeeNumber">Employee Number</label>
+          <input id="attendanceEmployeeNumber" type="text" class="form-control" formControlName="employeeNumber" />
+          <small class="hrms-error" *ngIf="form.controls.employeeNumber.touched && form.controls.employeeNumber.invalid">
+            Employee number is required.
+          </small>
+        </div>
 
-  <label>Time In</label><br />
-  <input type="time" formControlName="timeIn" /><br /><br />
+        <div class="hrms-form-field">
+          <label class="form-label" for="attendanceDate">Attendance Date</label>
+          <input id="attendanceDate" type="date" class="form-control" formControlName="attendanceDate" />
+          <small class="hrms-error" *ngIf="form.controls.attendanceDate.touched && form.controls.attendanceDate.invalid">
+            Attendance date is required.
+          </small>
+        </div>
 
-  <label>Time Out</label><br />
-  <input type="time" formControlName="timeOut" /><br /><br />
+        <div class="hrms-form-field">
+          <label class="form-label" for="attendanceTimeIn">Time In</label>
+          <input id="attendanceTimeIn" type="time" class="form-control" formControlName="timeIn" />
+        </div>
 
-  <label>Status</label><br />
-  <input type="text" formControlName="status" /><br /><br />
+        <div class="hrms-form-field">
+          <label class="form-label" for="attendanceTimeOut">Time Out</label>
+          <input id="attendanceTimeOut" type="time" class="form-control" formControlName="timeOut" />
+        </div>
 
-  <button type="submit" [disabled]="loading">{{ loading ? 'Saving...' : 'Save' }}</button>
-  <a routerLink="/attendance" style="margin-left:8px;">Cancel</a>
+        <div class="hrms-form-field hrms-form-field--full">
+          <label class="form-label" for="attendanceStatus">Status</label>
+          <input id="attendanceStatus" type="text" class="form-control" formControlName="status" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="hrms-form-actions">
+    <button type="submit" class="btn btn-primary" [disabled]="loading">{{ loading ? 'Saving...' : 'Save' }}</button>
+    <a class="btn btn-outline-secondary" routerLink="/attendance">Cancel</a>
+  </div>
 </form>

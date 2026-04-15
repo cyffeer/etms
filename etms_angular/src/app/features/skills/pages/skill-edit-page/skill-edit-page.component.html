@@ -1,12 +1,51 @@
-<h2>Edit Skill</h2>
-<p *ngIf="loading">Loading...</p>
-<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+<section class="page-hero page-hero--compact mb-4">
+  <span class="page-hero__eyebrow">Skills Inventory</span>
+  <h2 class="page-hero__title">Edit Skill</h2>
+</section>
 
-<form *ngIf="!loading" [formGroup]="form" (ngSubmit)="submit()">
-  <label>Skill Code *</label><br /><input type="text" formControlName="skillCode" /><br /><br />
-  <label>Skill Name *</label><br /><input type="text" formControlName="skillName" /><br /><br />
-  <label>Description</label><br /><input type="text" formControlName="description" /><br /><br />
-  <label><input type="checkbox" formControlName="active" /> Active</label><br /><br />
-  <button type="submit">Update</button>
-  <a routerLink="/skills" style="margin-left:8px;">Cancel</a>
+<div *ngIf="loading" class="alert alert-info">Loading skill details...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<form class="hrms-form-shell" *ngIf="!loading" [formGroup]="form" (ngSubmit)="submit()">
+  <section class="hrms-section-card">
+    <header class="hrms-section-card__header">
+      <span>Skill Details</span>
+    </header>
+    <div class="hrms-section-card__body">
+      <div class="hrms-form-grid hrms-form-grid--wide">
+        <div class="hrms-form-field">
+          <label class="form-label" for="skillEditCode">Skill Code</label>
+          <input id="skillEditCode" type="text" class="form-control" formControlName="skillCode" />
+          <small class="hrms-error" *ngIf="form.controls.skillCode.touched && form.controls.skillCode.invalid">
+            Skill code is required.
+          </small>
+        </div>
+
+        <div class="hrms-form-field">
+          <label class="form-label" for="skillEditName">Skill Name</label>
+          <input id="skillEditName" type="text" class="form-control" formControlName="skillName" />
+          <small class="hrms-error" *ngIf="form.controls.skillName.touched && form.controls.skillName.invalid">
+            Skill name is required.
+          </small>
+        </div>
+
+        <div class="hrms-form-field hrms-form-field--full">
+          <label class="form-label" for="skillEditDescription">Description</label>
+          <input id="skillEditDescription" type="text" class="form-control" formControlName="description" />
+        </div>
+
+        <div class="hrms-form-field hrms-form-field--full">
+          <div class="form-check mt-2">
+            <input id="skillEditActive" class="form-check-input" type="checkbox" formControlName="active" />
+            <label class="form-check-label" for="skillEditActive">Active</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="hrms-form-actions">
+    <button type="submit" class="btn btn-primary" [disabled]="loading">Update</button>
+    <a class="btn btn-outline-secondary" routerLink="/skills">Cancel</a>
+  </div>
 </form>

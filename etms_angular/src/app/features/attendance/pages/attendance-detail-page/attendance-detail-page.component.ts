@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AttendanceResponse } from '../../attendance.model';
 import { AttendanceService } from '../../services/attendance.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-attendance-detail-page',
@@ -12,8 +13,13 @@ export class AttendanceDetailPageComponent implements OnInit {
   item?: AttendanceResponse;
   loading = false;
   error = '';
+  readonly canEdit = this.authService.hasAnyRole(['ADMIN', 'HR', 'MANAGER']);
 
-  constructor(private route: ActivatedRoute, private service: AttendanceService) {}
+  constructor(
+    private route: ActivatedRoute,
+    private service: AttendanceService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('attendanceId'));

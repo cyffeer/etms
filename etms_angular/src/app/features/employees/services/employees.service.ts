@@ -44,6 +44,8 @@ export class EmployeesService {
   searchEmployees(filters: {
     employeeNumber?: string | null;
     nameKeyword?: string | null;
+    startDate?: string | null;
+    endDate?: string | null;
   }): Observable<EmployeeResponse[]> {
     let params = new HttpParams();
 
@@ -52,6 +54,12 @@ export class EmployeesService {
     }
     if (filters.nameKeyword?.trim()) {
       params = params.set('nameKeyword', filters.nameKeyword.trim());
+    }
+    if (filters.startDate?.trim()) {
+      params = params.set('startDate', filters.startDate.trim());
+    }
+    if (filters.endDate?.trim()) {
+      params = params.set('endDate', filters.endDate.trim());
     }
 
     return this.http

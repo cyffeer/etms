@@ -1,0 +1,75 @@
+.chart-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.chart-list__row {
+  display: grid;
+  grid-template-columns: 110px 1fr 40px;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.chart-list__label,
+.chart-list__value {
+  font-size: 0.88rem;
+  color: #35516c;
+}
+
+.chart-list__bar {
+  height: 0.85rem;
+  border-radius: 999px;
+  background: rgba(31, 78, 121, 0.12);
+  overflow: hidden;
+}
+
+.chart-list__fill {
+  height: 100%;
+  border-radius: inherit;
+}
+
+.chart-list__fill--primary {
+  background: linear-gradient(90deg, #1f4e79, #4f86c6);
+}
+
+.chart-list__fill--success {
+  background: linear-gradient(90deg, #2d6a4f, #52b788);
+}
+
+.notification-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.notification-list__item {
+  display: block;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(31, 78, 121, 0.16);
+  border-radius: 0.8rem;
+  background: #fff;
+  text-decoration: none;
+}
+
+.notification-list__title-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.notification-list__title {
+  color: #143a5a;
+  font-weight: 700;
+}
+
+.notification-list__message {
+  color: #5a6f82;
+  font-size: 0.92rem;
+}
+
+@media (max-width: 767.98px) {
+  .chart-list__row {
+    grid-template-columns: 1fr;
+  }
+}

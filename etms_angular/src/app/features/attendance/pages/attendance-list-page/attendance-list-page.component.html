@@ -20,7 +20,7 @@
   <div class="page-actions ms-auto">
     <button class="btn btn-primary" type="button" (click)="load()">Search</button>
     <button class="btn btn-outline-secondary" type="button" (click)="resetFilters()">Reset</button>
-    <a class="btn btn-warning" routerLink="/attendance/new">Add Attendance</a>
+    <a class="btn btn-warning" routerLink="/attendance/new" *ngIf="canCreate">Add Attendance</a>
   </div>
 </div>
 
@@ -28,7 +28,7 @@
 <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
 <div class="table-responsive" *ngIf="!loading && !error && rows.length > 0">
-  <table class="table align-middle mb-0">
+  <table class="table hrms-responsive-table align-middle mb-0">
     <thead>
       <tr>
         <th>ID</th>
@@ -42,17 +42,17 @@
     </thead>
     <tbody>
       <tr *ngFor="let row of rows">
-        <td>{{ row.attendanceRecordId }}</td>
-        <td>{{ row.employeeNumber }}</td>
-        <td>{{ row.attendanceDate | date:'yyyy-MM-dd' }}</td>
-        <td>{{ row.timeIn || '-' }}</td>
-        <td>{{ row.timeOut || '-' }}</td>
-        <td>{{ row.status || '-' }}</td>
-        <td class="text-end">
+        <td data-label="ID">{{ row.attendanceRecordId }}</td>
+        <td data-label="Employee #">{{ row.employeeNumber }}</td>
+        <td data-label="Date">{{ row.attendanceDate | date:'yyyy-MM-dd' }}</td>
+        <td data-label="Time In">{{ row.timeIn || '-' }}</td>
+        <td data-label="Time Out">{{ row.timeOut || '-' }}</td>
+        <td data-label="Status">{{ row.status || '-' }}</td>
+        <td class="text-end" data-label="Actions">
           <div class="page-actions justify-content-end">
             <a class="btn btn-sm btn-outline-primary" [routerLink]="['/attendance', row.attendanceRecordId]">View</a>
-            <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/attendance', row.attendanceRecordId, 'edit']">Edit</a>
-            <button class="btn btn-sm btn-outline-danger" type="button" (click)="onDelete(row.attendanceRecordId)">Delete</button>
+            <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/attendance', row.attendanceRecordId, 'edit']" *ngIf="canEdit">Edit</a>
+            <button class="btn btn-sm btn-outline-danger" type="button" (click)="onDelete(row.attendanceRecordId)" *ngIf="canDelete">Delete</button>
           </div>
         </td>
       </tr>

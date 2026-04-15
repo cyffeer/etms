@@ -1,0 +1,36 @@
+<section class="page-hero page-hero--compact mb-4">
+  <span class="page-hero__eyebrow">Master Data</span>
+  <h2 class="page-hero__title">Leave Type Details</h2>
+</section>
+
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+<div *ngIf="loading" class="alert alert-info">Loading leave type...</div>
+
+<div *ngIf="!loading && item" class="hrms-profile-shell">
+  <section class="hrms-section-card">
+    <div class="hrms-section-card__header">
+      <span>{{ item.leaveTypeCode }}</span>
+    </div>
+    <div class="hrms-section-card__body">
+      <div class="hrms-details-grid">
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Name</span>
+          <span class="hrms-detail-item__value">{{ item.leaveTypeName }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Status</span>
+          <span class="hrms-detail-item__value">{{ item.active ? 'Active' : 'Inactive' }}</span>
+        </div>
+        <div class="hrms-detail-item hrms-form-field--full">
+          <span class="hrms-detail-item__label">Description</span>
+          <span class="hrms-detail-item__value">{{ item.description || '-' }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="page-actions">
+    <a class="btn btn-outline-secondary" routerLink="/leave-types">Back</a>
+    <a class="btn btn-primary" [routerLink]="['/leave-types', item.leaveTypeId, 'edit']">Edit</a>
+  </div>
+</div>

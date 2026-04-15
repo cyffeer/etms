@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../../core/services/auth.service';
 import { TrngInfoService } from '../../services/trng-info.service';
 import { TrngInfo } from '../../models/training.models';
 
@@ -11,8 +12,13 @@ export class TrngInfoListPageComponent implements OnInit {
   items: TrngInfo[] = [];
   loading = false;
   error = '';
+  readonly canManage = this.authService.hasAnyRole(['ADMIN', 'HR', 'MANAGER']);
 
-  constructor(private service: TrngInfoService, private router: Router) {}
+  constructor(
+    private service: TrngInfoService,
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
     this.loadData();

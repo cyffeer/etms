@@ -1,0 +1,82 @@
+<nav class="module-subnav mb-4">
+  <a routerLink="/travel/passports" routerLinkActive="active" class="module-subnav__link">Passport Registry</a>
+  <a routerLink="/travel/visas" routerLinkActive="active" class="module-subnav__link">Visa Registry</a>
+  <a routerLink="/travel/visa-types" routerLinkActive="active" class="module-subnav__link">Visa Types</a>
+</nav>
+
+<section class="page-hero mb-4">
+  <span class="page-hero__eyebrow">Travelling Information</span>
+  <h2 class="page-hero__title">Passport Search And Monitoring</h2>
+  <p class="page-hero__copy">
+    Browse employee passport records from the Spring backend, filter by employee number, and quickly identify expired
+    documents.
+  </p>
+</section>
+
+<div class="hrms-summary-strip mb-4">
+  <div class="hrms-summary-strip__card">
+    <div class="hrms-summary-strip__label">Visible Passports</div>
+    <div class="hrms-summary-strip__value">{{ summary.total }}</div>
+  </div>
+  <div class="hrms-summary-strip__card">
+    <div class="hrms-summary-strip__label">Current</div>
+    <div class="hrms-summary-strip__value">{{ summary.current }}</div>
+  </div>
+  <div class="hrms-summary-strip__card">
+    <div class="hrms-summary-strip__label">Expired</div>
+    <div class="hrms-summary-strip__value">{{ summary.expired }}</div>
+  </div>
+</div>
+
+<div class="page-toolbar">
+  <div>
+    <label class="form-label">Employee Number</label>
+    <input class="form-control" [(ngModel)]="filters.employeeNumber" name="travelPassportEmployeeFilter" />
+  </div>
+  <div>
+    <label class="form-label">Passport Status</label>
+    <select class="form-select" [(ngModel)]="filters.status" name="travelPassportStatusFilter">
+      <option value="all">All</option>
+      <option value="current">Current</option>
+      <option value="expired">Expired</option>
+    </select>
+  </div>
+  <div class="page-actions ms-auto">
+    <button class="btn btn-primary" type="button" (click)="load()">Search</button>
+    <button class="btn btn-outline-secondary" type="button" (click)="resetFilters()">Reset</button>
+  </div>
+</div>
+
+<div *ngIf="loading" class="alert alert-info">Loading passport records...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<div class="table-responsive" *ngIf="!loading && !error && rows.length > 0">
+  <table class="table hrms-responsive-table align-middle mb-0">
+    <thead>
+      <tr>
+        <th>Passport Number</th>
+        <th>Employee #</th>
+        <th>Issued</th>
+        <th>Expiry</th>
+        <th>Status</th>
+        <th>Updated</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of rows">
+        <td data-label="Passport #">{{ row.passportNumber }}</td>
+        <td data-label="Employee #">{{ row.employeeNumber }}</td>
+        <td data-label="Issued">{{ row.issuedDate ? (row.issuedDate | date:'yyyy-MM-dd') : '-' }}</td>
+        <td data-label="Expiry">{{ row.expiryDate ? (row.expiryDate | date:'yyyy-MM-dd') : '-' }}</td>
+        <td data-label="Status">
+          <span class="status-pill" [ngClass]="statusClass(row.expiryDate)">{{ statusLabel(row.expiryDate) }}</span>
+        </td>
+        <td data-label="Updated">{{ row.updatedAt ? (row.updatedAt | date:'yyyy-MM-dd HH:mm') : '-' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="empty-state" *ngIf="!loading && !error && rows.length === 0">
+  No passport records matched the current search.
+</div>

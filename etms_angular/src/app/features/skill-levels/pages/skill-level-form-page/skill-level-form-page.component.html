@@ -1,0 +1,64 @@
+<section class="page-hero page-hero--compact mb-4">
+  <span class="page-hero__eyebrow">Master Data</span>
+  <h2 class="page-hero__title">{{ isEdit ? 'Edit Skill Level' : 'Create Skill Level' }}</h2>
+</section>
+
+<div *ngIf="loading && isEdit" class="alert alert-info">Loading skill level...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<form class="hrms-form-shell" [formGroup]="form" (ngSubmit)="submit()">
+  <section class="hrms-section-card">
+    <header class="hrms-section-card__header">
+      <span>Skill Level Details</span>
+    </header>
+    <div class="hrms-section-card__body">
+      <div class="hrms-form-grid hrms-form-grid--wide">
+        <div class="hrms-form-field">
+          <label class="form-label" for="skillLevelSkill">Skill</label>
+          <select id="skillLevelSkill" class="form-select" formControlName="skillId">
+            <option [ngValue]="null">Select Skill</option>
+            <option *ngFor="let skill of skills" [ngValue]="skill.skillId">
+              {{ skill.skillName }}
+            </option>
+          </select>
+          <small class="hrms-error" *ngIf="form.controls.skillId.touched && form.controls.skillId.invalid">
+            Skill is required.
+          </small>
+        </div>
+
+        <div class="hrms-form-field">
+          <label class="form-label" for="skillLevelCode">Level Code</label>
+          <input id="skillLevelCode" type="text" class="form-control" formControlName="lvlCode" />
+          <small class="hrms-error" *ngIf="form.controls.lvlCode.touched && form.controls.lvlCode.invalid">
+            Level code is required.
+          </small>
+        </div>
+
+        <div class="hrms-form-field">
+          <label class="form-label" for="skillLevelName">Level Name</label>
+          <input id="skillLevelName" type="text" class="form-control" formControlName="lvlName" />
+          <small class="hrms-error" *ngIf="form.controls.lvlName.touched && form.controls.lvlName.invalid">
+            Level name is required.
+          </small>
+        </div>
+
+        <div class="hrms-form-field">
+          <label class="form-label" for="skillLevelRank">Rank</label>
+          <input id="skillLevelRank" type="number" class="form-control" formControlName="lvlRank" />
+        </div>
+
+        <div class="hrms-form-field hrms-form-field--checkbox">
+          <div class="form-check mt-4">
+            <input id="skillLevelActive" type="checkbox" class="form-check-input" formControlName="active" />
+            <label class="form-check-label" for="skillLevelActive">Active</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="hrms-form-actions">
+    <button type="submit" class="btn btn-primary" [disabled]="loading">{{ loading ? 'Saving...' : 'Save' }}</button>
+    <a class="btn btn-outline-secondary" routerLink="/skill-levels">Cancel</a>
+  </div>
+</form>

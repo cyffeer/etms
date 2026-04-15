@@ -1,19 +1,62 @@
-<h2>{{ isEdit ? 'Edit Department Member' : 'Create Department Member' }}</h2>
-<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+<section class="page-hero page-hero--compact mb-4">
+  <span class="page-hero__eyebrow">Administration</span>
+  <h2 class="page-hero__title">{{ isEdit ? 'Edit Department Membership' : 'Create Department Membership' }}</h2>
+</section>
 
-<form [formGroup]="form" (ngSubmit)="submit()">
-  <label>Department Code</label><br />
-  <input type="text" formControlName="departmentCode" /><br /><br />
+<div *ngIf="loading && isEdit" class="alert alert-info">Loading department membership...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
-  <label>Employee Number</label><br />
-  <input type="text" formControlName="employeeNumber" /><br /><br />
+<form class="hrms-form-shell" [formGroup]="form" (ngSubmit)="submit()">
+  <section class="hrms-section-card">
+    <header class="hrms-section-card__header">
+      <span>Membership Details</span>
+    </header>
+    <div class="hrms-section-card__body">
+      <div class="hrms-form-grid hrms-form-grid--wide">
+        <div class="hrms-form-field">
+          <label class="form-label" for="departmentMemberCode">Department Code</label>
+          <input id="departmentMemberCode" type="text" class="form-control" formControlName="departmentCode" />
+          <small class="hrms-error" *ngIf="form.controls.departmentCode.touched && form.controls.departmentCode.invalid">
+            Department code is required.
+          </small>
+        </div>
 
-  <label>Member Start</label><br />
-  <input type="date" formControlName="memberStart" /><br /><br />
+        <div class="hrms-form-field">
+          <label class="form-label" for="departmentMemberEmployee">Employee Number</label>
+          <input id="departmentMemberEmployee" type="text" class="form-control" formControlName="employeeNumber" />
+          <small class="hrms-error" *ngIf="form.controls.employeeNumber.touched && form.controls.employeeNumber.invalid">
+            Employee number is required.
+          </small>
+        </div>
 
-  <label>Member End</label><br />
-  <input type="date" formControlName="memberEnd" /><br /><br />
+        <div class="hrms-form-field">
+          <label class="form-label" for="departmentMemberType">Position</label>
+          <select id="departmentMemberType" class="form-select" formControlName="memberTypeId">
+            <option [ngValue]="null">Select Position</option>
+            <option *ngFor="let memberType of memberTypes" [ngValue]="memberType.memberTypeId">
+              {{ memberType.memberTypeName }}
+            </option>
+          </select>
+        </div>
 
-  <button type="submit" [disabled]="loading">{{ loading ? 'Saving...' : 'Save' }}</button>
-  <a routerLink="/department-members" style="margin-left:8px;">Cancel</a>
+        <div class="hrms-form-field">
+          <label class="form-label" for="departmentMemberStart">Membership Start</label>
+          <input id="departmentMemberStart" type="date" class="form-control" formControlName="memberStart" />
+          <small class="hrms-error" *ngIf="form.controls.memberStart.touched && form.controls.memberStart.invalid">
+            Membership start is required.
+          </small>
+        </div>
+
+        <div class="hrms-form-field">
+          <label class="form-label" for="departmentMemberEnd">Membership End</label>
+          <input id="departmentMemberEnd" type="date" class="form-control" formControlName="memberEnd" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="hrms-form-actions">
+    <button type="submit" class="btn btn-primary" [disabled]="loading">{{ loading ? 'Saving...' : 'Save' }}</button>
+    <a class="btn btn-outline-secondary" routerLink="/department-members">Cancel</a>
+  </div>
 </form>

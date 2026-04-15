@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../../core/services/auth.service';
 import { TrngHistoryService } from '../../services/trng-history.service';
 import { TrngHist } from '../../models/training.models';
 
@@ -12,8 +13,13 @@ export class TrngHistListPageComponent implements OnInit {
   loading = false;
   error = '';
   employeeNumberFilter = '';
+  readonly canManage = this.authService.hasAnyRole(['ADMIN', 'HR', 'MANAGER']);
 
-  constructor(private service: TrngHistoryService, private router: Router) {}
+  constructor(
+    private service: TrngHistoryService,
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
     this.loadData();

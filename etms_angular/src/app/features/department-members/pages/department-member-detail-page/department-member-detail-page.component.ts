@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DepartmentMemberResponse } from '../../department-member.model';
 import { DepartmentMemberService } from '../../services/department-member.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-department-member-detail-page',
@@ -12,8 +13,13 @@ export class DepartmentMemberDetailPageComponent implements OnInit {
   item?: DepartmentMemberResponse;
   loading = false;
   error = '';
+  readonly canEdit = this.authService.hasAnyRole(['ADMIN', 'MANAGER']);
 
-  constructor(private route: ActivatedRoute, private service: DepartmentMemberService) {}
+  constructor(
+    private route: ActivatedRoute,
+    private service: DepartmentMemberService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('deptMemberId'));

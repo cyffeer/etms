@@ -1,17 +1,62 @@
-<h2>NP Level Info Details</h2>
-<p *ngIf="loading">Loading...</p>
-<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+<section class="page-hero page-hero--compact mb-4">
+  <span class="page-hero__eyebrow">Nihongo Proficiency</span>
+  <h2 class="page-hero__title">Nihongo Level Rule Details</h2>
+</section>
 
-<div *ngIf="!loading && item">
-  <p><strong>ID:</strong> {{ item.npLvlInfoId }}</p>
-  <p><strong>Code:</strong> {{ item.npLvlInfoCode }}</p>
-  <p><strong>Name:</strong> {{ item.npLvlInfoName }}</p>
-  <p><strong>NP Type Code:</strong> {{ item.npTypeCode }}</p>
-  <p><strong>Valid From:</strong> {{ item.validFrom ? (item.validFrom | date:'yyyy-MM-dd') : '-' }}</p>
-  <p><strong>Valid To:</strong> {{ item.validTo ? (item.validTo | date:'yyyy-MM-dd') : '-' }}</p>
-  <p><strong>Allowance Amount:</strong> {{ item.allowanceAmount ?? '-' }}</p>
-  <p><strong>Allowance Currency:</strong> {{ item.allowanceCurrency || '-' }}</p>
-  <p><strong>Active:</strong> {{ item.active ? 'Yes' : 'No' }}</p>
-  <a routerLink="/np-lvl-info">Back</a> |
-  <a [routerLink]="['/np-lvl-info', item.npLvlInfoId, 'edit']">Edit</a>
+<div *ngIf="loading" class="alert alert-info">Loading Nihongo level rule details...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<div class="hrms-profile-shell" *ngIf="!loading && item">
+  <section class="hrms-section-card">
+    <header class="hrms-section-card__header">
+      <span>{{ item.npLvlInfoName }}</span>
+    </header>
+    <div class="hrms-section-card__body">
+      <div class="hrms-details-grid">
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Rule ID</span>
+          <span class="hrms-detail-item__value">{{ item.npLvlInfoId }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Level Code</span>
+          <span class="hrms-detail-item__value">{{ item.npLvlInfoCode }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Level Name</span>
+          <span class="hrms-detail-item__value">{{ item.npLvlInfoName }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Nihongo Type Code</span>
+          <span class="hrms-detail-item__value">{{ item.npTypeCode }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Valid From</span>
+          <span class="hrms-detail-item__value">{{ item.validFrom ? (item.validFrom | date:'yyyy-MM-dd') : '-' }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Valid To</span>
+          <span class="hrms-detail-item__value">{{ item.validTo ? (item.validTo | date:'yyyy-MM-dd') : '-' }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Allowance Amount</span>
+          <span class="hrms-detail-item__value">{{ item.allowanceAmount ?? '-' }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Allowance Currency</span>
+          <span class="hrms-detail-item__value">{{ item.allowanceCurrency || '-' }}</span>
+        </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Status</span>
+          <span class="status-pill" [ngClass]="item.active ? 'status-pill--active' : 'status-pill--inactive'">
+            {{ item.active ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="hrms-form-actions">
+    <a class="btn btn-outline-secondary" routerLink="/np-lvl-info">Back</a>
+    <a class="btn btn-primary" [routerLink]="['/np-lvl-info', item.npLvlInfoId, 'edit']" *ngIf="canManage">Edit</a>
+  </div>
 </div>

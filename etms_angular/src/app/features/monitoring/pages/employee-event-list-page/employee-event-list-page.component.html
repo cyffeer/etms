@@ -1,0 +1,90 @@
+<section class="page-hero mb-4">
+  <span class="page-hero__eyebrow">Monitoring &amp; Management</span>
+  <h2 class="page-hero__title">Employee Events</h2>
+</section>
+
+<div class="page-toolbar">
+  <div>
+    <label class="form-label">Employee Number</label>
+    <input class="form-control" [(ngModel)]="filters.employeeNumber" name="employeeEventEmployeeFilter" />
+  </div>
+  <div>
+    <label class="form-label">Event Type</label>
+    <select class="form-select" [(ngModel)]="filters.eventType" name="employeeEventTypeFilter">
+      <option value="">All Types</option>
+      <option *ngFor="let eventType of eventTypes" [value]="eventType">{{ eventType }}</option>
+    </select>
+  </div>
+  <div>
+    <label class="form-label">Status</label>
+    <select class="form-select" [(ngModel)]="filters.status" name="employeeEventStatusFilter">
+      <option value="">All Statuses</option>
+      <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+    </select>
+  </div>
+  <div>
+    <label class="form-label">Keyword</label>
+    <input class="form-control" [(ngModel)]="filters.keyword" name="employeeEventKeywordFilter" />
+  </div>
+  <div>
+    <label class="form-label">From</label>
+    <input class="form-control" type="date" [(ngModel)]="filters.startDate" name="employeeEventStartFilter" />
+  </div>
+  <div>
+    <label class="form-label">To</label>
+    <input class="form-control" type="date" [(ngModel)]="filters.endDate" name="employeeEventEndFilter" />
+  </div>
+  <div class="page-actions ms-auto">
+    <button class="btn btn-primary" type="button" (click)="load()">Search</button>
+    <button class="btn btn-outline-secondary" type="button" (click)="resetFilters()">Reset</button>
+    <a class="btn btn-warning" routerLink="/monitoring/new" *ngIf="canManage">Add Event</a>
+  </div>
+</div>
+
+<div *ngIf="loading" class="alert alert-info">Loading monitoring events...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<div class="table-responsive" *ngIf="!loading && !error && rows.length > 0">
+  <table class="table hrms-responsive-table align-middle mb-0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Employee</th>
+        <th>Type</th>
+        <th>Title</th>
+        <th>Department</th>
+        <th>Effective</th>
+        <th>Status</th>
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of rows">
+        <td data-label="ID">{{ row.employeeEventId }}</td>
+        <td data-label="Employee">{{ row.employeeName || row.employeeNumber }}<span *ngIf="row.employeeName">&nbsp;({{ row.employeeNumber }})</span></td>
+        <td data-label="Type">{{ row.eventType }}</td>
+        <td data-label="Title">{{ row.title }}</td>
+        <td data-label="Department">{{ row.departmentName || row.departmentCode || '-' }}</td>
+        <td data-label="Effective">{{ row.effectiveDate | date:'yyyy-MM-dd' }}</td>
+        <td data-label="Status">
+          <span class="status-pill" [ngClass]="{
+            'status-pill--active': row.status === 'APPROVED' || row.status === 'ACTIVE',
+            'status-pill--warning': row.status === 'PENDING',
+            'status-pill--inactive': row.status === 'REJECTED' || row.status === 'CLOSED'
+          }">{{ row.status }}</span>
+        </td>
+        <td class="text-end" data-label="Actions">
+          <div class="page-actions justify-content-end">
+            <a class="btn btn-sm btn-outline-primary" [routerLink]="['/monitoring', row.employeeEventId]">View</a>
+            <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/monitoring', row.employeeEventId, 'edit']" *ngIf="canManage">Edit</a>
+            <button class="btn btn-sm btn-outline-danger" type="button" (click)="onDelete(row.employeeEventId)" *ngIf="canDelete">Delete</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="empty-state" *ngIf="!loading && !error && rows.length === 0">
+  No monitoring events matched the current search.
+</div>

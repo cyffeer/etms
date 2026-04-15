@@ -1,0 +1,69 @@
+<section class="page-hero page-hero--compact mb-4">
+  <span class="page-hero__eyebrow">Monitoring &amp; Management</span>
+  <h2 class="page-hero__title">{{ isEdit ? 'Edit Employee Event' : 'Create Employee Event' }}</h2>
+</section>
+
+<div *ngIf="loading && isEdit" class="alert alert-info">Loading employee event...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<form class="hrms-form-shell" [formGroup]="form" (ngSubmit)="submit()">
+  <section class="hrms-section-card">
+    <header class="hrms-section-card__header">
+      <span>Event Details</span>
+    </header>
+    <div class="hrms-section-card__body">
+      <div class="hrms-form-grid hrms-form-grid--wide">
+        <div class="hrms-form-field">
+          <label class="form-label" for="employeeEventEmployee">Employee Number</label>
+          <input id="employeeEventEmployee" type="text" class="form-control" formControlName="employeeNumber" />
+        </div>
+        <div class="hrms-form-field">
+          <label class="form-label" for="employeeEventType">Event Type</label>
+          <select id="employeeEventType" class="form-select" formControlName="eventType">
+            <option *ngFor="let eventType of eventTypes" [value]="eventType">{{ eventType }}</option>
+          </select>
+        </div>
+        <div class="hrms-form-field">
+          <label class="form-label" for="employeeEventTitle">Title</label>
+          <input id="employeeEventTitle" type="text" class="form-control" formControlName="title" />
+        </div>
+        <div class="hrms-form-field">
+          <label class="form-label" for="employeeEventDepartment">Department</label>
+          <select id="employeeEventDepartment" class="form-select" formControlName="departmentCode">
+            <option value="">Select Department</option>
+            <option *ngFor="let department of departments" [value]="department.departmentCode">
+              {{ department.departmentName }}
+            </option>
+          </select>
+        </div>
+        <div class="hrms-form-field">
+          <label class="form-label" for="employeeEventReference">Reference Code</label>
+          <input id="employeeEventReference" type="text" class="form-control" formControlName="referenceCode" />
+        </div>
+        <div class="hrms-form-field">
+          <label class="form-label" for="employeeEventEffectiveDate">Effective Date</label>
+          <input id="employeeEventEffectiveDate" type="date" class="form-control" formControlName="effectiveDate" />
+        </div>
+        <div class="hrms-form-field">
+          <label class="form-label" for="employeeEventEndDate">End Date</label>
+          <input id="employeeEventEndDate" type="date" class="form-control" formControlName="endDate" />
+        </div>
+        <div class="hrms-form-field">
+          <label class="form-label" for="employeeEventStatus">Status</label>
+          <select id="employeeEventStatus" class="form-select" formControlName="status">
+            <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+          </select>
+        </div>
+        <div class="hrms-form-field hrms-form-field--full">
+          <label class="form-label" for="employeeEventDescription">Description</label>
+          <textarea id="employeeEventDescription" class="form-control" rows="4" formControlName="description"></textarea>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="hrms-form-actions">
+    <button type="submit" class="btn btn-primary" [disabled]="loading">{{ loading ? 'Saving...' : 'Save' }}</button>
+    <a class="btn btn-outline-secondary" routerLink="/monitoring">Cancel</a>
+  </div>
+</form>

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MemberType } from '../../models/member-type.models';
 import { MemberTypeService } from '../../services/member-type.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-member-type-list-page',
@@ -11,8 +12,9 @@ export class MemberTypeListPageComponent implements OnInit {
   memberTypes: MemberType[] = [];
   loading = false;
   error = '';
+  readonly canManage = this.authService.hasAnyRole(['ADMIN']);
 
-  constructor(private service: MemberTypeService) {}
+  constructor(private service: MemberTypeService, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.load();
@@ -34,6 +36,9 @@ export class MemberTypeListPageComponent implements OnInit {
   }
 
   onDelete(id: number): void {
+    if (!this.canManage) {
+      return;
+    }
     if (!confirm('Delete this member type?')) return;
     this.service.delete(id).subscribe({
       next: () => this.load(),

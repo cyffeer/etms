@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { DepartmentResponse } from '../../models/department.model';
 import { DepartmentsService } from '../../services/departments.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-department-list-page',
@@ -11,8 +12,9 @@ export class DepartmentListPageComponent implements OnInit {
   loading = false;
   error = '';
   keyword = '';
+  readonly canManage = this.authService.hasAnyRole(['ADMIN']);
 
-  constructor(private departmentsService: DepartmentsService) {}
+  constructor(private departmentsService: DepartmentsService, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.load();
@@ -38,6 +40,9 @@ export class DepartmentListPageComponent implements OnInit {
   }
 
   onDelete(departmentId: number): void {
+    if (!this.canManage) {
+      return;
+    }
     if (!confirm('Delete this department?')) return;
     this.departmentsService.deleteDepartment(departmentId).subscribe({
       next: () => this.load(),

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AttendanceResponse } from '../../attendance.model';
 import { AttendanceService } from '../../services/attendance.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-attendance-list-page',
@@ -16,8 +17,11 @@ export class AttendanceListPageComponent implements OnInit {
     year: '',
     month: '',
   };
+  readonly canCreate = this.authService.hasAnyRole(['ADMIN', 'HR', 'EMPLOYEE']);
+  readonly canEdit = this.authService.hasAnyRole(['ADMIN', 'HR', 'MANAGER']);
+  readonly canDelete = this.authService.hasAnyRole(['ADMIN']);
 
-  constructor(private service: AttendanceService) {}
+  constructor(private service: AttendanceService, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.load();
@@ -48,6 +52,9 @@ export class AttendanceListPageComponent implements OnInit {
   }
 
   onDelete(id: number): void {
+    if (!this.canDelete) {
+      return;
+    }
     if (!confirm('Delete this attendance record?')) return;
     this.service.delete(id).subscribe({
       next: () => this.load(),

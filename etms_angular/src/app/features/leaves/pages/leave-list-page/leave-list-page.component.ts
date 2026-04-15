@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Leave } from '../../models/leave.models';
 import { LeaveService } from '../../services/leave.service';
+import { LeaveType } from '../../../leave-types/models/leave-type.models';
+import { LeaveTypeService } from '../../../leave-types/services/leave-type.service';
 
 @Component({
   selector: 'app-leave-list-page',
@@ -11,6 +13,7 @@ export class LeaveListPageComponent implements OnInit {
   loading = false;
   error = '';
   items: Leave[] = [];
+  leaveTypes: LeaveType[] = [];
   filters = {
     employeeNumber: '',
     leaveType: '',
@@ -18,9 +21,14 @@ export class LeaveListPageComponent implements OnInit {
   };
   readonly statusOptions = ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'];
 
-  constructor(private service: LeaveService, private router: Router) {}
+  constructor(
+    private service: LeaveService,
+    private router: Router,
+    private leaveTypeService: LeaveTypeService
+  ) {}
 
   ngOnInit(): void {
+    this.loadLeaveTypes();
     this.loadData();
   }
 
@@ -69,5 +77,21 @@ export class LeaveListPageComponent implements OnInit {
       status: '',
     };
     this.loadData();
+  }
+
+  leaveTypeLabel(code: string): string {
+    const match = this.leaveTypes.find((leaveType) => leaveType.leaveTypeCode === code);
+    return match ? `${match.leaveTypeCode} - ${match.leaveTypeName}` : code;
+  }
+
+  private loadLeaveTypes(): void {
+    this.leaveTypeService.getAll().subscribe({
+      next: (rows) => {
+        this.leaveTypes = rows.filter((row) => row.active);
+      },
+      error: () => {
+        this.leaveTypes = [];
+      }
+    });
   }
 }

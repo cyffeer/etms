@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { map } from 'rxjs';
 import { EmployeeResponse } from '../../models/employee.model';
 import { EmployeesService } from '../../services/employees.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-employee-list-page',
@@ -14,9 +15,13 @@ export class EmployeeListPageComponent implements OnInit {
   filters = {
     employeeNumber: '',
     nameKeyword: '',
+    startDate: '',
+    endDate: ''
   };
+  readonly canManage = this.authService.hasAnyRole(['ADMIN', 'MANAGER']);
+  readonly canDelete = this.authService.hasAnyRole(['ADMIN']);
 
-  constructor(private employeesService: EmployeesService) {}
+  constructor(private employeesService: EmployeesService, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.load();
@@ -25,7 +30,11 @@ export class EmployeeListPageComponent implements OnInit {
   load(): void {
     this.loading = true;
     this.error = '';
-    const hasFilters = !!this.filters.employeeNumber.trim() || !!this.filters.nameKeyword.trim();
+    const hasFilters =
+      !!this.filters.employeeNumber.trim() ||
+      !!this.filters.nameKeyword.trim() ||
+      !!this.filters.startDate.trim() ||
+      !!this.filters.endDate.trim();
     const request$ = hasFilters
       ? this.employeesService.searchEmployees(this.filters)
       : this.employeesService.getEmployees().pipe(map((result) => result.items));
@@ -43,6 +52,9 @@ export class EmployeeListPageComponent implements OnInit {
   }
 
   onDelete(employeeId: number): void {
+    if (!this.canDelete) {
+      return;
+    }
     if (!confirm('Delete this employee?')) return;
     this.employeesService.deleteEmployee(employeeId).subscribe({
       next: () => this.load(),
@@ -54,6 +66,8 @@ export class EmployeeListPageComponent implements OnInit {
     this.filters = {
       employeeNumber: '',
       nameKeyword: '',
+      startDate: '',
+      endDate: ''
     };
     this.load();
   }

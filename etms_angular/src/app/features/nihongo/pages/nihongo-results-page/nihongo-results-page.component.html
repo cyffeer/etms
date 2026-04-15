@@ -1,0 +1,118 @@
+<nav class="module-subnav mb-4">
+  <a routerLink="/nihongo/results" routerLinkActive="active" class="module-subnav__link">Employee Results</a>
+  <a routerLink="/nihongo/tests" routerLinkActive="active" class="module-subnav__link">Test Schedule</a>
+  <a routerLink="/nihongo/types" routerLinkActive="active" class="module-subnav__link">Type Master</a>
+  <a routerLink="/np-lvl-info" class="module-subnav__link">Level Rules</a>
+</nav>
+
+<section class="page-hero mb-4">
+  <span class="page-hero__eyebrow">Nihongo Proficiency Monitoring</span>
+  <h2 class="page-hero__title">Employee Nihongo Search</h2>
+  <p class="page-hero__copy">
+    Search employee Nihongo exam records using the backend filters for passed exams and most recent attempts, then
+    view the current level, location, score, and policy window at a glance.
+  </p>
+</section>
+
+<div class="hrms-summary-strip mb-4">
+  <div class="hrms-summary-strip__card">
+    <div class="hrms-summary-strip__label">Visible Results</div>
+    <div class="hrms-summary-strip__value">{{ summary.total }}</div>
+  </div>
+  <div class="hrms-summary-strip__card">
+    <div class="hrms-summary-strip__label">Passed</div>
+    <div class="hrms-summary-strip__value">{{ summary.passed }}</div>
+  </div>
+  <div class="hrms-summary-strip__card">
+    <div class="hrms-summary-strip__label">Employees</div>
+    <div class="hrms-summary-strip__value">{{ summary.employees }}</div>
+  </div>
+  <div class="hrms-summary-strip__card">
+    <div class="hrms-summary-strip__label">Most Recent Mode</div>
+    <div class="hrms-summary-strip__value">{{ filters.mostRecentOnly ? 'On' : 'Off' }}</div>
+  </div>
+</div>
+
+<div class="page-toolbar">
+  <div>
+    <label class="form-label">Employee Number</label>
+    <input class="form-control" [(ngModel)]="filters.employeeNumber" name="nihongoEmployeeFilter" />
+  </div>
+  <div class="d-flex align-items-end">
+    <div class="form-check">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        id="nihongoPassedOnly"
+        [(ngModel)]="filters.passedOnly"
+        name="nihongoPassedOnly"
+      />
+      <label class="form-check-label" for="nihongoPassedOnly">Passed only</label>
+    </div>
+  </div>
+  <div class="d-flex align-items-end">
+    <div class="form-check">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        id="nihongoRecentOnly"
+        [(ngModel)]="filters.mostRecentOnly"
+        name="nihongoRecentOnly"
+      />
+      <label class="form-check-label" for="nihongoRecentOnly">Most recent only</label>
+    </div>
+  </div>
+  <div class="page-actions ms-auto">
+    <button class="btn btn-primary" type="button" (click)="load()">Search</button>
+    <button class="btn btn-outline-secondary" type="button" (click)="resetFilters()">Reset</button>
+  </div>
+</div>
+
+<div *ngIf="loading" class="alert alert-info">Loading Nihongo results...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<div class="table-responsive" *ngIf="!loading && !error && rows.length > 0">
+  <table class="table hrms-responsive-table align-middle mb-0">
+    <thead>
+      <tr>
+        <th>Employee #</th>
+        <th>Employee Name</th>
+        <th>Level Type</th>
+        <th>Current Level</th>
+        <th>Test Date</th>
+        <th>Policy Valid To</th>
+        <th>Points</th>
+        <th>Location</th>
+        <th>Result</th>
+        <th>Test Taken</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of rows">
+        <td data-label="Employee #">{{ row.employeeNumber }}</td>
+        <td data-label="Employee Name">{{ row.employeeName }}</td>
+        <td data-label="Level Type">{{ row.typeLabel }}</td>
+        <td data-label="Current Level">
+          {{ row.levelLabel }}
+          <div class="hrms-meta-note" *ngIf="row.testLevel">Requested: {{ row.testLevel }}</div>
+        </td>
+        <td data-label="Test Date">{{ row.testDate ? (row.testDate | date:'yyyy-MM-dd') : '-' }}</td>
+        <td data-label="Policy Valid To">
+          <span class="status-pill" [ngClass]="policyStatusClass(row.policyValidTo)">
+            {{ policyStatusLabel(row.policyValidTo) }}
+          </span>
+        </td>
+        <td data-label="Points">{{ row.pointsLabel }}</td>
+        <td data-label="Location">{{ row.testCenter || '-' }}</td>
+        <td data-label="Result">
+          <span class="status-pill" [ngClass]="row.resultClass">{{ row.resultLabel }}</span>
+        </td>
+        <td data-label="Test Taken">{{ row.takeFlagLabel }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="empty-state" *ngIf="!loading && !error && rows.length === 0">
+  No Nihongo employee records matched the current filters.
+</div>

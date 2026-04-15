@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { AuthGuard } from '../../core/guards/auth.guard';
 import { EmployeeCreatePageComponent } from './pages/employee-create-page/employee-create-page.component';
 import { EmployeeDetailsPageComponent } from './pages/employee-details-page/employee-details-page.component';
 import { EmployeeEditPageComponent } from './pages/employee-edit-page/employee-edit-page.component';
@@ -7,8 +8,8 @@ import { EmployeeListPageComponent } from './pages/employee-list-page/employee-l
 
 const routes: Routes = [
   { path: '', component: EmployeeListPageComponent },
-  { path: 'new', component: EmployeeCreatePageComponent },
-  { path: ':employeeId/edit', component: EmployeeEditPageComponent },
+  { path: 'new', component: EmployeeCreatePageComponent, canActivate: [AuthGuard], data: { roles: ['ADMIN', 'MANAGER'] } },
+  { path: ':employeeId/edit', component: EmployeeEditPageComponent, canActivate: [AuthGuard], data: { roles: ['ADMIN', 'MANAGER'] } },
   { path: ':employeeId', component: EmployeeDetailsPageComponent }
 ];
 

@@ -1,60 +1,73 @@
-<div class="page-container">
-  <h2>{{ isEdit ? 'Edit' : 'Create' }} Training Info</h2>
+<nav class="module-subnav mb-4">
+  <a routerLink="/training/types" routerLinkActive="active" class="module-subnav__link">Training Types</a>
+  <a routerLink="/training/info" routerLinkActive="active" class="module-subnav__link">Training Info</a>
+  <a routerLink="/training/history" routerLinkActive="active" class="module-subnav__link">Training History</a>
+  <a routerLink="/training/vendors" routerLinkActive="active" class="module-subnav__link">Vendors</a>
+</nav>
 
-  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
-  <div *ngIf="loading" class="spinner">Loading...</div>
+<section class="page-hero page-hero--compact mb-4">
+  <span class="page-hero__eyebrow">Master Data</span>
+  <h2 class="page-hero__title">{{ isEdit ? 'Edit' : 'Add' }} Training Info</h2>
+</section>
 
-  <form [formGroup]="form" (ngSubmit)="submit()" *ngIf="!loading">
-    <div class="form-group">
-      <label>Code *</label>
-      <input formControlName="trngCode" class="form-control" />
-      <div class="error" *ngIf="form.get('trngCode')?.hasError('required')">Required</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+<div *ngIf="loading" class="alert alert-info">Loading training record...</div>
+
+<form [formGroup]="form" (ngSubmit)="submit()" *ngIf="!loading" class="hrms-form-shell">
+  <section class="hrms-section-card">
+    <div class="hrms-section-card__header">Training Information</div>
+    <div class="hrms-section-card__body">
+      <div class="hrms-form-grid hrms-form-grid--wide">
+        <div class="hrms-form-field">
+          <label class="form-label">Training Code *</label>
+          <input formControlName="trngCode" class="form-control" />
+        </div>
+
+        <div class="hrms-form-field">
+          <label class="form-label">Training Name *</label>
+          <input formControlName="trngName" class="form-control" />
+        </div>
+
+        <div class="hrms-form-field">
+          <label class="form-label">Type Code *</label>
+          <input formControlName="trngTypeCode" class="form-control" />
+        </div>
+
+        <div class="hrms-form-field">
+          <label class="form-label">Vendor Code</label>
+          <input formControlName="vendorCode" class="form-control" />
+        </div>
+
+        <div class="hrms-form-field">
+          <label class="form-label">Start Date</label>
+          <input type="date" formControlName="startDate" class="form-control" />
+        </div>
+
+        <div class="hrms-form-field">
+          <label class="form-label">End Date</label>
+          <input type="date" formControlName="endDate" class="form-control" />
+        </div>
+
+        <div class="hrms-form-field">
+          <label class="form-label">Location</label>
+          <input formControlName="location" class="form-control" />
+        </div>
+
+        <div class="hrms-form-field">
+          <label class="form-label">Status</label>
+          <select class="form-select" formControlName="active">
+            <option [ngValue]="true">Active</option>
+            <option [ngValue]="false">Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="hrms-form-actions mt-3">
+        <button type="submit" [disabled]="form.invalid || saving" class="btn btn-primary">
+          {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+        <button type="button" (click)="cancel()" class="btn btn-outline-secondary">Cancel</button>
+      </div>
     </div>
-
-    <div class="form-group">
-      <label>Name *</label>
-      <input formControlName="trngName" class="form-control" />
-      <div class="error" *ngIf="form.get('trngName')?.hasError('required')">Required</div>
-    </div>
-
-    <div class="form-group">
-      <label>Type Code *</label>
-      <input formControlName="trngTypeCode" class="form-control" />
-      <div class="error" *ngIf="form.get('trngTypeCode')?.hasError('required')">Required</div>
-    </div>
-
-    <div class="form-group">
-      <label>Vendor Code</label>
-      <input formControlName="vendorCode" class="form-control" />
-    </div>
-
-    <div class="form-group">
-      <label>Start Date</label>
-      <input type="date" formControlName="startDate" class="form-control" />
-    </div>
-
-    <div class="form-group">
-      <label>End Date</label>
-      <input type="date" formControlName="endDate" class="form-control" />
-    </div>
-
-    <div class="form-group">
-      <label>Location</label>
-      <input formControlName="location" class="form-control" />
-    </div>
-
-    <div class="form-group">
-      <label>
-        <input type="checkbox" formControlName="active" />
-        Active
-      </label>
-    </div>
-
-    <div class="form-actions">
-      <button type="submit" [disabled]="form.invalid || saving" class="btn btn-primary">
-        {{ saving ? 'Saving...' : 'Save' }}
-      </button>
-      <button type="button" (click)="cancel()" class="btn btn-secondary">Cancel</button>
-    </div>
-  </form>
-</div>
+  </section>
+</form>

@@ -15,16 +15,28 @@ export class DepartmentMemberService {
   }
 
   search(filters: {
-    departmentCode?: string | null;
+    departmentKeyword?: string | null;
     employeeNumber?: string | null;
+    memberTypeId?: number | null;
+    startDate?: string | null;
+    endDate?: string | null;
   }): Observable<DepartmentMemberResponse[]> {
     let params = new HttpParams();
 
-    if (filters.departmentCode?.trim()) {
-      params = params.set('departmentCode', filters.departmentCode.trim());
+    if (filters.departmentKeyword?.trim()) {
+      params = params.set('departmentKeyword', filters.departmentKeyword.trim());
     }
     if (filters.employeeNumber?.trim()) {
       params = params.set('employeeNumber', filters.employeeNumber.trim());
+    }
+    if (filters.memberTypeId != null) {
+      params = params.set('memberTypeId', filters.memberTypeId);
+    }
+    if (filters.startDate?.trim()) {
+      params = params.set('startDate', filters.startDate.trim());
+    }
+    if (filters.endDate?.trim()) {
+      params = params.set('endDate', filters.endDate.trim());
     }
 
     return this.http.get<DepartmentMemberResponse[]>(`${this.baseUrl}/search`, { params });

@@ -1,32 +1,58 @@
-<h2>Edit Employee</h2>
+<section class="page-hero mb-4">
+  <span class="page-hero__eyebrow">Administration</span>
+  <h2 class="page-hero__title">Update Employee Record</h2>
+  <p class="page-hero__copy">Edit the selected employee record and save the changes back to the ETMS backend.</p>
+</section>
 
-<p *ngIf="loading">Loading...</p>
-<p *ngIf="error" style="color:#b91c1c">{{ error }}</p>
+<div *ngIf="loading" class="alert alert-info">Loading employee record...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
-<form *ngIf="!loading" [formGroup]="form" (ngSubmit)="submit()">
-  <label>Employee Code *</label><br />
-  <input type="text" formControlName="employeeCode" />
-  <br /><br />
+<form *ngIf="!loading" [formGroup]="form" (ngSubmit)="submit()" class="hrms-form-shell">
+  <section class="hrms-section-card">
+    <div class="hrms-section-card__header">
+      <span>Employee Details</span>
+      <span class="hrms-meta-note">Use the same employee code stored in the backend</span>
+    </div>
+    <div class="hrms-section-card__body">
+      <div class="hrms-form-grid hrms-form-grid--wide">
+        <div class="hrms-form-field">
+          <label class="form-label">Employee Code *</label>
+          <input class="form-control" type="text" formControlName="employeeCode" />
+        </div>
 
-  <label>First Name *</label><br />
-  <input type="text" formControlName="firstName" />
-  <br /><br />
+        <div class="hrms-form-field">
+          <label class="form-label">First Name *</label>
+          <input class="form-control" type="text" formControlName="firstName" />
+        </div>
 
-  <label>Last Name *</label><br />
-  <input type="text" formControlName="lastName" />
-  <br /><br />
+        <div class="hrms-form-field">
+          <label class="form-label">Last Name *</label>
+          <input class="form-control" type="text" formControlName="lastName" />
+        </div>
 
-  <label>Email *</label><br />
-  <input type="email" formControlName="email" />
-  <br /><br />
+        <div class="hrms-form-field">
+          <label class="form-label">Email Address *</label>
+          <input class="form-control" type="email" formControlName="email" />
+        </div>
 
-  <label>Hire Date</label><br />
-  <input type="date" formControlName="hireDate" />
-  <br /><br />
+        <div class="hrms-form-field">
+          <label class="form-label">Hire Date</label>
+          <input class="form-control" type="date" formControlName="hireDate" />
+        </div>
 
-  <label><input type="checkbox" formControlName="active" /> Active</label>
-  <br /><br />
+        <div class="hrms-form-field">
+          <label class="form-label">Employment Status</label>
+          <div class="form-check mt-2">
+            <input class="form-check-input" id="editEmployeeActive" type="checkbox" formControlName="active" />
+            <label class="form-check-label" for="editEmployeeActive">Active employee</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <button type="submit">Update</button>
-  <a routerLink="/employees" style="margin-left:8px;">Cancel</a>
+  <div class="hrms-form-actions">
+    <button class="btn btn-primary" type="submit">Update Employee</button>
+    <a class="btn btn-outline-secondary" routerLink="/employees">Cancel</a>
+  </div>
 </form>

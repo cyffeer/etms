@@ -1,10 +1,16 @@
+<nav class="module-subnav mb-4">
+  <a routerLink="/training/types" routerLinkActive="active" class="module-subnav__link">Training Types</a>
+  <a routerLink="/training/info" routerLinkActive="active" class="module-subnav__link">Training Info</a>
+  <a routerLink="/training/history" routerLinkActive="active" class="module-subnav__link">Training History</a>
+  <a routerLink="/training/vendors" routerLinkActive="active" class="module-subnav__link">Vendors</a>
+</nav>
+
 <section class="page-hero mb-4">
   <span class="page-hero__eyebrow">Monitoring And Management</span>
   <h2 class="page-hero__title">Training Information</h2>
-  <p class="page-hero__copy">Maintain ETMS training records, type mapping, vendor references, schedules, and locations.</p>
 </section>
 
-<div class="page-actions mb-3">
+<div class="page-actions mb-3" *ngIf="canManage">
   <button (click)="create()" class="btn btn-warning">New Training Record</button>
 </div>
 
@@ -12,7 +18,7 @@
 <div *ngIf="loading" class="alert alert-info">Loading training information...</div>
 
 <div class="table-responsive" *ngIf="!loading && items.length > 0">
-  <table class="table align-middle mb-0">
+  <table class="table hrms-responsive-table align-middle mb-0">
     <thead>
       <tr>
         <th>Code</th>
@@ -21,22 +27,22 @@
         <th>Vendor</th>
         <th>Location</th>
         <th>Status</th>
-        <th class="text-end">Actions</th>
+        <th class="text-end" *ngIf="canManage">Actions</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let item of items">
-        <td>{{ item.trngCode }}</td>
-        <td>{{ item.trngName }}</td>
-        <td>{{ item.trngTypeCode }}</td>
-        <td>{{ item.vendorCode || '-' }}</td>
-        <td>{{ item.location || '-' }}</td>
-        <td>
+        <td data-label="Code">{{ item.trngCode }}</td>
+        <td data-label="Name">{{ item.trngName }}</td>
+        <td data-label="Type">{{ item.trngTypeCode }}</td>
+        <td data-label="Vendor">{{ item.vendorCode || '-' }}</td>
+        <td data-label="Location">{{ item.location || '-' }}</td>
+        <td data-label="Status">
           <span class="status-pill" [ngClass]="item.active ? 'status-pill--active' : 'status-pill--inactive'">
             {{ item.active ? 'Active' : 'Inactive' }}
           </span>
         </td>
-        <td class="text-end">
+        <td class="text-end" data-label="Actions" *ngIf="canManage">
           <div class="page-actions justify-content-end">
             <button (click)="edit(item.trngInfoId)" class="btn btn-sm btn-outline-secondary">Edit</button>
             <button (click)="delete(item.trngInfoId)" class="btn btn-sm btn-outline-danger">Delete</button>

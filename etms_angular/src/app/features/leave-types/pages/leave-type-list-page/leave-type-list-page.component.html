@@ -1,0 +1,56 @@
+<section class="page-hero page-hero--compact mb-4">
+  <span class="page-hero__eyebrow">Master Data</span>
+  <h2 class="page-hero__title">Leave Types</h2>
+</section>
+
+<div class="page-toolbar">
+  <div>
+    <label class="form-label">Search</label>
+    <input class="form-control" [(ngModel)]="keyword" name="leaveTypeKeywordFilter" placeholder="Code or name" />
+  </div>
+  <div class="page-actions ms-auto">
+    <button class="btn btn-primary" type="button" (click)="load()">Search</button>
+    <button class="btn btn-outline-secondary" type="button" (click)="resetFilters()">Reset</button>
+    <a class="btn btn-warning" routerLink="/leave-types/new">Add Leave Type</a>
+  </div>
+</div>
+
+<div *ngIf="loading" class="alert alert-info">Loading leave types...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+<div class="table-responsive" *ngIf="!loading && !error && rows.length > 0">
+  <table class="table hrms-responsive-table align-middle mb-0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Code</th>
+        <th>Name</th>
+        <th>Status</th>
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of rows">
+        <td data-label="ID">{{ row.leaveTypeId }}</td>
+        <td data-label="Code">{{ row.leaveTypeCode }}</td>
+        <td data-label="Name">{{ row.leaveTypeName }}</td>
+        <td data-label="Status">
+          <span class="status-pill" [ngClass]="row.active ? 'status-pill--active' : 'status-pill--inactive'">
+            {{ row.active ? 'Active' : 'Inactive' }}
+          </span>
+        </td>
+        <td data-label="Actions" class="text-end">
+          <div class="page-actions justify-content-end">
+            <a class="btn btn-sm btn-outline-primary" [routerLink]="['/leave-types', row.leaveTypeId]">View</a>
+            <a class="btn btn-sm btn-outline-secondary" [routerLink]="['/leave-types', row.leaveTypeId, 'edit']">Edit</a>
+            <button class="btn btn-sm btn-outline-danger" type="button" (click)="onDelete(row.leaveTypeId)">Delete</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="empty-state" *ngIf="!loading && !error && rows.length === 0">
+  No leave types found.
+</div>

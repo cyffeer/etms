@@ -1,11 +1,3 @@
-.table-responsive {
-  border-top: 1px solid rgba(47, 111, 159, 0.08);
-}
-
-.table thead th {
-  white-space: nowrap;
-}
-
-.card-header {
-  background: linear-gradient(135deg, #2f6f9f 0%, #1f527c 100%);
+:host {
+  display: block;
 }
