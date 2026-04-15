@@ -77,6 +77,14 @@ public class EtmsAccessPolicy {
             return ALL_ROLES;
         }
 
+        if (requestUri.startsWith("/api/dashboard")) {
+            return ALL_ROLES;
+        }
+
+        if (requestUri.startsWith("/api/audit-logs")) {
+            return EnumSet.of(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER);
+        }
+
         if (matchesAnyPrefix(requestUri, MASTER_DATA_PREFIXES)) {
             return isReadMethod(method) ? MASTER_DATA_VIEW_ROLES : MASTER_DATA_WRITE_ROLES;
         }
@@ -121,6 +129,10 @@ public class EtmsAccessPolicy {
 
         if (requestUri.startsWith("/api/skills-inventory")) {
             return isReadMethod(method) ? ALL_ROLES : SKILLS_WRITE_ROLES;
+        }
+
+        if (requestUri.startsWith("/api/employee-events")) {
+            return isReadMethod(method) ? ALL_ROLES : EnumSet.of(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER);
         }
 
         if (requestUri.startsWith("/api/passport-info") || requestUri.startsWith("/api/visa-info")) {
