@@ -21,6 +21,7 @@ export interface TrngInfo {
   endDate?: string | null;
   location?: string | null;
   active: boolean;
+  certificatePath?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
 }
@@ -43,6 +44,8 @@ export interface TrngHist {
   createdAt?: string | null;
   updatedAt?: string | null;
 }
+
+export type TrngHistResponse = TrngHist;
 
 export interface TrngHistRequest {
   employeeNumber: string;

@@ -18,6 +18,8 @@
   <div class="page-actions ms-auto">
     <button class="btn btn-primary" type="button" (click)="loadData()">Search</button>
     <button class="btn btn-outline-secondary" type="button" (click)="resetFilters()">Reset</button>
+    <button class="btn btn-outline-primary" type="button" (click)="exportReport('xlsx')" [disabled]="exporting">Export Excel</button>
+    <button class="btn btn-outline-dark" type="button" (click)="exportReport('pdf')" [disabled]="exporting">Export PDF</button>
     <button *ngIf="canManage" class="btn btn-warning" type="button" (click)="assign()">Assign Training</button>
   </div>
 </div>

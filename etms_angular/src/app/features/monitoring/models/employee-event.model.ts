@@ -26,3 +26,33 @@ export interface EmployeeEventResponse {
   createdAt?: string | null;
   updatedAt?: string | null;
 }
+
+export interface EmployeeEventPagedData {
+  data: EmployeeEventResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface EmployeeEventListResult {
+  items: EmployeeEventResponse[];
+  page?: number;
+  size?: number;
+  totalElements?: number;
+  totalPages?: number;
+}
+
+export interface EmployeeEventSummaryItem {
+  eventType: string;
+  label: string;
+  count: number;
+}
+
+export interface EmployeeEventSummaryResponse {
+  totalCount: number;
+  activeCount: number;
+  pendingCount: number;
+  closedCount: number;
+  categories: EmployeeEventSummaryItem[];
+}

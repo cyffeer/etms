@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
@@ -29,5 +29,16 @@ export class TrngHistoryService {
 
   delete(trngId: number, employeeNumber: string): Observable<void> {
     return this.http.delete<void>(`${this.url}/${trngId}/${employeeNumber}`);
+  }
+
+  exportReport(format: 'xlsx' | 'pdf', employeeNumber?: string): Observable<Blob> {
+    let params = new HttpParams().set('format', format);
+    if (employeeNumber?.trim()) {
+      params = params.set('employeeNumber', employeeNumber.trim());
+    }
+    return this.http.get(`${environment.apiBaseUrl}/reports/training-history`, {
+      params,
+      responseType: 'blob'
+    });
   }
 }

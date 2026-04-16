@@ -9,8 +9,14 @@ import { LeaveTypeService } from '../../services/leave-type.service';
 export class LeaveTypeListPageComponent implements OnInit {
   loading = false;
   error = '';
+  leaveTypeId: number | null = null;
   keyword = '';
   rows: LeaveType[] = [];
+  page = 0;
+  size = 10;
+  totalElements = 0;
+  totalPages = 0;
+  readonly pageSizes = [5, 10, 20, 50];
 
   constructor(private readonly leaveTypeService: LeaveTypeService) {}
 
@@ -21,9 +27,11 @@ export class LeaveTypeListPageComponent implements OnInit {
   load(): void {
     this.loading = true;
     this.error = '';
-    this.leaveTypeService.getAll(this.keyword).subscribe({
-      next: (rows) => {
-        this.rows = rows;
+    this.leaveTypeService.getAll({ leaveTypeId: this.leaveTypeId, keyword: this.keyword }, this.page, this.size).subscribe({
+      next: (result) => {
+        this.rows = result.items;
+        this.totalElements = result.totalElements ?? result.items.length;
+        this.totalPages = result.totalPages ?? 1;
         this.loading = false;
       },
       error: (err) => {
@@ -35,7 +43,26 @@ export class LeaveTypeListPageComponent implements OnInit {
 
   resetFilters(): void {
     this.keyword = '';
+    this.leaveTypeId = null;
+    this.page = 0;
     this.load();
+  }
+
+  onPageSizeChange(): void {
+    this.page = 0;
+    this.load();
+  }
+
+  goToPage(page: number): void {
+    if (page < 0 || page >= this.totalPages || page === this.page) {
+      return;
+    }
+    this.page = page;
+    this.load();
+  }
+
+  get visiblePages(): number[] {
+    return Array.from({ length: this.totalPages }, (_, index) => index);
   }
 
   onDelete(id: number): void {

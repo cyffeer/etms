@@ -76,6 +76,7 @@
         <th>Status</th>
         <th>Cancel Flag</th>
         <th>Updated</th>
+        <th class="text-end">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -89,6 +90,26 @@
         </td>
         <td data-label="Cancel Flag">{{ cancelFlagLabel(row.cancelFlag) }}</td>
         <td data-label="Updated">{{ row.updatedAt ? (row.updatedAt | date:'yyyy-MM-dd HH:mm') : '-' }}</td>
+        <td data-label="Actions" class="text-end">
+          <div class="page-actions justify-content-end">
+            <button
+              class="btn btn-sm btn-outline-success"
+              type="button"
+              (click)="setCancelFlag(row, true)"
+              [disabled]="!canEditCancelFlag(row) || row.cancelFlag === true"
+            >
+              Mark YES
+            </button>
+            <button
+              class="btn btn-sm btn-outline-secondary"
+              type="button"
+              (click)="setCancelFlag(row, false)"
+              [disabled]="!canEditCancelFlag(row) || row.cancelFlag === false"
+            >
+              Mark NO
+            </button>
+          </div>
+        </td>
       </tr>
     </tbody>
   </table>

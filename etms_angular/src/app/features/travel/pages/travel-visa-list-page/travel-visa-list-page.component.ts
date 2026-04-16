@@ -77,6 +77,22 @@ export class TravelVisaListPageComponent implements OnInit {
     });
   }
 
+  setCancelFlag(row: VisaInfo, cancelFlag: boolean): void {
+    if (!confirm(`Mark visa cancel flag as ${cancelFlag ? 'YES' : 'NO'} for this record?`)) {
+      return;
+    }
+
+    this.loading = true;
+    this.error = '';
+    this.visaInfoService.updateCancelFlag(row.employeeNumber, row.visaTypeId, cancelFlag).subscribe({
+      next: () => this.load(),
+      error: (err) => {
+        this.error = err?.message || 'Failed to update visa cancel flag.';
+        this.loading = false;
+      },
+    });
+  }
+
   resetFilters(): void {
     this.filters = {
       employeeNumber: '',
@@ -150,6 +166,10 @@ export class TravelVisaListPageComponent implements OnInit {
       return 'status-pill--active';
     }
     return 'status-pill--neutral';
+  }
+
+  canEditCancelFlag(row: VisaInfo): boolean {
+    return this.resolveStatus(row.expiryDate) !== 'expired';
   }
 
   private applyModeFilter(rows: VisaInfo[]): VisaInfo[] {

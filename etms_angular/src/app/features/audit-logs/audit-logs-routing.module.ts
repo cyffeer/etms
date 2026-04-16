@@ -8,7 +8,7 @@ const routes: Routes = [
     path: '',
     component: AuditLogListPageComponent,
     canActivate: [AuthGuard],
-    data: { roles: ['ADMIN', 'HR', 'MANAGER'] }
+    data: { roles: ['ADMIN'] }
   }
 ];
 

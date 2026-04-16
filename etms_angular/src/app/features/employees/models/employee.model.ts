@@ -45,6 +45,7 @@ export interface EmployeeResponse {
   lastName: string;
   email: string;
   hireDate: string | null;   // LocalDate
+  photoUrl?: string | null;
   active: boolean;
   createdAt: string | null;  // LocalDateTime
   updatedAt: string | null;  // LocalDateTime

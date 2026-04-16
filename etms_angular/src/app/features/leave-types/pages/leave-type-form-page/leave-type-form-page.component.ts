@@ -18,6 +18,7 @@ export class LeaveTypeFormPageComponent implements OnInit {
     leaveTypeCode: ['', [Validators.required, Validators.maxLength(30)]],
     leaveTypeName: ['', [Validators.required, Validators.maxLength(120)]],
     description: ['', Validators.maxLength(255)],
+    annualEntitlementDays: [0, [Validators.required, Validators.min(0), Validators.max(365)]],
     active: [true],
   });
 
@@ -60,6 +61,7 @@ export class LeaveTypeFormPageComponent implements OnInit {
       leaveTypeCode: raw.leaveTypeCode?.trim() || '',
       leaveTypeName: raw.leaveTypeName?.trim() || '',
       description: raw.description?.trim() || null,
+      annualEntitlementDays: Number(raw.annualEntitlementDays ?? 0),
       active: raw.active ?? true,
     };
 

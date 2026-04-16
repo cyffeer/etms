@@ -21,6 +21,10 @@
           <span class="hrms-detail-item__label">Status</span>
           <span class="hrms-detail-item__value">{{ item.active ? 'Active' : 'Inactive' }}</span>
         </div>
+        <div class="hrms-detail-item">
+          <span class="hrms-detail-item__label">Annual Entitlement</span>
+          <span class="hrms-detail-item__value">{{ item.annualEntitlementDays }} days</span>
+        </div>
         <div class="hrms-detail-item hrms-form-field--full">
           <span class="hrms-detail-item__label">Description</span>
           <span class="hrms-detail-item__value">{{ item.description || '-' }}</span>

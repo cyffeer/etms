@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { map } from 'rxjs';
 import { EmployeeResponse } from '../../models/employee.model';
 import { EmployeesService } from '../../services/employees.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -10,8 +9,15 @@ import { AuthService } from '../../../../core/services/auth.service';
 })
 export class EmployeeListPageComponent implements OnInit {
   employees: EmployeeResponse[] = [];
+  private filteredEmployees: EmployeeResponse[] = [];
   loading = false;
+  exporting = false;
   error = '';
+  page = 0;
+  readonly size = 10;
+  totalPages = 0;
+  totalElements = 0;
+  hasFilters = false;
   filters = {
     employeeNumber: '',
     nameKeyword: '',
@@ -30,18 +36,33 @@ export class EmployeeListPageComponent implements OnInit {
   load(): void {
     this.loading = true;
     this.error = '';
-    const hasFilters =
+    this.hasFilters =
       !!this.filters.employeeNumber.trim() ||
       !!this.filters.nameKeyword.trim() ||
       !!this.filters.startDate.trim() ||
       !!this.filters.endDate.trim();
-    const request$ = hasFilters
-      ? this.employeesService.searchEmployees(this.filters)
-      : this.employeesService.getEmployees().pipe(map((result) => result.items));
+    if (this.hasFilters) {
+      this.employeesService.searchEmployees(this.filters).subscribe({
+        next: (employees: EmployeeResponse[]) => {
+          this.filteredEmployees = employees;
+          this.totalElements = this.filteredEmployees.length;
+          this.totalPages = this.totalElements === 0 ? 0 : Math.ceil(this.totalElements / this.size);
+          this.applyFilteredPageSlice();
+          this.loading = false;
+        },
+        error: (err: { message?: string }) => {
+          this.error = err?.message || 'Failed to load employees.';
+          this.loading = false;
+        }
+      });
+      return;
+    }
 
-    request$.subscribe({
-      next: (employees: EmployeeResponse[]) => {
-        this.employees = employees;
+    this.employeesService.getEmployees(this.page, this.size).subscribe({
+      next: (result) => {
+        this.employees = result.items;
+        this.totalPages = result.totalPages ?? 0;
+        this.totalElements = result.totalElements ?? result.items.length;
         this.loading = false;
       },
       error: (err: { message?: string }) => {
@@ -69,6 +90,61 @@ export class EmployeeListPageComponent implements OnInit {
       startDate: '',
       endDate: ''
     };
+    this.page = 0;
     this.load();
+  }
+
+  search(): void {
+    this.page = 0;
+    this.load();
+  }
+
+  prevPage(): void {
+    if (!this.hasPrevPage()) return;
+    this.page -= 1;
+    this.hasFilters ? this.applyFilteredPageSlice() : this.load();
+  }
+
+  nextPage(): void {
+    if (!this.hasNextPage()) return;
+    this.page += 1;
+    this.hasFilters ? this.applyFilteredPageSlice() : this.load();
+  }
+
+  hasPrevPage(): boolean {
+    return this.page > 0;
+  }
+
+  hasNextPage(): boolean {
+    return this.totalPages > 0 && this.page + 1 < this.totalPages;
+  }
+
+  private applyFilteredPageSlice(): void {
+    if (this.totalPages > 0 && this.page >= this.totalPages) {
+      this.page = this.totalPages - 1;
+    }
+    const from = this.page * this.size;
+    const to = from + this.size;
+    this.employees = this.filteredEmployees.slice(from, to);
+  }
+
+  exportReport(format: 'xlsx' | 'pdf'): void {
+    this.exporting = true;
+    this.error = '';
+    this.employeesService.exportEmployees(format).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `employees-report.${format}`;
+        anchor.click();
+        window.URL.revokeObjectURL(url);
+        this.exporting = false;
+      },
+      error: (err) => {
+        this.error = err?.error?.message || err?.message || 'Failed to export employee report.';
+        this.exporting = false;
+      }
+    });
   }
 }

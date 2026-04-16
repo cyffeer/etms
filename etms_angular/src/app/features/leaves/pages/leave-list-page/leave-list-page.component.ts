@@ -13,11 +13,19 @@ export class LeaveListPageComponent implements OnInit {
   loading = false;
   error = '';
   items: Leave[] = [];
+  page = 0;
+  size = 10;
+  totalElements = 0;
+  totalPages = 0;
+  readonly pageSizes = [5, 10, 20, 50];
   leaveTypes: LeaveType[] = [];
+  exporting = false;
   filters = {
     employeeNumber: '',
     leaveType: '',
     status: '',
+    startDate: '',
+    endDate: '',
   };
   readonly statusOptions = ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'];
 
@@ -35,12 +43,19 @@ export class LeaveListPageComponent implements OnInit {
   loadData(): void {
     this.loading = true;
     this.error = '';
-    const hasFilters = !!this.filters.employeeNumber.trim() || !!this.filters.leaveType.trim() || !!this.filters.status.trim();
-    const request$ = hasFilters ? this.service.search(this.filters) : this.service.getAll();
+    const hasFilters =
+      !!this.filters.employeeNumber.trim() ||
+      !!this.filters.leaveType.trim() ||
+      !!this.filters.status.trim() ||
+      !!this.filters.startDate.trim() ||
+      !!this.filters.endDate.trim();
+    const request$ = hasFilters ? this.service.search(this.filters, this.page, this.size) : this.service.getAll(this.page, this.size);
 
     request$.subscribe({
       next: (res) => {
-        this.items = res;
+        this.items = res.items;
+        this.totalElements = res.totalElements ?? res.items.length;
+        this.totalPages = res.totalPages ?? 1;
         this.loading = false;
       },
       error: (err) => {
@@ -70,13 +85,59 @@ export class LeaveListPageComponent implements OnInit {
     });
   }
 
+  exportReport(format: 'xlsx' | 'pdf'): void {
+    this.exporting = true;
+    this.error = '';
+    this.service.exportReport(format, {
+      employeeNumber: this.filters.employeeNumber,
+      leaveType: this.filters.leaveType,
+      status: this.filters.status,
+      startDate: this.filters.startDate,
+      endDate: this.filters.endDate,
+    }).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `leave-report.${format}`;
+        anchor.click();
+        window.URL.revokeObjectURL(url);
+        this.exporting = false;
+      },
+      error: (err) => {
+        this.error = err?.error?.message || err?.message || 'Failed to export leave report.';
+        this.exporting = false;
+      }
+    });
+  }
+
   resetFilters(): void {
     this.filters = {
       employeeNumber: '',
       leaveType: '',
       status: '',
+      startDate: '',
+      endDate: '',
     };
+    this.page = 0;
     this.loadData();
+  }
+
+  onPageSizeChange(): void {
+    this.page = 0;
+    this.loadData();
+  }
+
+  goToPage(page: number): void {
+    if (page < 0 || page >= this.totalPages || page === this.page) {
+      return;
+    }
+    this.page = page;
+    this.loadData();
+  }
+
+  get visiblePages(): number[] {
+    return Array.from({ length: this.totalPages }, (_, index) => index);
   }
 
   leaveTypeLabel(code: string): string {
@@ -86,8 +147,8 @@ export class LeaveListPageComponent implements OnInit {
 
   private loadLeaveTypes(): void {
     this.leaveTypeService.getAll().subscribe({
-      next: (rows) => {
-        this.leaveTypes = rows.filter((row) => row.active);
+      next: (result) => {
+        this.leaveTypes = result.items.filter((row: LeaveType) => row.active);
       },
       error: () => {
         this.leaveTypes = [];

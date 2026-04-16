@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ApiResponse } from '../../../models/api-response.model';
-import { SkillLevelRequest, SkillLevelResponse } from '../models/skill-level.model';
+import { SkillLevelListResult, SkillLevelPagedData, SkillLevelRequest, SkillLevelResponse } from '../models/skill-level.model';
 
 @Injectable({ providedIn: 'root' })
 export class SkillLevelsService {
@@ -15,7 +15,7 @@ export class SkillLevelsService {
     skillLvlId?: number | null;
     skillId?: number | null;
     keyword?: string | null;
-  }): Observable<SkillLevelResponse[]> {
+  }, page?: number, size?: number): Observable<SkillLevelListResult> {
     let params = new HttpParams();
 
     if (filters?.skillLvlId != null) {
@@ -27,10 +27,25 @@ export class SkillLevelsService {
     if (filters?.keyword?.trim()) {
       params = params.set('keyword', filters.keyword.trim());
     }
+    if (page != null && size != null) {
+      params = params.set('page', page).set('size', size);
+    }
 
     return this.http
-      .get<ApiResponse<SkillLevelResponse[]>>(this.baseUrl, { params })
-      .pipe(map((res) => res.data ?? []));
+      .get<ApiResponse<SkillLevelResponse[] | SkillLevelPagedData>>(this.baseUrl, { params })
+      .pipe(map((res) => {
+        const payload = res.data;
+        if (Array.isArray(payload)) {
+          return { items: payload };
+        }
+        return {
+          items: payload.data,
+          page: payload.page,
+          size: payload.size,
+          totalElements: payload.totalElements,
+          totalPages: payload.totalPages
+        };
+      }));
   }
 
   getSkillLevelById(skillLvlId: number): Observable<SkillLevelResponse> {

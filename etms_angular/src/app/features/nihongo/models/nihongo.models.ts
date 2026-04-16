@@ -24,6 +24,16 @@ export interface NpTestEmpHist {
   npTestEmpHistId: number;
   employeeNumber: string;
   npTestHistId: number;
+  npTypeCode?: string | null;
+  npTypeName?: string | null;
+  npLvlInfoCode?: string | null;
+  npLvlInfoName?: string | null;
+  policyRank?: number | null;
+  allowanceStartDate?: string | null;
+  allowanceEndDate?: string | null;
+  effectiveAllowanceEndDate?: string | null;
+  expired?: boolean | null;
+  firstTimePass?: boolean | null;
   passFlag?: boolean | null;
   takeFlag?: boolean | null;
   points?: number | null;

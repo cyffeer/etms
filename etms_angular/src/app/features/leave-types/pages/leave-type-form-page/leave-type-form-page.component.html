@@ -26,6 +26,10 @@
           <textarea rows="3" class="form-control" formControlName="description"></textarea>
         </div>
         <div class="hrms-form-field">
+          <label class="form-label">Annual Entitlement Days</label>
+          <input type="number" min="0" max="365" class="form-control" formControlName="annualEntitlementDays" />
+        </div>
+        <div class="hrms-form-field">
           <label class="form-label">Status</label>
           <select class="form-select" formControlName="active">
             <option [ngValue]="true">Active</option>

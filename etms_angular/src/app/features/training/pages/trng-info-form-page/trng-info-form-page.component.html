@@ -60,6 +60,13 @@
             <option [ngValue]="false">Inactive</option>
           </select>
         </div>
+
+        <div class="hrms-form-field hrms-form-field--wide">
+          <label class="form-label">Training Certificate</label>
+          <input type="file" class="form-control" (change)="onCertificateSelected($event)" accept=".pdf,.jpg,.jpeg,.png,.webp" />
+          <div class="form-text">Upload a training certificate after saving or when updating the training record.</div>
+          <div class="mt-2 small text-success" *ngIf="certificateMessage">{{ certificateMessage }}</div>
+        </div>
       </div>
 
       <div class="hrms-form-actions mt-3">

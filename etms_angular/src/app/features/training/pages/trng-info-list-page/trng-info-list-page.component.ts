@@ -12,7 +12,7 @@ export class TrngInfoListPageComponent implements OnInit {
   items: TrngInfo[] = [];
   loading = false;
   error = '';
-  readonly canManage = this.authService.hasAnyRole(['ADMIN', 'HR', 'MANAGER']);
+  readonly canManage = this.authService.hasAnyRole(['ADMIN', 'HR']);
 
   constructor(
     private service: TrngInfoService,
@@ -54,5 +54,25 @@ export class TrngInfoListPageComponent implements OnInit {
         error: (err) => (this.error = err.error?.message || 'Delete failed'),
       });
     }
+  }
+
+  hasCertificate(item: TrngInfo): boolean {
+    return !!item.certificatePath;
+  }
+
+  downloadCertificate(item: TrngInfo): void {
+    this.service.downloadCertificate(item.trngInfoId).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = item.certificatePath || `training-${item.trngInfoId}-certificate`;
+        anchor.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        this.error = err.error?.message || 'Certificate download failed';
+      }
+    });
   }
 }

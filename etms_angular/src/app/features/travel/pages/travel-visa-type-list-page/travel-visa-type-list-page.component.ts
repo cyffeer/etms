@@ -12,7 +12,7 @@ export class TravelVisaTypeListPageComponent implements OnInit {
   error = '';
   keyword = '';
   rows: VisaType[] = [];
-  readonly canManage = this.authService.hasAnyRole(['ADMIN']);
+  readonly canManage = this.authService.hasAnyRole(['ADMIN', 'HR']);
 
   constructor(
     private readonly visaTypeService: VisaTypeService,

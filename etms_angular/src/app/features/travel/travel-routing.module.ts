@@ -11,8 +11,8 @@ const routes: Routes = [
   { path: 'passports', component: TravelPassportListPageComponent },
   { path: 'visas', component: TravelVisaListPageComponent },
   { path: 'visa-types', component: TravelVisaTypeListPageComponent },
-  { path: 'visa-types/new', component: TravelVisaTypeFormPageComponent, canActivate: [AuthGuard], data: { roles: ['ADMIN'] } },
-  { path: 'visa-types/:visaTypeId/edit', component: TravelVisaTypeFormPageComponent, canActivate: [AuthGuard], data: { roles: ['ADMIN'] } },
+  { path: 'visa-types/new', component: TravelVisaTypeFormPageComponent, canActivate: [AuthGuard], data: { roles: ['ADMIN', 'HR'] } },
+  { path: 'visa-types/:visaTypeId/edit', component: TravelVisaTypeFormPageComponent, canActivate: [AuthGuard], data: { roles: ['ADMIN', 'HR'] } },
 ];
 
 @NgModule({

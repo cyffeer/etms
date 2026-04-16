@@ -27,6 +27,7 @@ export class EmployeeEventFormPageComponent implements OnInit {
   error = '';
   isEdit = false;
   private employeeEventId = 0;
+  private presetEventType = '';
 
   form = this.fb.group({
     employeeNumber: ['', [Validators.required, Validators.maxLength(30)]],
@@ -49,6 +50,17 @@ export class EmployeeEventFormPageComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.route.queryParamMap.subscribe((queryParams) => {
+      const requestedType = queryParams.get('eventType') || '';
+      if (requestedType && this.eventTypes.includes(requestedType)) {
+        this.presetEventType = requestedType;
+        this.form.patchValue({
+          eventType: requestedType,
+          title: this.defaultTitleFor(requestedType),
+        });
+      }
+    });
+
     this.departmentsService.getDepartments().subscribe({
       next: (rows) => {
         this.departments = rows;
@@ -58,6 +70,12 @@ export class EmployeeEventFormPageComponent implements OnInit {
     this.employeeEventId = Number(this.route.snapshot.paramMap.get('employeeEventId'));
     this.isEdit = !!this.employeeEventId;
     if (!this.isEdit) {
+      if (this.presetEventType) {
+        this.form.patchValue({
+          eventType: this.presetEventType,
+          title: this.defaultTitleFor(this.presetEventType),
+        });
+      }
       return;
     }
 
@@ -113,9 +131,36 @@ export class EmployeeEventFormPageComponent implements OnInit {
     request$.subscribe({
       next: () => this.router.navigate(['/monitoring']),
       error: (err) => {
-        this.error = err?.message || 'Failed to save employee event.';
+        this.error = this.resolveErrorMessage(err);
         this.loading = false;
       }
     });
+  }
+
+  private defaultTitleFor(eventType: string): string {
+    const titles: Record<string, string> = {
+      PROMOTION: 'Promotion Record',
+      VIOLATION: 'Violation Record',
+      CITATION: 'Citation Record',
+      PROJECT_ASSIGNMENT: 'Project Assignment',
+      RESIGNATION: 'Resignation Record',
+      SUSPENSION: 'Suspension Record',
+      TERMINATION: 'Termination Record'
+    };
+    return titles[eventType] || 'Employee Event';
+  }
+
+  private resolveErrorMessage(err: any): string {
+    const detailData = err?.details?.data;
+    if (Array.isArray(detailData) && detailData.length > 0) {
+      return detailData.join(', ');
+    }
+
+    const detailErrors = err?.details?.errors;
+    if (Array.isArray(detailErrors) && detailErrors.length > 0) {
+      return detailErrors.join(', ');
+    }
+
+    return err?.message || 'Failed to save employee event.';
   }
 }

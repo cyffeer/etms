@@ -18,3 +18,19 @@ export interface SkillLevelResponse {
   createdAt?: string | null;
   updatedAt?: string | null;
 }
+
+export interface SkillLevelPagedData {
+  data: SkillLevelResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface SkillLevelListResult {
+  items: SkillLevelResponse[];
+  page?: number;
+  size?: number;
+  totalElements?: number;
+  totalPages?: number;
+}

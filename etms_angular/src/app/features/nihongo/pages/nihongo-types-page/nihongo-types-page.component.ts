@@ -12,7 +12,7 @@ export class NihongoTypesPageComponent implements OnInit {
   error = '';
   keyword = '';
   rows: NpType[] = [];
-  readonly canManage = this.authService.hasAnyRole(['ADMIN']);
+  readonly canManage = this.authService.hasAnyRole(['ADMIN', 'HR']);
 
   constructor(
     private readonly npTypeService: NpTypeService,

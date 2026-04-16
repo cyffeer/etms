@@ -61,7 +61,17 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!this.userSubject.value && !!sessionStorage.getItem(this.tokenStorageKey);
+    const token = sessionStorage.getItem(this.tokenStorageKey);
+    if (!this.userSubject.value || !token) {
+      return false;
+    }
+
+    if (this.isTokenExpired(token)) {
+      this.logout();
+      return false;
+    }
+
+    return true;
   }
 
   hasAnyRole(roles: string[]): boolean {
@@ -95,6 +105,24 @@ export class AuthService {
     } catch {
       sessionStorage.removeItem(this.storageKey);
       return null;
+    }
+  }
+
+  private isTokenExpired(token: string): boolean {
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      return true;
+    }
+
+    try {
+      const payloadJson = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
+      const payload = JSON.parse(payloadJson) as { exp?: number };
+      if (!payload.exp) {
+        return true;
+      }
+      return Date.now() >= payload.exp * 1000;
+    } catch {
+      return true;
     }
   }
 

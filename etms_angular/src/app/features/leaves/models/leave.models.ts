@@ -10,6 +10,46 @@ export interface LeaveApi {
   updatedAt?: string | null;
 }
 
+export interface LeavePagedData {
+  data: LeaveApi[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface LeaveListResult {
+  items: Leave[];
+  page?: number;
+  size?: number;
+  totalElements?: number;
+  totalPages?: number;
+}
+
+export interface LeaveBalanceApi {
+  employeeNumber: string;
+  employeeName: string;
+  year: number;
+  leaveTypeCode: string;
+  leaveTypeName: string;
+  annualEntitlementDays: number;
+  approvedDaysUsed: number;
+  pendingDays: number;
+  remainingDays: number;
+}
+
+export interface LeaveBalance {
+  employeeNumber: string;
+  employeeName: string;
+  year: number;
+  leaveTypeCode: string;
+  leaveTypeName: string;
+  annualEntitlementDays: number;
+  approvedDaysUsed: number;
+  pendingDays: number;
+  remainingDays: number;
+}
+
 export interface Leave {
   leaveRecordId: number;
   employeeNumber: string;
@@ -24,7 +64,7 @@ export interface LeaveRequest {
   employeeNumber: string;
   leaveType: string;
   startDate: string;   // yyyy-MM-dd
-  endDate: string;     // yyyy-MM-dd
+  endDate?: string | null;     // yyyy-MM-dd
   status?: string | null;
   remarks?: string | null;
 }

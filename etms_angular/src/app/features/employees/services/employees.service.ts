@@ -85,6 +85,34 @@ export class EmployeesService {
       .pipe(map((res) => res.data));
   }
 
+  uploadPhoto(employeeId: number, file: File): Observable<EmployeeResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http
+      .post<ApiResponse<EmployeeResponse>>(`${this.baseUrl}/${employeeId}/photo`, formData)
+      .pipe(map((res) => res.data));
+  }
+
+  exportEmployees(format: 'xlsx' | 'pdf'): Observable<Blob> {
+    const params = new HttpParams().set('format', format);
+    return this.http.get(`${environment.apiBaseUrl}/reports/employees`, {
+      params,
+      responseType: 'blob'
+    });
+  }
+
+  resolvePhotoUrl(photoUrl?: string | null): string | null {
+    if (!photoUrl) {
+      return null;
+    }
+    if (/^https?:\/\//i.test(photoUrl)) {
+      return photoUrl;
+    }
+    const origin = environment.apiBaseUrl.replace(/\/api$/, '');
+    return `${origin}${photoUrl}`;
+  }
+
   deleteEmployee(employeeId: number): Observable<void> {
     return this.http
       .delete<ApiResponse<void>>(`${this.baseUrl}/${employeeId}`)

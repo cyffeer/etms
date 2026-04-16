@@ -99,8 +99,8 @@ export class LeaveFormPageComponent implements OnInit {
 
   private loadLeaveTypes(): void {
     this.leaveTypeService.getAll().subscribe({
-      next: (rows) => {
-        this.leaveTypes = rows.filter((row) => row.active);
+      next: (result) => {
+        this.leaveTypes = result.items.filter((row: LeaveType) => row.active);
       },
       error: () => {
         this.leaveTypes = [];

@@ -29,4 +29,18 @@ export class TrngInfoService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.url}/${id}`);
   }
+
+  uploadCertificate(id: number, file: File): Observable<{ message: string; certificatePath: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{ message: string; certificatePath: string }>(`${this.url}/${id}/certificate`, formData);
+  }
+
+  downloadCertificate(id: number): Observable<Blob> {
+    return this.http.get(`${this.url}/${id}/certificate`, { responseType: 'blob' });
+  }
+
+  getCertificateUrl(id: number): string {
+    return `${this.url}/${id}/certificate`;
+  }
 }

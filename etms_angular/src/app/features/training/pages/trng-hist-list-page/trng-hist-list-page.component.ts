@@ -11,9 +11,10 @@ import { TrngHist } from '../../models/training.models';
 export class TrngHistListPageComponent implements OnInit {
   items: TrngHist[] = [];
   loading = false;
+  exporting = false;
   error = '';
   employeeNumberFilter = '';
-  readonly canManage = this.authService.hasAnyRole(['ADMIN', 'HR', 'MANAGER']);
+  readonly canManage = this.authService.hasAnyRole(['ADMIN', 'HR']);
 
   constructor(
     private service: TrngHistoryService,
@@ -60,5 +61,25 @@ export class TrngHistListPageComponent implements OnInit {
   resetFilters(): void {
     this.employeeNumberFilter = '';
     this.loadData();
+  }
+
+  exportReport(format: 'xlsx' | 'pdf'): void {
+    this.exporting = true;
+    this.error = '';
+    this.service.exportReport(format, this.employeeNumberFilter).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `training-history-report.${format}`;
+        anchor.click();
+        window.URL.revokeObjectURL(url);
+        this.exporting = false;
+      },
+      error: (err) => {
+        this.error = err?.error?.message || err?.message || 'Failed to export training history report.';
+        this.exporting = false;
+      }
+    });
   }
 }

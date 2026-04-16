@@ -12,6 +12,8 @@ export class TrngInfoFormPageComponent implements OnInit {
   loading = false;
   saving = false;
   error = '';
+  certificateFile: File | null = null;
+  certificateMessage = '';
   isEdit = false;
   id?: number;
 
@@ -45,7 +47,8 @@ export class TrngInfoFormPageComponent implements OnInit {
     this.loading = true;
     this.service.getById(id).subscribe({
       next: (data) => {
-        this.form.patchValue(data);
+      this.form.patchValue(data);
+        this.certificateMessage = data.certificatePath ? 'Certificate uploaded' : '';
         this.loading = false;
       },
       error: (err) => {
@@ -59,6 +62,8 @@ export class TrngInfoFormPageComponent implements OnInit {
     if (this.form.invalid) return;
 
     this.saving = true;
+    this.error = '';
+    this.certificateMessage = '';
     const req = this.form.value;
 
     const call = this.isEdit
@@ -66,14 +71,30 @@ export class TrngInfoFormPageComponent implements OnInit {
       : this.service.create(req);
 
     call.subscribe({
-      next: () => {
-        this.router.navigate(['training/info']);
+      next: (saved) => {
+        if (!this.certificateFile) {
+          this.router.navigate(['training/info']);
+          return;
+        }
+
+        this.service.uploadCertificate(saved.trngInfoId, this.certificateFile).subscribe({
+          next: () => this.router.navigate(['training/info']),
+          error: (err) => {
+            this.error = err.error?.message || 'Training saved, but certificate upload failed';
+            this.saving = false;
+          }
+        });
       },
       error: (err) => {
         this.error = err.error?.message || 'Save failed';
         this.saving = false;
       },
     });
+  }
+
+  onCertificateSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.certificateFile = input.files && input.files.length ? input.files[0] : null;
   }
 
   cancel() {

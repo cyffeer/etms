@@ -14,10 +14,13 @@ type NihongoResultRow = {
   employeeName: string;
   typeLabel: string;
   levelLabel: string;
+  allowanceStartDate?: string | null;
+  allowanceEndDate?: string | null;
   testDate?: string | null;
   testCenter?: string | null;
   testLevel?: string | null;
   policyValidTo?: string | null;
+  expired?: boolean | null;
   pointsLabel: string;
   resultLabel: string;
   resultClass: string;
@@ -136,16 +139,6 @@ export class NihongoResultsPageComponent implements OnInit {
       return acc;
     }, {});
 
-    const levelByCode = levels.reduce<Record<string, NpLvlInfoResponse>>((acc, level) => {
-      acc[level.npLvlInfoCode] = level;
-      return acc;
-    }, {});
-
-    const typeByCode = types.reduce<Record<string, NpType>>((acc, type) => {
-      acc[type.npTypeCode] = type;
-      return acc;
-    }, {});
-
     const testById = tests.reduce<Record<number, NpTestHist>>((acc, test) => {
       acc[test.npTestHistId] = test;
       return acc;
@@ -155,18 +148,22 @@ export class NihongoResultsPageComponent implements OnInit {
       .map((result) => {
         const employee = employeeByCode[result.employeeNumber];
         const test = testById[result.npTestHistId];
-        const level = test ? levelByCode[test.npLvlInfoCode] : undefined;
-        const type = level ? typeByCode[level.npTypeCode] : undefined;
+        const level = levels.find((item) => item.npLvlInfoCode === (result.npLvlInfoCode || test?.npLvlInfoCode));
+        const type = types.find((item) => item.npTypeCode === (result.npTypeCode || level?.npTypeCode));
+        const policyValidTo = result.effectiveAllowanceEndDate || result.allowanceEndDate || level?.validTo || null;
 
         return {
           employeeNumber: result.employeeNumber,
           employeeName: employee ? `${employee.firstName} ${employee.lastName}` : 'Unknown Employee',
-          typeLabel: type ? `${type.npTypeCode} - ${type.npTypeName}` : (level?.npTypeCode || '-'),
-          levelLabel: level ? `${level.npLvlInfoCode} - ${level.npLvlInfoName}` : (test?.npLvlInfoCode || '-'),
+          typeLabel: type ? `${type.npTypeCode} - ${type.npTypeName}` : (result.npTypeName || result.npTypeCode || level?.npTypeCode || '-'),
+          levelLabel: level ? `${level.npLvlInfoCode} - ${level.npLvlInfoName}` : (result.npLvlInfoName || result.npLvlInfoCode || test?.npLvlInfoCode || '-'),
+          allowanceStartDate: result.allowanceStartDate || null,
+          allowanceEndDate: result.allowanceEndDate || null,
           testDate: test?.testDate || null,
           testCenter: test?.testCenter || null,
           testLevel: test?.testLevel || null,
-          policyValidTo: level?.validTo || null,
+          policyValidTo,
+          expired: result.expired ?? null,
           pointsLabel: this.buildPointsLabel(result.points, test?.score),
           resultLabel: this.buildResultLabel(result),
           resultClass: this.buildResultClass(result),

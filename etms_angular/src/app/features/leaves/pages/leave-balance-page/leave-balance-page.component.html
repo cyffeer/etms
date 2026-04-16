@@ -1,0 +1,56 @@
+<section class="page-hero page-hero--compact mb-4">
+  <span class="page-hero__eyebrow">Leave Monitoring</span>
+  <h2 class="page-hero__title">Leave Balance</h2>
+</section>
+
+<div class="page-toolbar">
+  <div>
+    <label class="form-label">Employee Number</label>
+    <input class="form-control" [(ngModel)]="filters.employeeNumber" name="leaveBalanceEmployeeFilter" placeholder="Optional" />
+  </div>
+  <div>
+    <label class="form-label">Year</label>
+    <input class="form-control" type="number" [(ngModel)]="filters.year" name="leaveBalanceYearFilter" />
+  </div>
+  <div class="page-actions ms-auto">
+    <button class="btn btn-primary" type="button" (click)="load()">Load</button>
+    <button class="btn btn-outline-secondary" type="button" (click)="reset()">Reset</button>
+    <a class="btn btn-outline-secondary" routerLink="/leaves">Leave Records</a>
+  </div>
+</div>
+
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+<div *ngIf="loading" class="alert alert-info">Loading leave balances...</div>
+
+<div class="table-responsive" *ngIf="!loading && items.length">
+  <table class="table hrms-responsive-table align-middle mb-0">
+    <thead>
+      <tr>
+        <th>Employee #</th>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Entitlement</th>
+        <th>Approved Used</th>
+        <th>Pending</th>
+        <th>Remaining</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of items">
+        <td data-label="Employee #">{{ item.employeeNumber }}</td>
+        <td data-label="Name">{{ item.employeeName }}</td>
+        <td data-label="Type">{{ item.leaveTypeCode }} - {{ item.leaveTypeName }}</td>
+        <td data-label="Entitlement">{{ item.annualEntitlementDays }}</td>
+        <td data-label="Approved Used">{{ item.approvedDaysUsed }}</td>
+        <td data-label="Pending">{{ item.pendingDays }}</td>
+        <td data-label="Remaining">
+          <strong [class.text-danger]="item.remainingDays <= 0">{{ item.remainingDays }}</strong>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="empty-state" *ngIf="!loading && !items.length">
+  No leave balance records found.
+</div>

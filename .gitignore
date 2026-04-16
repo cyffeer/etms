@@ -25,6 +25,7 @@
 
 # Eclipse metadata
 **/.metadata/
+**/.tooling/
 
 # OS files
 Thumbs.db

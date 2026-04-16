@@ -27,4 +27,10 @@ export class VisaInfoService {
       params: { days },
     });
   }
+
+  updateCancelFlag(employeeNumber: string, visaTypeId: number, cancelFlag: boolean): Observable<VisaInfo> {
+    return this.http.patch<VisaInfo>(`${this.baseUrl}/${employeeNumber}/${visaTypeId}/cancel-flag`, {
+      cancelFlag,
+    });
+  }
 }

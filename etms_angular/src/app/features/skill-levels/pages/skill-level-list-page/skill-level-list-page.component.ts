@@ -14,6 +14,11 @@ export class SkillLevelListPageComponent implements OnInit {
   skills: SkillsResponse[] = [];
   loading = false;
   error = '';
+  page = 0;
+  size = 10;
+  totalElements = 0;
+  totalPages = 0;
+  readonly pageSizes = [5, 10, 20, 50];
   filters = {
     skillLvlId: null as number | null,
     skillId: null as number | null,
@@ -39,9 +44,11 @@ export class SkillLevelListPageComponent implements OnInit {
   load(): void {
     this.loading = true;
     this.error = '';
-    this.skillLevelsService.getSkillLevels(this.filters).subscribe({
-      next: (rows) => {
-        this.rows = rows;
+    this.skillLevelsService.getSkillLevels(this.filters, this.page, this.size).subscribe({
+      next: (result) => {
+        this.rows = result.items;
+        this.totalElements = result.totalElements ?? result.items.length;
+        this.totalPages = result.totalPages ?? 1;
         this.loading = false;
       },
       error: (err) => {
@@ -57,7 +64,25 @@ export class SkillLevelListPageComponent implements OnInit {
       skillId: null,
       keyword: ''
     };
+    this.page = 0;
     this.load();
+  }
+
+  onPageSizeChange(): void {
+    this.page = 0;
+    this.load();
+  }
+
+  goToPage(page: number): void {
+    if (page < 0 || page >= this.totalPages || page === this.page) {
+      return;
+    }
+    this.page = page;
+    this.load();
+  }
+
+  get visiblePages(): number[] {
+    return Array.from({ length: this.totalPages }, (_, index) => index);
   }
 
   onDelete(skillLvlId: number): void {

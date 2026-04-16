@@ -1,7 +1,45 @@
 <section class="page-hero mb-4">
   <span class="page-hero__eyebrow">Monitoring &amp; Management</span>
-  <h2 class="page-hero__title">Employee Events</h2>
+  <h2 class="page-hero__title">{{ pageTitle }}</h2>
 </section>
+
+<div class="row g-3 mb-4" *ngIf="!summaryLoading && summary">
+  <div class="col-12 col-md-4">
+    <div class="hrms-section-card h-100">
+      <div class="hrms-section-card__body">
+        <div class="text-muted small">Total monitoring records</div>
+        <div class="display-6 fw-semibold">{{ summary.totalCount }}</div>
+        <div class="small text-muted">Active {{ summary.activeCount }} | Pending {{ summary.pendingCount }} | Closed {{ summary.closedCount }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-md-8">
+    <div class="row g-3">
+      <div class="col-6 col-lg-4" *ngFor="let link of quickLinks" [hidden]="!canShowCategoryLink(link.restrictedForHr)">
+        <a class="hrms-section-card text-decoration-none h-100 d-block" [routerLink]="link.route">
+          <div class="hrms-section-card__body">
+            <div class="text-muted small">{{ link.label }}</div>
+            <div class="display-6 fw-semibold">{{ categoryCount(link.eventType) }}</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="summaryLoading" class="alert alert-info">Loading monitoring summary...</div>
+<div *ngIf="summaryError" class="alert alert-warning">{{ summaryError }}</div>
+
+<nav class="module-subnav mb-4">
+  <a routerLink="/monitoring" routerLinkActive="active" class="module-subnav__link">All Events</a>
+  <a routerLink="/monitoring/promotion" routerLinkActive="active" class="module-subnav__link">Promotions</a>
+  <a routerLink="/monitoring/violations" routerLinkActive="active" class="module-subnav__link">Violations</a>
+  <a routerLink="/monitoring/citations" routerLinkActive="active" class="module-subnav__link">Citations</a>
+  <a routerLink="/monitoring/project-assignments" routerLinkActive="active" class="module-subnav__link" *ngIf="!isHr">Project Assignments</a>
+  <a routerLink="/monitoring/resignations" routerLinkActive="active" class="module-subnav__link" *ngIf="!isHr">Resignations</a>
+  <a routerLink="/monitoring/suspensions" routerLinkActive="active" class="module-subnav__link" *ngIf="!isHr">Suspensions</a>
+  <a routerLink="/monitoring/terminations" routerLinkActive="active" class="module-subnav__link" *ngIf="!isHr">Terminations</a>
+</nav>
 
 <div class="page-toolbar">
   <div>
@@ -37,7 +75,19 @@
   <div class="page-actions ms-auto">
     <button class="btn btn-primary" type="button" (click)="load()">Search</button>
     <button class="btn btn-outline-secondary" type="button" (click)="resetFilters()">Reset</button>
-    <a class="btn btn-warning" routerLink="/monitoring/new" *ngIf="canManage">Add Event</a>
+    <button class="btn btn-warning" type="button" (click)="addEvent()" *ngIf="canManage">Add Record</button>
+  </div>
+</div>
+
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3" *ngIf="!loading">
+  <div class="text-muted small">
+    Showing {{ rows.length }} of {{ totalElements }} record(s)
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    <label class="form-label mb-0 small text-muted" for="monitoringPageSize">Rows</label>
+    <select id="monitoringPageSize" class="form-select form-select-sm" style="width: auto;" [(ngModel)]="size" (change)="onPageSizeChange()">
+      <option *ngFor="let item of pageSizes" [ngValue]="item">{{ item }}</option>
+    </select>
   </div>
 </div>
 
@@ -88,3 +138,17 @@
 <div class="empty-state" *ngIf="!loading && !error && rows.length === 0">
   No monitoring events matched the current search.
 </div>
+
+<nav class="mt-4" *ngIf="!loading && !error && totalPages > 1">
+  <ul class="pagination justify-content-center flex-wrap gap-1">
+    <li class="page-item" [class.disabled]="page === 0">
+      <button class="page-link" type="button" (click)="goToPage(page - 1)">Previous</button>
+    </li>
+    <li class="page-item" *ngFor="let pageIndex of visiblePages" [class.active]="pageIndex === page">
+      <button class="page-link" type="button" (click)="goToPage(pageIndex)">{{ pageIndex + 1 }}</button>
+    </li>
+    <li class="page-item" [class.disabled]="page >= totalPages - 1">
+      <button class="page-link" type="button" (click)="goToPage(page + 1)">Next</button>
+    </li>
+  </ul>
+</nav>

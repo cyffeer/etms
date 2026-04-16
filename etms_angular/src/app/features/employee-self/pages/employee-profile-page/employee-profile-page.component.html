@@ -1,0 +1,46 @@
+<section class="page-hero mb-4">
+  <h2 class="page-hero__title mb-2">My Profile</h2>
+  <p class="page-hero__copy mb-0">View and update your personal profile details.</p>
+</section>
+
+<div *ngIf="loading" class="alert alert-info">Loading your profile...</div>
+<div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+<div *ngIf="success" class="alert alert-success">{{ success }}</div>
+
+<div *ngIf="!loading && profile; else emptyState" class="card">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Employee Code</label>
+        <input class="form-control" [value]="profile.employeeCode || ''" disabled />
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Hire Date</label>
+        <input class="form-control" [value]="profile.hireDate || ''" disabled />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">First Name</label>
+        <input class="form-control" [(ngModel)]="form.firstName" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Last Name</label>
+        <input class="form-control" [(ngModel)]="form.lastName" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Email</label>
+        <input class="form-control" [(ngModel)]="form.email" />
+      </div>
+    </div>
+    <div class="mt-3">
+      <button class="btn btn-primary" type="button" [disabled]="saving" (click)="save()">
+        {{ saving ? 'Saving...' : 'Save Profile' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<ng-template #emptyState>
+  <div class="alert alert-secondary mb-0">
+    Your profile is not available yet.
+  </div>
+</ng-template>

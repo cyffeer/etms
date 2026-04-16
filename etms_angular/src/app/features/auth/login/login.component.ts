@@ -22,7 +22,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.authService.isAuthenticated()) {
-      this.router.navigateByUrl('/dashboard');
+      this.router.navigateByUrl(this.resolveLandingRoute());
       return;
     }
 
@@ -42,8 +42,13 @@ export class LoginComponent implements OnInit {
       username: this.username.trim(),
       password: this.password
     }).subscribe({
-      next: () => {
+      next: (user) => {
         this.loading = false;
+        const isDefaultLanding = this.returnUrl === '/dashboard' || this.returnUrl === '/';
+        if (isDefaultLanding && (user.role || '').toUpperCase() === 'EMPLOYEE') {
+          this.router.navigateByUrl('/employee/profile');
+          return;
+        }
         this.router.navigateByUrl(this.returnUrl);
       },
       error: (err) => {
@@ -57,5 +62,10 @@ export class LoginComponent implements OnInit {
     this.username = '';
     this.password = '';
     this.errorMessage = '';
+  }
+
+  private resolveLandingRoute(): string {
+    const currentUser = this.authService.getCurrentUser();
+    return (currentUser?.role || '').toUpperCase() === 'EMPLOYEE' ? '/employee/profile' : '/dashboard';
   }
 }

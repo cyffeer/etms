@@ -55,13 +55,32 @@
 
     <div class="col-xl-4">
       <section class="hrms-section-card">
-        <div class="hrms-section-card__header">Employee Summary</div>
+        <div class="hrms-section-card__header">Employee Photo</div>
         <div class="hrms-section-card__body">
           <div class="hrms-identity-card">
-            <div class="hrms-identity-card__initials">
-              {{ employee.firstName.charAt(0) }}{{ employee.lastName.charAt(0) }}
-            </div>
-            <div class="hrms-identity-card__caption">Profile snapshot is generated from live API data.</div>
+            <img
+              *ngIf="employeesService.resolvePhotoUrl(employee.photoUrl); else initialsCard"
+              [src]="employeesService.resolvePhotoUrl(employee.photoUrl)!"
+              [alt]="employee.firstName + ' ' + employee.lastName"
+              class="img-fluid rounded-3 border mb-3"
+            />
+            <ng-template #initialsCard>
+              <div class="hrms-identity-card__initials">
+                {{ employee.firstName.charAt(0) }}{{ employee.lastName.charAt(0) }}
+              </div>
+            </ng-template>
+          </div>
+          <div class="mt-3" *ngIf="canEdit">
+            <label class="form-label">Upload Photo</label>
+            <input class="form-control" type="file" accept="image/*" (change)="onFileSelected($event)" />
+            <button
+              class="btn btn-outline-primary mt-2"
+              type="button"
+              [disabled]="!selectedPhoto || uploading"
+              (click)="uploadPhoto()"
+            >
+              {{ uploading ? 'Uploading...' : 'Save Photo' }}
+            </button>
           </div>
         </div>
       </section>
