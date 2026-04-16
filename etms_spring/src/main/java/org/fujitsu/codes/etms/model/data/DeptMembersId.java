@@ -8,12 +8,12 @@ public class DeptMembersId implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String departmentCode;
-    private String employeeNumber;
+    private Integer employeeNumber;
 
     public DeptMembersId() {
     }
 
-    public DeptMembersId(String departmentCode, String employeeNumber) {
+    public DeptMembersId(String departmentCode, Integer employeeNumber) {
         this.departmentCode = departmentCode;
         this.employeeNumber = employeeNumber;
     }
@@ -26,11 +26,11 @@ public class DeptMembersId implements Serializable {
         this.departmentCode = departmentCode;
     }
 
-    public String getEmployeeNumber() {
+    public Integer getEmployeeNumber() {
         return employeeNumber;
     }
 
-    public void setEmployeeNumber(String employeeNumber) {
+    public void setEmployeeNumber(Integer employeeNumber) {
         this.employeeNumber = employeeNumber;
     }
 

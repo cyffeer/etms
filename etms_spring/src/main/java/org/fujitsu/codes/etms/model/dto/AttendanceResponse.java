@@ -7,6 +7,9 @@ public class AttendanceResponse {
 
     private Long attendanceRecordId;
     private String employeeNumber;
+    private String employeeName;
+    private String designation;
+    private String officeName;
     private LocalDate attendanceDate;
     private LocalTime timeIn;
     private LocalTime timeOut;
@@ -27,6 +30,30 @@ public class AttendanceResponse {
 
     public void setEmployeeNumber(String employeeNumber) {
         this.employeeNumber = employeeNumber;
+    }
+
+    public String getEmployeeName() {
+        return employeeName;
+    }
+
+    public void setEmployeeName(String employeeName) {
+        this.employeeName = employeeName;
+    }
+
+    public String getDesignation() {
+        return designation;
+    }
+
+    public void setDesignation(String designation) {
+        this.designation = designation;
+    }
+
+    public String getOfficeName() {
+        return officeName;
+    }
+
+    public void setOfficeName(String officeName) {
+        this.officeName = officeName;
     }
 
     public LocalDate getAttendanceDate() {

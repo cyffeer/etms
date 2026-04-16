@@ -65,12 +65,38 @@ public class DepartmentDao {
         }
 
         try (Session session = sessionFactory.openSession()) {
-            return session.createQuery(
-                    "from Department d where lower(d.departmentCode) like :keyword or lower(d.departmentName) like :keyword " +
-                    "order by d.departmentId asc",
-                    Department.class
-            ).setParameter("keyword", "%" + keyword.trim().toLowerCase() + "%")
-             .getResultList();
+            String normalizedKeyword = keyword.trim().toLowerCase();
+            String departmentCode = normalizeDepartmentCode(keyword);
+            StringBuilder hql = new StringBuilder("from Department d where lower(d.departmentCode) like :keyword or lower(d.departmentName) like :keyword");
+            if (departmentCode != null) {
+                hql.append(" or lower(d.departmentCode) = :departmentCode");
+            }
+            hql.append(" order by d.departmentId asc");
+            Query<Department> query = session.createQuery(hql.toString(), Department.class)
+                    .setParameter("keyword", "%" + normalizedKeyword + "%");
+            if (departmentCode != null) {
+                query.setParameter("departmentCode", departmentCode.toLowerCase());
+            }
+            return query.getResultList();
+        }
+    }
+
+    private String normalizeDepartmentCode(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return null;
+        }
+        String normalized = keyword.trim().toUpperCase();
+        if (normalized.matches("D\\d+")) {
+            return normalized;
+        }
+        String digits = normalized.replaceAll("\\D+", "");
+        if (digits.isBlank()) {
+            return null;
+        }
+        try {
+            return "D" + String.format("%03d", Integer.parseInt(digits));
+        } catch (NumberFormatException ex) {
+            return null;
         }
     }
 

@@ -2,6 +2,7 @@ package org.fujitsu.codes.etms.controller;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import org.fujitsu.codes.etms.model.dao.LeaveTypeDao;
 import org.fujitsu.codes.etms.model.data.LeaveType;
 import org.fujitsu.codes.etms.model.dto.LeaveTypeRequest;
 import org.fujitsu.codes.etms.model.dto.LeaveTypeResponse;
+import org.fujitsu.codes.etms.model.dto.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,14 +42,15 @@ public class LeaveTypeRestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<LeaveTypeResponse>> getAll(
-            @RequestParam(name = "keyword", required = false) String keyword) {
-        List<LeaveTypeResponse> data = (keyword == null || keyword.isBlank()
-                ? leaveTypeDao.findAll()
-                : leaveTypeDao.search(keyword)).stream()
+    public ResponseEntity<ApiResponse<?>> getAll(
+            @RequestParam(name = "leaveTypeId", required = false) Long leaveTypeId,
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "page", required = false) Integer page,
+            @RequestParam(name = "size", required = false) Integer size) {
+        List<LeaveTypeResponse> allItems = leaveTypeDao.search(leaveTypeId, keyword).stream()
                 .map(this::toResponse)
                 .toList();
-        return ResponseEntity.ok(data);
+        return paginate(allItems, page, size);
     }
 
     @PostMapping
@@ -113,6 +116,7 @@ public class LeaveTypeRestController {
         target.setLeaveTypeCode(request.getLeaveTypeCode());
         target.setLeaveTypeName(request.getLeaveTypeName());
         target.setDescription(request.getDescription());
+        target.setAnnualEntitlementDays(request.getAnnualEntitlementDays());
         target.setActive(request.getActive() == null ? Boolean.TRUE : request.getActive());
         return target;
     }
@@ -123,9 +127,36 @@ public class LeaveTypeRestController {
         response.setLeaveTypeCode(target.getLeaveTypeCode());
         response.setLeaveTypeName(target.getLeaveTypeName());
         response.setDescription(target.getDescription());
+        response.setAnnualEntitlementDays(target.getAnnualEntitlementDays());
         response.setActive(target.getActive());
         response.setCreatedAt(target.getCreatedAt());
         response.setUpdatedAt(target.getUpdatedAt());
         return response;
+    }
+
+    private ResponseEntity<ApiResponse<?>> paginate(List<LeaveTypeResponse> allItems, Integer page, Integer size) {
+        if (page == null && size == null) {
+            return ResponseEntity.ok(ApiResponse.success("Leave types fetched", allItems));
+        }
+
+        if (page == null || size == null || page < 0 || size <= 0) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Invalid pagination values", List.of("page must be >= 0 and size must be > 0")));
+        }
+
+        int fromIndex = Math.min(page * size, allItems.size());
+        int toIndex = Math.min(fromIndex + size, allItems.size());
+        List<LeaveTypeResponse> data = new ArrayList<>(allItems.subList(fromIndex, toIndex));
+        long totalElements = allItems.size();
+        long totalPages = (long) Math.ceil((double) totalElements / size);
+
+        return ResponseEntity.ok(ApiResponse.success("Leave types fetched",
+                Map.of(
+                        "data", data,
+                        "page", page,
+                        "size", size,
+                        "totalElements", totalElements,
+                        "totalPages", totalPages
+                )));
     }
 }

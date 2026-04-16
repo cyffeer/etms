@@ -9,7 +9,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.ColumnTransformer;
 
 @Entity
 @Table(name = "attendance_records")
@@ -21,8 +20,7 @@ public class AttendanceRecord {
     private Long attendanceRecordId;
 
     @Column(name = "emp_no", nullable = false)
-    @ColumnTransformer(read = "cast(emp_no as varchar)", write = "?::integer")
-    private String employeeNumber;
+    private Integer employeeNumber;
 
     @Column(name = "attendance_date")
     private LocalDate attendanceDate;
@@ -45,11 +43,11 @@ public class AttendanceRecord {
         this.attendanceRecordId = attendanceRecordId;
     }
 
-    public String getEmployeeNumber() {
+    public Integer getEmployeeNumber() {
         return employeeNumber;
     }
 
-    public void setEmployeeNumber(String employeeNumber) {
+    public void setEmployeeNumber(Integer employeeNumber) {
         this.employeeNumber = employeeNumber;
     }
 

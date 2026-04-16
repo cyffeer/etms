@@ -34,6 +34,9 @@ public class Employees {
     @Column(name = "hire_date")
     private LocalDate hireDate;
 
+    @Column(name = "photo_path", length = 255)
+    private String photoPath;
+
     @Column(name = "is_active", nullable = false)
     private Boolean active = Boolean.TRUE;
 
@@ -89,6 +92,14 @@ public class Employees {
 
     public void setHireDate(LocalDate hireDate) {
         this.hireDate = hireDate;
+    }
+
+    public String getPhotoPath() {
+        return photoPath;
+    }
+
+    public void setPhotoPath(String photoPath) {
+        this.photoPath = photoPath;
     }
 
     public Boolean getActive() {

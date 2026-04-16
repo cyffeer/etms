@@ -1,6 +1,5 @@
 package org.fujitsu.codes.etms.service;
 
-import java.util.Base64;
 import java.util.Optional;
 
 import org.fujitsu.codes.etms.exception.InvalidInputException;
@@ -42,28 +41,7 @@ public class AuthService {
             return authenticateBearerHeader(authorizationHeader);
         }
 
-        if (!authorizationHeader.regionMatches(true, 0, "Basic ", 0, 6)) {
-            throw new InvalidInputException("Authorization header must use Bearer or Basic authentication");
-        }
-
-        String token = authorizationHeader.substring(6).trim();
-        if (token.isEmpty()) {
-            throw new InvalidInputException("Authorization token is required");
-        }
-
-        try {
-            String decoded = new String(Base64.getDecoder().decode(token));
-            int separatorIndex = decoded.indexOf(':');
-            if (separatorIndex < 0) {
-                throw new InvalidInputException("Authorization token must contain username and password");
-            }
-
-            String username = decoded.substring(0, separatorIndex);
-            String password = decoded.substring(separatorIndex + 1);
-            return authenticate(username, password);
-        } catch (IllegalArgumentException ex) {
-            throw new InvalidInputException("Authorization token is not valid Base64");
-        }
+        throw new InvalidInputException("Authorization header must use Bearer authentication");
     }
 
     public Login authenticateBearerHeader(String authorizationHeader) {

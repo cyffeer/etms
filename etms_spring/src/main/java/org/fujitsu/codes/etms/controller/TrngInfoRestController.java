@@ -1,5 +1,6 @@
 package org.fujitsu.codes.etms.controller;
 
+import java.io.IOException;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,7 +13,13 @@ import org.fujitsu.codes.etms.model.dao.VendorInfoDao;
 import org.fujitsu.codes.etms.model.data.TrngInfo;
 import org.fujitsu.codes.etms.model.dto.TrngInfoRequest;
 import org.fujitsu.codes.etms.model.dto.TrngInfoResponse;
+import org.fujitsu.codes.etms.service.TrainingCertificateService;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,9 +27,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/trng-info")
@@ -31,14 +40,18 @@ public class TrngInfoRestController {
     private final TrngInfoDao trngInfoDao;
     private final TrngTypeDao trngTypeDao;
     private final VendorInfoDao vendorInfoDao;
+    private final TrainingCertificateService trainingCertificateService;
 
-    public TrngInfoRestController(TrngInfoDao trngInfoDao, TrngTypeDao trngTypeDao, VendorInfoDao vendorInfoDao) {
+    public TrngInfoRestController(TrngInfoDao trngInfoDao, TrngTypeDao trngTypeDao, VendorInfoDao vendorInfoDao,
+            TrainingCertificateService trainingCertificateService) {
         this.trngInfoDao = trngInfoDao;
         this.trngTypeDao = trngTypeDao;
         this.vendorInfoDao = vendorInfoDao;
+        this.trainingCertificateService = trainingCertificateService;
     }
 
     @GetMapping("/{trngInfoId}")
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
     public ResponseEntity<?> getById(@PathVariable Long trngInfoId) {
         return trngInfoDao.findById(trngInfoId)
                 .<ResponseEntity<?>>map(item -> ResponseEntity.ok(toResponse(item)))
@@ -46,6 +59,7 @@ public class TrngInfoRestController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
     public ResponseEntity<List<TrngInfoResponse>> getAll() {
         List<TrngInfoResponse> data = trngInfoDao.findAll().stream()
                 .map(this::toResponse)
@@ -54,6 +68,7 @@ public class TrngInfoRestController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public ResponseEntity<?> create(@Valid @RequestBody TrngInfoRequest request) {
         normalize(request);
 
@@ -73,6 +88,7 @@ public class TrngInfoRestController {
     }
 
     @PutMapping("/{trngInfoId}")
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public ResponseEntity<?> update(@PathVariable Long trngInfoId, @Valid @RequestBody TrngInfoRequest request) {
         normalize(request);
 
@@ -94,12 +110,64 @@ public class TrngInfoRestController {
     }
 
     @DeleteMapping("/{trngInfoId}")
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public ResponseEntity<?> delete(@PathVariable Long trngInfoId) {
         boolean deleted = trngInfoDao.deleteById(trngInfoId);
         if (!deleted) {
             return ResponseEntity.status(404).body(Map.of("message", "Training info not found"));
         }
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping(value = "/{trngInfoId}/certificate", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
+    public ResponseEntity<?> uploadCertificate(
+            @PathVariable Long trngInfoId,
+            @RequestPart("file") MultipartFile file) {
+        TrngInfo current = trngInfoDao.findById(trngInfoId)
+                .orElse(null);
+        if (current == null) {
+            return ResponseEntity.status(404).body(Map.of("message", "Training info not found"));
+        }
+
+        String storedPath = trainingCertificateService.storeCertificate(
+                trngInfoId,
+                current.getTrngCode(),
+                file,
+                current.getCertificatePath());
+        current.setCertificatePath(storedPath);
+        current.setUpdatedAt(LocalDateTime.now());
+        trngInfoDao.update(trngInfoId, current);
+        return ResponseEntity.ok(Map.of(
+                "message", "Training certificate uploaded successfully",
+                "certificatePath", storedPath));
+    }
+
+    @GetMapping("/{trngInfoId}/certificate")
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
+    public ResponseEntity<?> downloadCertificate(@PathVariable Long trngInfoId) throws IOException {
+        TrngInfo current = trngInfoDao.findById(trngInfoId)
+                .orElse(null);
+        if (current == null) {
+            return ResponseEntity.status(404).body(Map.of("message", "Training info not found"));
+        }
+        if (current.getCertificatePath() == null || current.getCertificatePath().isBlank()) {
+            return ResponseEntity.status(404).body(Map.of("message", "Training certificate not available"));
+        }
+
+        Resource resource = trainingCertificateService.loadCertificate(current.getCertificatePath());
+        MediaType mediaType = MediaType.parseMediaType(
+                java.nio.file.Files.probeContentType(resource.getFile().toPath()) == null
+                        ? "application/octet-stream"
+                        : java.nio.file.Files.probeContentType(resource.getFile().toPath()));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(mediaType);
+        headers.setContentDisposition(ContentDisposition.inline().filename(current.getCertificatePath()).build());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(resource);
     }
 
     private List<String> validate(TrngInfoRequest request, Long trngInfoId) {
@@ -167,6 +235,7 @@ public class TrngInfoRestController {
         response.setEndDate(target.getEndDate());
         response.setLocation(target.getLocation());
         response.setActive(target.getActive());
+        response.setCertificatePath(target.getCertificatePath());
         response.setCreatedAt(target.getCreatedAt());
         response.setUpdatedAt(target.getUpdatedAt());
         return response;

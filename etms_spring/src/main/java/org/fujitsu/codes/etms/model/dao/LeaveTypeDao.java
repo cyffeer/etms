@@ -45,15 +45,21 @@ public class LeaveTypeDao {
         }
     }
 
-    public List<LeaveType> search(String keyword) {
+    public List<LeaveType> search(Long leaveTypeId, String keyword) {
         try (Session session = sessionFactory.openSession()) {
             String hql = "from LeaveType l where 1=1";
+            if (leaveTypeId != null) {
+                hql += " and l.leaveTypeId = :leaveTypeId";
+            }
             if (keyword != null && !keyword.isBlank()) {
                 hql += " and (lower(l.leaveTypeCode) like :keyword or lower(l.leaveTypeName) like :keyword)";
             }
             hql += " order by l.leaveTypeCode asc";
 
             Query<LeaveType> query = session.createQuery(hql, LeaveType.class);
+            if (leaveTypeId != null) {
+                query.setParameter("leaveTypeId", leaveTypeId);
+            }
             if (keyword != null && !keyword.isBlank()) {
                 query.setParameter("keyword", "%" + keyword.trim().toLowerCase() + "%");
             }

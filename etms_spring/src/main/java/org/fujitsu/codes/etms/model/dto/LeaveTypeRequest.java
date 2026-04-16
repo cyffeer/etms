@@ -1,6 +1,9 @@
 package org.fujitsu.codes.etms.model.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Size;
 
 public class LeaveTypeRequest {
@@ -15,6 +18,11 @@ public class LeaveTypeRequest {
 
     @Size(max = 255, message = "Description must be at most 255 characters")
     private String description;
+
+    @NotNull(message = "Annual entitlement is required")
+    @Min(value = 0, message = "Annual entitlement must be at least 0")
+    @Max(value = 365, message = "Annual entitlement must be at most 365")
+    private Integer annualEntitlementDays;
 
     private Boolean active = Boolean.TRUE;
 
@@ -40,6 +48,14 @@ public class LeaveTypeRequest {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Integer getAnnualEntitlementDays() {
+        return annualEntitlementDays;
+    }
+
+    public void setAnnualEntitlementDays(Integer annualEntitlementDays) {
+        this.annualEntitlementDays = annualEntitlementDays;
     }
 
     public Boolean getActive() {

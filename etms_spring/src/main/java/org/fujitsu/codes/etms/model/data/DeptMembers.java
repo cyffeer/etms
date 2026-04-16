@@ -8,7 +8,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
 
@@ -23,8 +22,7 @@ public class DeptMembers {
 
     @Id
     @Column(name = "emp_no", nullable = false)
-    @ColumnTransformer(read = "cast(emp_no as varchar)", write = "?::integer")
-    private String employeeNumber;
+    private Integer employeeNumber;
 
     @Column(name = "dept_member_id", insertable = false, updatable = false)
     @Generated(event = {EventType.INSERT}, writable = false)
@@ -61,11 +59,11 @@ public class DeptMembers {
         this.departmentCode = departmentCode;
     }
 
-    public String getEmployeeNumber() {
+    public Integer getEmployeeNumber() {
         return employeeNumber;
     }
 
-    public void setEmployeeNumber(String employeeNumber) {
+    public void setEmployeeNumber(Integer employeeNumber) {
         this.employeeNumber = employeeNumber;
     }
 

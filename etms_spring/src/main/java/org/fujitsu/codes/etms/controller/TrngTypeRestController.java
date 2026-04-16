@@ -9,6 +9,7 @@ import org.fujitsu.codes.etms.model.data.TrngType;
 import org.fujitsu.codes.etms.model.dto.TrngTypeRequest;
 import org.fujitsu.codes.etms.model.dto.TrngTypeResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +32,7 @@ public class TrngTypeRestController {
     }
 
     @GetMapping("/{trngTypeId}")
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
     public ResponseEntity<?> getById(@PathVariable Long trngTypeId) {
         return trngTypeDao.findById(trngTypeId)
                 .<ResponseEntity<?>>map(t -> ResponseEntity.ok(toResponse(t)))
@@ -38,6 +40,7 @@ public class TrngTypeRestController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
     public ResponseEntity<List<TrngTypeResponse>> getAll() {
         List<TrngTypeResponse> data = trngTypeDao.findAll().stream()
                 .map(this::toResponse)
@@ -46,6 +49,7 @@ public class TrngTypeRestController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> create(@Valid @RequestBody TrngTypeRequest request) {
         normalize(request);
 
@@ -56,6 +60,7 @@ public class TrngTypeRestController {
     }
 
     @PutMapping("/{trngTypeId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> update(@PathVariable Long trngTypeId, @Valid @RequestBody TrngTypeRequest request) {
         normalize(request);
 
@@ -70,6 +75,7 @@ public class TrngTypeRestController {
     }
 
     @DeleteMapping("/{trngTypeId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> delete(@PathVariable Long trngTypeId) {
         boolean deleted = trngTypeDao.deleteById(trngTypeId);
         if (!deleted) {

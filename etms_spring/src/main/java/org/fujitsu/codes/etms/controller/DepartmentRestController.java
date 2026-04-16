@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import jakarta.validation.Valid;
 
@@ -27,13 +28,16 @@ import jakarta.validation.Valid;
 public class DepartmentRestController {
 
     private final DepartmentDao departmentDao;
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DepartmentRestController.class);
 
     public DepartmentRestController(DepartmentDao departmentDao) {
         this.departmentDao = departmentDao;
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<?>> getAllDepartments() {
+        log.info("Department list requested");
         List<DepartmentResponse> data = departmentDao.findAll().stream()
                 .map(this::toResponse)
                 .toList();
@@ -41,8 +45,10 @@ public class DepartmentRestController {
     }
 
     @GetMapping("/search")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<?>> searchDepartments(
             @RequestParam(name = "keyword", required = false) String keyword) {
+        log.info("Department search requested");
 
         List<DepartmentResponse> data = departmentDao.search(keyword).stream()
                 .map(this::toResponse)
@@ -51,6 +57,7 @@ public class DepartmentRestController {
     }
 
     @GetMapping("/{departmentId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<DepartmentResponse>> getDepartmentById(
             @PathVariable("departmentId") Long departmentId) {
         Department department = departmentDao.findById(departmentId);
@@ -62,7 +69,9 @@ public class DepartmentRestController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<?>> createDepartment(@Valid @RequestBody DepartmentRequest request) {
+        log.info("Department create requested");
         normalize(request);
 
         if (departmentDao.existsByDepartmentCode(request.getDepartmentCode())) {
@@ -82,9 +91,11 @@ public class DepartmentRestController {
     }
 
     @PutMapping("/{departmentId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<?>> updateDepartment(
             @PathVariable("departmentId") Long departmentId,
             @Valid @RequestBody DepartmentRequest request) {
+        log.info("Department update requested for id={}", departmentId);
         normalize(request);
 
         Department existing = departmentDao.findById(departmentId);
@@ -111,8 +122,10 @@ public class DepartmentRestController {
     }
 
     @DeleteMapping("/{departmentId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteDepartment(
             @PathVariable("departmentId") Long departmentId) {
+        log.info("Department delete requested for id={}", departmentId);
         Department d = departmentDao.findById(departmentId);
         if (d == null) {
             return ResponseEntity.status(404)

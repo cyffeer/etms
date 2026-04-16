@@ -9,7 +9,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Generated;
 import org.hibernate.generator.EventType;
 
@@ -21,8 +20,7 @@ public class SkillsInventory {
 
     @Id
     @Column(name = "emp_no", nullable = false)
-    @ColumnTransformer(read = "cast(emp_no as varchar)", write = "?::integer")
-    private String employeeNumber;
+    private Integer employeeNumber;
 
     @Id
     @Column(name = "skill_id", nullable = false)
@@ -49,11 +47,11 @@ public class SkillsInventory {
         this.skillsInventoryId = skillsInventoryId;
     }
 
-    public String getEmployeeNumber() {
+    public Integer getEmployeeNumber() {
         return employeeNumber;
     }
 
-    public void setEmployeeNumber(String employeeNumber) {
+    public void setEmployeeNumber(Integer employeeNumber) {
         this.employeeNumber = employeeNumber;
     }
 

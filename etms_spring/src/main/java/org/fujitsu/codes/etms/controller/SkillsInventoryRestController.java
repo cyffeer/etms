@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import jakarta.validation.Valid;
 
@@ -51,6 +52,7 @@ public class SkillsInventoryRestController {
     }
 
     @GetMapping("/{skillsInventoryId}")
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
     public ResponseEntity<ApiResponse<SkillsInventoryResponse>> getById(@PathVariable("skillsInventoryId") Long skillsInventoryId) {
         return skillsInventoryDao.findById(skillsInventoryId)
                 .<ResponseEntity<ApiResponse<SkillsInventoryResponse>>>map(row ->
@@ -60,6 +62,7 @@ public class SkillsInventoryRestController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
     public ResponseEntity<ApiResponse<List<SkillsInventoryResponse>>> getAll() {
         try {
             List<SkillsInventory> rows = skillsInventoryDao.findAll();
@@ -77,8 +80,13 @@ public class SkillsInventoryRestController {
 
     // get all skills of an employee
     @GetMapping("/employee/{employeeNumber}/skills")
+    @PreAuthorize("@etmsAuthorizationService.canAccessEmployeeInput(authentication, #employeeNumber)")
     public ResponseEntity<List<SkillsInventoryResponse>> getAllSkillsOfEmployee(@PathVariable String employeeNumber) {
-        List<SkillsInventoryResponse> data = skillsInventoryDao.findByEmployeeNumber(employeeNumber).stream()
+        Integer employeeId = employeesDao.resolveEmployeeIdentifier(employeeNumber);
+        if (employeeId == null) {
+            return ResponseEntity.ok(List.of());
+        }
+        List<SkillsInventoryResponse> data = skillsInventoryDao.findByEmployeeNumber(employeeId).stream()
                 .map(this::toResponse)
                 .toList();
         return ResponseEntity.ok(data);
@@ -86,12 +94,14 @@ public class SkillsInventoryRestController {
 
     // keep existing endpoint for compatibility
     @GetMapping("/by-employee/{employeeNumber}")
+    @PreAuthorize("@etmsAuthorizationService.canAccessEmployeeInput(authentication, #employeeNumber)")
     public ResponseEntity<List<SkillsInventoryResponse>> getByEmployee(@PathVariable String employeeNumber) {
         return getAllSkillsOfEmployee(employeeNumber);
     }
 
     // get employees by skill id
     @GetMapping("/skill/{skillId}/employees")
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
     public ResponseEntity<List<SkillsInventoryResponse>> getEmployeesBySkillId(@PathVariable Long skillId) {
         List<SkillsInventoryResponse> data = skillsInventoryDao.findBySkillId(skillId).stream()
                 .map(this::toResponse)
@@ -101,20 +111,26 @@ public class SkillsInventoryRestController {
 
     // assign a skill to an employee
     @PostMapping("/assign")
+    @PreAuthorize("@etmsAuthorizationService.canAccessEmployeeInput(authentication, #request.employeeNumber)")
     public ResponseEntity<?> assignSkill(@Valid @RequestBody SkillsInventoryRequest request) {
         return create(request);
     }
 
     @PostMapping
+    @PreAuthorize("@etmsAuthorizationService.canAccessEmployeeInput(authentication, #request.employeeNumber)")
     public ResponseEntity<?> create(@Valid @RequestBody SkillsInventoryRequest request) {
         normalize(request);
 
         List<String> errors = validate(request);
+        Integer employeeId = employeesDao.resolveEmployeeIdentifier(request.getEmployeeNumber());
+        if (employeeId == null) {
+            errors.add("Employee number does not exist");
+        }
         if (!errors.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("errors", errors));
         }
 
-        if (skillsInventoryDao.existsByEmployeeNumberAndSkillId(request.getEmployeeNumber(), request.getSkillId())) {
+        if (skillsInventoryDao.existsByEmployeeNumberAndSkillId(employeeId, request.getSkillId())) {
             return ResponseEntity.badRequest().body(Map.of("errors", List.of("Skill is already assigned to employee")));
         }
 
@@ -130,6 +146,7 @@ public class SkillsInventoryRestController {
 
     // update employee skill level
     @PatchMapping("/{skillsInventoryId}/skill-level")
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
     public ResponseEntity<?> updateEmployeeSkillLevel(
             @PathVariable Long skillsInventoryId,
             @RequestBody Map<String, Long> payload) {
@@ -149,6 +166,7 @@ public class SkillsInventoryRestController {
     }
 
     @PutMapping("/{skillsInventoryId}")
+    @PreAuthorize("@etmsAuthorizationService.canAccessEmployeeInput(authentication, #request.employeeNumber)")
     public ResponseEntity<?> update(
             @PathVariable Long skillsInventoryId,
             @Valid @RequestBody SkillsInventoryRequest request) {
@@ -160,6 +178,10 @@ public class SkillsInventoryRestController {
         }
 
         List<String> errors = validate(request);
+        Integer employeeId = employeesDao.resolveEmployeeIdentifier(request.getEmployeeNumber());
+        if (employeeId == null) {
+            errors.add("Employee number does not exist");
+        }
         if (!errors.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("errors", errors));
         }
@@ -174,6 +196,7 @@ public class SkillsInventoryRestController {
 
     // delete an employee skill record
     @DeleteMapping("/{skillsInventoryId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> delete(@PathVariable Long skillsInventoryId) {
         boolean deleted = skillsInventoryDao.deleteById(skillsInventoryId);
         if (!deleted) {
@@ -185,7 +208,7 @@ public class SkillsInventoryRestController {
     private List<String> validate(SkillsInventoryRequest request) {
         List<String> errors = new ArrayList<>();
 
-        if (!employeesDao.existsByEmployeeCode(request.getEmployeeNumber())) {
+        if (employeesDao.resolveEmployeeIdentifier(request.getEmployeeNumber()) == null) {
             errors.add("Employee number does not exist");
         }
 
@@ -208,7 +231,8 @@ public class SkillsInventoryRestController {
 
     private SkillsInventory toEntity(SkillsInventoryRequest request) {
         SkillsInventory s = new SkillsInventory();
-        s.setEmployeeNumber(request.getEmployeeNumber());
+        Integer employeeId = employeesDao.resolveEmployeeIdentifier(request.getEmployeeNumber());
+        s.setEmployeeNumber(employeeId);
         s.setSkillId(request.getSkillId());
         s.setSkillLvlId(request.getSkillLvlId());
         return s;

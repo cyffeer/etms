@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.fujitsu.codes.etms.model.dao.AttendanceDao;
 import org.fujitsu.codes.etms.model.dao.EmployeesDao;
@@ -14,11 +15,17 @@ import org.fujitsu.codes.etms.model.dao.LeaveDao;
 import org.fujitsu.codes.etms.model.dao.NpLvlInfoDao;
 import org.fujitsu.codes.etms.model.dao.NpTestEmpHistDao;
 import org.fujitsu.codes.etms.model.dao.NpTestHistDao;
+import org.fujitsu.codes.etms.model.dao.NpTypeDao;
 import org.fujitsu.codes.etms.model.dao.TrngInfoDao;
+import org.fujitsu.codes.etms.model.data.NpLvlInfo;
+import org.fujitsu.codes.etms.model.data.NpTestEmpHist;
+import org.fujitsu.codes.etms.model.data.NpTestHist;
+import org.fujitsu.codes.etms.model.data.NpType;
 import org.fujitsu.codes.etms.model.dto.DashboardCardDto;
 import org.fujitsu.codes.etms.model.dto.DashboardNotificationDto;
 import org.fujitsu.codes.etms.model.dto.DashboardSummaryResponse;
 import org.fujitsu.codes.etms.model.dto.DashboardTrendPointDto;
+import org.fujitsu.codes.etms.util.NihongoAllowanceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -36,6 +43,7 @@ public class DashboardService {
     private final NpTestEmpHistDao npTestEmpHistDao;
     private final NpTestHistDao npTestHistDao;
     private final NpLvlInfoDao npLvlInfoDao;
+    private final NpTypeDao npTypeDao;
     private final AttendanceDao attendanceDao;
 
     public DashboardService(
@@ -45,6 +53,7 @@ public class DashboardService {
             NpTestEmpHistDao npTestEmpHistDao,
             NpTestHistDao npTestHistDao,
             NpLvlInfoDao npLvlInfoDao,
+            NpTypeDao npTypeDao,
             AttendanceDao attendanceDao) {
         this.employeesDao = employeesDao;
         this.trngInfoDao = trngInfoDao;
@@ -52,6 +61,7 @@ public class DashboardService {
         this.npTestEmpHistDao = npTestEmpHistDao;
         this.npTestHistDao = npTestHistDao;
         this.npLvlInfoDao = npLvlInfoDao;
+        this.npTypeDao = npTypeDao;
         this.attendanceDao = attendanceDao;
     }
 
@@ -76,26 +86,17 @@ public class DashboardService {
         ));
         response.setTrainingsPerMonth(buildTrainingTrend());
         response.setAttendanceTrends(buildAttendanceTrend());
-        response.setNotifications(buildNotifications());
+        response.setNotifications(getNotifications());
         return response;
     }
 
-    private long countExpiredNihongoCertifications() {
-        LocalDate today = LocalDate.now();
-        var testsById = npTestHistDao.findAll().stream()
-                .collect(java.util.stream.Collectors.toMap(item -> item.getNpTestHistId(), item -> item, (left, right) -> left));
-        var levelsByCode = npLvlInfoDao.findAll().stream()
-                .collect(java.util.stream.Collectors.toMap(item -> item.getNpLvlInfoCode(), item -> item, (left, right) -> left));
+    public List<DashboardNotificationDto> getNotifications() {
+        return buildNotifications();
+    }
 
-        return npTestEmpHistDao.search(null, true, true).stream()
-                .filter(item -> {
-                    var test = testsById.get(item.getNpTestHistId());
-                    if (test == null) {
-                        return false;
-                    }
-                    var level = levelsByCode.get(test.getNpLvlInfoCode());
-                    return level != null && level.getValidTo() != null && level.getValidTo().isBefore(today);
-                })
+    private long countExpiredNihongoCertifications() {
+        return buildCurrentNihongoPolicies().values().stream()
+                .filter(policy -> policy.effectiveEndDate != null && policy.effectiveEndDate.isBefore(LocalDate.now()))
                 .count();
     }
 
@@ -174,23 +175,10 @@ public class DashboardService {
             ));
         }
 
-        var testsById = npTestHistDao.findAll().stream()
-                .collect(java.util.stream.Collectors.toMap(item -> item.getNpTestHistId(), item -> item, (left, right) -> left));
-        var levelsByCode = npLvlInfoDao.findAll().stream()
-                .collect(java.util.stream.Collectors.toMap(item -> item.getNpLvlInfoCode(), item -> item, (left, right) -> left));
-
-        long expiringSoon = npTestEmpHistDao.search(null, true, true).stream()
-                .filter(item -> {
-                    var test = testsById.get(item.getNpTestHistId());
-                    if (test == null) {
-                        return false;
-                    }
-                    var level = levelsByCode.get(test.getNpLvlInfoCode());
-                    return level != null
-                            && level.getValidTo() != null
-                            && !level.getValidTo().isBefore(today)
-                            && !level.getValidTo().isAfter(soon);
-                })
+        long expiringSoon = buildCurrentNihongoPolicies().values().stream()
+                .filter(policy -> policy.effectiveEndDate != null
+                        && !policy.effectiveEndDate.isBefore(today)
+                        && !policy.effectiveEndDate.isAfter(soon))
                 .count();
         if (expiringSoon > 0) {
             notifications.add(new DashboardNotificationDto(
@@ -203,5 +191,74 @@ public class DashboardService {
         }
 
         return notifications;
+    }
+
+    private Map<String, NihongoPolicy> buildCurrentNihongoPolicies() {
+        Map<Long, NpTestHist> testsById = npTestHistDao.findAll().stream()
+                .collect(java.util.stream.Collectors.toMap(NpTestHist::getNpTestHistId, item -> item, (left, right) -> left));
+        Map<String, NpLvlInfo> levelsByCode = npLvlInfoDao.findAll().stream()
+                .collect(java.util.stream.Collectors.toMap(NpLvlInfo::getNpLvlInfoCode, item -> item, (left, right) -> left));
+        Map<String, NpType> typesByCode = npTypeDao.findAll().stream()
+                .collect(java.util.stream.Collectors.toMap(NpType::getNpTypeCode, item -> item, (left, right) -> left));
+
+        Map<String, NihongoPolicy> policiesByEmployee = new LinkedHashMap<>();
+        Map<String, List<NpTestEmpHist>> historyByEmployee = npTestEmpHistDao.findAll().stream()
+                .collect(java.util.stream.Collectors.groupingBy(NpTestEmpHist::getEmployeeNumber, LinkedHashMap::new, java.util.stream.Collectors.toList()));
+
+        historyByEmployee.forEach((employeeNumber, history) -> {
+            Optional<NihongoPolicy> latestPass = history.stream()
+                    .filter(item -> Boolean.TRUE.equals(item.getPassFlag()))
+                    .map(item -> {
+                        NpTestHist test = testsById.get(item.getNpTestHistId());
+                        NpLvlInfo level = test == null ? null : levelsByCode.get(test.getNpLvlInfoCode());
+                        NpType type = level == null ? null : typesByCode.get(level.getNpTypeCode());
+                        Integer waitingMonths = NihongoAllowanceUtil.resolveAllowanceWaitingMonths(type == null ? null : type.getNpTypeCode());
+                        Integer validityMonths = NihongoAllowanceUtil.resolveValidityMonths(
+                                type == null ? null : type.getNpTypeCode(),
+                                level == null ? null : level.getNpLvlInfoCode(),
+                                level == null ? null : level.getNpLvlInfoName());
+                        LocalDate startDate = test == null ? null : NihongoAllowanceUtil.calculateAllowanceStartDate(test.getTestDate(), waitingMonths);
+                        LocalDate endDate = NihongoAllowanceUtil.calculateAllowanceEndDate(startDate, validityMonths);
+                        return new NihongoPolicy(item.getEmployeeNumber(), item.getNpTestEmpHistId(), test == null ? null : test.getNpTestHistId(), startDate, endDate);
+                    })
+                    .filter(policy -> policy.effectiveEndDate != null)
+                    .max((left, right) -> {
+                        if (left.allowanceStartDate == null && right.allowanceStartDate == null) {
+                            return 0;
+                        }
+                        if (left.allowanceStartDate == null) {
+                            return -1;
+                        }
+                        if (right.allowanceStartDate == null) {
+                            return 1;
+                        }
+                        return left.allowanceStartDate.compareTo(right.allowanceStartDate);
+                    });
+
+            latestPass.ifPresent(policy -> policiesByEmployee.put(employeeNumber, policy));
+        });
+
+        return policiesByEmployee;
+    }
+
+    private static final class NihongoPolicy {
+        private final String employeeNumber;
+        private final Long npTestEmpHistId;
+        private final Long npTestHistId;
+        private final LocalDate allowanceStartDate;
+        private final LocalDate effectiveEndDate;
+
+        private NihongoPolicy(
+                String employeeNumber,
+                Long npTestEmpHistId,
+                Long npTestHistId,
+                LocalDate allowanceStartDate,
+                LocalDate effectiveEndDate) {
+            this.employeeNumber = employeeNumber;
+            this.npTestEmpHistId = npTestEmpHistId;
+            this.npTestHistId = npTestHistId;
+            this.allowanceStartDate = allowanceStartDate;
+            this.effectiveEndDate = effectiveEndDate;
+        }
     }
 }

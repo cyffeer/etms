@@ -14,6 +14,7 @@ public class TrngInfoResponse {
     private LocalDate endDate;
     private String location;
     private Boolean active;
+    private String certificatePath;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -87,6 +88,14 @@ public class TrngInfoResponse {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public String getCertificatePath() {
+        return certificatePath;
+    }
+
+    public void setCertificatePath(String certificatePath) {
+        this.certificatePath = certificatePath;
     }
 
     public LocalDateTime getCreatedAt() {

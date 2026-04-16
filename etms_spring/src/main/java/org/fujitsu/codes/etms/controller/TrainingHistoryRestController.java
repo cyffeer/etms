@@ -13,6 +13,7 @@ import org.fujitsu.codes.etms.model.data.TrngHist;
 import org.fujitsu.codes.etms.model.dto.TrngHistRequest;
 import org.fujitsu.codes.etms.model.dto.TrngHistResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +40,7 @@ public class TrainingHistoryRestController {
     }
 
     @PostMapping("/assign")
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public ResponseEntity<?> assignTrainingToEmployee(@Valid @RequestBody TrngHistRequest request) {
         normalize(request);
 
@@ -62,6 +64,7 @@ public class TrainingHistoryRestController {
     }
 
     @GetMapping("/{trngId}/{employeeNumber}")
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
     public ResponseEntity<?> getByKey(
             @PathVariable Long trngId,
             @PathVariable String employeeNumber) {
@@ -72,6 +75,7 @@ public class TrainingHistoryRestController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
     public ResponseEntity<?> getAllTrainingHistory(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -100,6 +104,7 @@ public class TrainingHistoryRestController {
     }
 
     @GetMapping("/by-employee/{employeeNumber}")
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
     public ResponseEntity<List<TrngHistResponse>> getByEmployeeNumber(@PathVariable String employeeNumber) {
         List<TrngHistResponse> data = trngHistDao.findByEmployeeNumber(employeeNumber).stream()
                 .map(this::toResponse)
@@ -108,6 +113,7 @@ public class TrainingHistoryRestController {
     }
 
     @GetMapping("/by-training/{trainingId}")
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
     public ResponseEntity<List<TrngHistResponse>> getByTrainingId(@PathVariable Long trainingId) {
         List<TrngHistResponse> data = trngHistDao.findByTrainingId(trainingId).stream()
                 .map(this::toResponse)
@@ -116,6 +122,7 @@ public class TrainingHistoryRestController {
     }
 
     @DeleteMapping("/{trngId}/{employeeNumber}")
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public ResponseEntity<?> deleteTrainingHistory(@PathVariable Long trngId, @PathVariable String employeeNumber) {
         boolean deleted = trngHistDao.deleteByTrainingAndEmployee(trngId, employeeNumber);
         if (!deleted) {

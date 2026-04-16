@@ -7,22 +7,22 @@ public class SkillsInventoryId implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String employeeNumber;
+    private Integer employeeNumber;
     private Long skillId;
 
     public SkillsInventoryId() {
     }
 
-    public SkillsInventoryId(String employeeNumber, Long skillId) {
+    public SkillsInventoryId(Integer employeeNumber, Long skillId) {
         this.employeeNumber = employeeNumber;
         this.skillId = skillId;
     }
 
-    public String getEmployeeNumber() {
+    public Integer getEmployeeNumber() {
         return employeeNumber;
     }
 
-    public void setEmployeeNumber(String employeeNumber) {
+    public void setEmployeeNumber(Integer employeeNumber) {
         this.employeeNumber = employeeNumber;
     }
 

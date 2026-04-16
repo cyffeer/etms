@@ -46,13 +46,26 @@ public class DeptMembersDao {
         }
     }
 
-    public List<DeptMembers> findByEmployeeNumber(String employeeNumber) {
+    public List<DeptMembers> findByEmployeeNumber(Integer employeeNumber) {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
-                    "from DeptMembers dm where lower(dm.employeeNumber) = lower(:employeeNumber) " +
+                    "from DeptMembers dm where dm.employeeNumber = :employeeNumber " +
                     "order by dm.memberStart desc, dm.deptMemberId desc",
                     DeptMembers.class
             ).setParameter("employeeNumber", employeeNumber).getResultList();
+        }
+    }
+
+    public List<DeptMembers> findByEmployeeNumber(String employeeNumber) {
+        if (employeeNumber == null || employeeNumber.isBlank()) {
+            return findAll();
+        }
+        try (Session session = sessionFactory.openSession()) {
+            return session.createQuery(
+                    "from DeptMembers dm where lower(str(dm.employeeNumber)) like :employeeNumber " +
+                    "order by dm.memberStart desc, dm.deptMemberId desc",
+                    DeptMembers.class
+            ).setParameter("employeeNumber", "%" + employeeNumber.trim().toLowerCase() + "%").getResultList();
         }
     }
 
@@ -68,12 +81,12 @@ public class DeptMembersDao {
 
     public List<DeptMembers> search(
             String departmentKeyword,
-            String employeeNumber,
+            Integer employeeNumber,
             Long memberTypeId,
             java.time.LocalDate startDate,
             java.time.LocalDate endDate) {
         if ((departmentKeyword == null || departmentKeyword.isBlank())
-                && (employeeNumber == null || employeeNumber.isBlank())) {
+                && employeeNumber == null) {
             if (memberTypeId == null && startDate == null && endDate == null) {
                 return findAll();
             }
@@ -88,8 +101,8 @@ public class DeptMembersDao {
                         .append("where d.departmentCode = dm.departmentCode ")
                         .append("and (lower(d.departmentCode) like :departmentKeyword or lower(d.departmentName) like :departmentKeyword))");
             }
-            if (employeeNumber != null && !employeeNumber.isBlank()) {
-                hql.append(" and lower(dm.employeeNumber) like :employeeNumber");
+            if (employeeNumber != null) {
+                hql.append(" and dm.employeeNumber = :employeeNumber");
             }
             if (memberTypeId != null) {
                 hql.append(" and dm.memberTypeId = :memberTypeId");
@@ -107,8 +120,8 @@ public class DeptMembersDao {
             if (departmentKeyword != null && !departmentKeyword.isBlank()) {
                 query.setParameter("departmentKeyword", "%" + departmentKeyword.trim().toLowerCase() + "%");
             }
-            if (employeeNumber != null && !employeeNumber.isBlank()) {
-                query.setParameter("employeeNumber", "%" + employeeNumber.trim().toLowerCase() + "%");
+            if (employeeNumber != null) {
+                query.setParameter("employeeNumber", employeeNumber);
             }
             if (memberTypeId != null) {
                 query.setParameter("memberTypeId", memberTypeId);
@@ -123,12 +136,12 @@ public class DeptMembersDao {
         }
     }
 
-    public boolean existsByDepartmentCodeAndEmployeeNumber(String departmentCode, String employeeNumber) {
+    public boolean existsByDepartmentCodeAndEmployeeNumber(String departmentCode, Integer employeeNumber) {
         try (Session session = sessionFactory.openSession()) {
             Long count = session.createQuery(
                     "select count(dm) from DeptMembers dm " +
                     "where lower(dm.departmentCode) = lower(:departmentCode) " +
-                    "and lower(dm.employeeNumber) = lower(:employeeNumber)",
+                    "and dm.employeeNumber = :employeeNumber",
                     Long.class
             )
             .setParameter("departmentCode", departmentCode)
@@ -203,4 +216,5 @@ public class DeptMembersDao {
             tx.rollback();
         }
     }
+
 }

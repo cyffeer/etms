@@ -48,12 +48,24 @@ public class AttendanceDao {
         }
     }
 
-    public List<AttendanceRecord> findByEmployeeNumber(String employeeNumber) {
+    public List<AttendanceRecord> findByEmployeeNumber(Integer employeeNumber) {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
-                    "from AttendanceRecord a where lower(a.employeeNumber) = lower(:employeeNumber) order by a.attendanceRecordId desc",
+                    "from AttendanceRecord a where a.employeeNumber = :employeeNumber order by a.attendanceRecordId desc",
                     AttendanceRecord.class
             ).setParameter("employeeNumber", employeeNumber).getResultList();
+        }
+    }
+
+    public List<AttendanceRecord> findByEmployeeNumber(String employeeNumber) {
+        if (employeeNumber == null || employeeNumber.isBlank()) {
+            return findAll();
+        }
+        try (Session session = sessionFactory.openSession()) {
+            return session.createQuery(
+                    "from AttendanceRecord a where lower(str(a.employeeNumber)) like :employeeNumber order by a.attendanceRecordId desc",
+                    AttendanceRecord.class
+            ).setParameter("employeeNumber", "%" + employeeNumber.trim().toLowerCase() + "%").getResultList();
         }
     }
 
@@ -70,12 +82,12 @@ public class AttendanceDao {
         }
     }
 
-    public List<AttendanceRecord> search(String employeeNumber, Integer year, Integer month) {
+    public List<AttendanceRecord> search(Integer employeeNumber, Integer year, Integer month) {
         try (Session session = sessionFactory.openSession()) {
             StringBuilder hql = new StringBuilder("from AttendanceRecord a where 1=1");
 
-            if (employeeNumber != null && !employeeNumber.isBlank()) {
-                hql.append(" and lower(a.employeeNumber) like :employeeNumber");
+            if (employeeNumber != null) {
+                hql.append(" and a.employeeNumber = :employeeNumber");
             }
             if (year != null) {
                 hql.append(" and year(a.attendanceDate) = :year");
@@ -88,8 +100,8 @@ public class AttendanceDao {
 
             Query<AttendanceRecord> query = session.createQuery(hql.toString(), AttendanceRecord.class);
 
-            if (employeeNumber != null && !employeeNumber.isBlank()) {
-                query.setParameter("employeeNumber", "%" + employeeNumber.trim().toLowerCase() + "%");
+            if (employeeNumber != null) {
+                query.setParameter("employeeNumber", employeeNumber);
             }
             if (year != null) {
                 query.setParameter("year", year);
@@ -98,6 +110,27 @@ public class AttendanceDao {
                 query.setParameter("month", month);
             }
 
+            return query.getResultList();
+        }
+    }
+
+    public List<AttendanceRecord> search(String employeeNumber, int year, int month) {
+        try (Session session = sessionFactory.openSession()) {
+            StringBuilder hql = new StringBuilder("from AttendanceRecord a where 1=1");
+
+            if (employeeNumber != null && !employeeNumber.isBlank()) {
+                hql.append(" and lower(str(a.employeeNumber)) like :employeeNumber");
+            }
+            hql.append(" and year(a.attendanceDate) = :year");
+            hql.append(" and month(a.attendanceDate) = :month");
+            hql.append(" order by a.attendanceDate desc, a.attendanceRecordId desc");
+
+            Query<AttendanceRecord> query = session.createQuery(hql.toString(), AttendanceRecord.class);
+            if (employeeNumber != null && !employeeNumber.isBlank()) {
+                query.setParameter("employeeNumber", "%" + employeeNumber.trim().toLowerCase() + "%");
+            }
+            query.setParameter("year", year);
+            query.setParameter("month", month);
             return query.getResultList();
         }
     }
@@ -151,4 +184,5 @@ public class AttendanceDao {
             tx.rollback();
         }
     }
+
 }

@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import jakarta.validation.Valid;
 
@@ -56,9 +57,9 @@ public class DepartmentMemberRestController {
     public ResponseEntity<?> getById(@PathVariable Long deptMemberId) {
         Map<String, Department> departmentsByCode = buildDepartmentsByCode();
         Map<Long, MemberType> memberTypesById = buildMemberTypesById();
-        Map<String, Employees> employeesByCode = buildEmployeesByCode();
+        Map<Integer, Employees> employeesById = buildEmployeesById();
         return deptMembersDao.findById(deptMemberId)
-                .<ResponseEntity<?>>map(item -> ResponseEntity.ok(toResponse(item, departmentsByCode, memberTypesById, employeesByCode)))
+                .<ResponseEntity<?>>map(item -> ResponseEntity.ok(toResponse(item, departmentsByCode, memberTypesById, employeesById)))
                 .orElseGet(() -> ResponseEntity.status(404).body(Map.of("message", "Department member not found")));
     }
 
@@ -66,20 +67,25 @@ public class DepartmentMemberRestController {
     public ResponseEntity<List<DeptMembersResponse>> getAll() {
         Map<String, Department> departmentsByCode = buildDepartmentsByCode();
         Map<Long, MemberType> memberTypesById = buildMemberTypesById();
-        Map<String, Employees> employeesByCode = buildEmployeesByCode();
+        Map<Integer, Employees> employeesById = buildEmployeesById();
         List<DeptMembersResponse> data = deptMembersDao.findAll().stream()
-                .map(item -> toResponse(item, departmentsByCode, memberTypesById, employeesByCode))
+                .map(item -> toResponse(item, departmentsByCode, memberTypesById, employeesById))
                 .toList();
         return ResponseEntity.ok(data);
     }
 
     @GetMapping("/by-employee/{employeeNumber}")
+    @PreAuthorize("@etmsAuthorizationService.canAccessEmployeeInput(authentication, #employeeNumber)")
     public ResponseEntity<List<DeptMembersResponse>> getByEmployeeNumber(@PathVariable String employeeNumber) {
         Map<String, Department> departmentsByCode = buildDepartmentsByCode();
         Map<Long, MemberType> memberTypesById = buildMemberTypesById();
-        Map<String, Employees> employeesByCode = buildEmployeesByCode();
-        List<DeptMembersResponse> data = deptMembersDao.findByEmployeeNumber(employeeNumber).stream()
-                .map(item -> toResponse(item, departmentsByCode, memberTypesById, employeesByCode))
+        Map<Integer, Employees> employeesById = buildEmployeesById();
+        Integer employeeId = employeesDao.resolveEmployeeIdentifier(employeeNumber);
+        if (employeeId == null) {
+            return ResponseEntity.ok(List.of());
+        }
+        List<DeptMembersResponse> data = deptMembersDao.findByEmployeeNumber(employeeId).stream()
+                .map(item -> toResponse(item, departmentsByCode, memberTypesById, employeesById))
                 .toList();
         return ResponseEntity.ok(data);
     }
@@ -88,14 +94,15 @@ public class DepartmentMemberRestController {
     public ResponseEntity<List<DeptMembersResponse>> getByDepartmentCode(@PathVariable String departmentCode) {
         Map<String, Department> departmentsByCode = buildDepartmentsByCode();
         Map<Long, MemberType> memberTypesById = buildMemberTypesById();
-        Map<String, Employees> employeesByCode = buildEmployeesByCode();
+        Map<Integer, Employees> employeesById = buildEmployeesById();
         List<DeptMembersResponse> data = deptMembersDao.findByDepartmentCode(departmentCode).stream()
-                .map(item -> toResponse(item, departmentsByCode, memberTypesById, employeesByCode))
+                .map(item -> toResponse(item, departmentsByCode, memberTypesById, employeesById))
                 .toList();
         return ResponseEntity.ok(data);
     }
 
     @GetMapping("/search")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<DeptMembersResponse>> search(
             @RequestParam(required = false) String departmentKeyword,
             @RequestParam(required = false) String departmentCode,
@@ -111,25 +118,33 @@ public class DepartmentMemberRestController {
 
         Map<String, Department> departmentsByCode = buildDepartmentsByCode();
         Map<Long, MemberType> memberTypesById = buildMemberTypesById();
-        Map<String, Employees> employeesByCode = buildEmployeesByCode();
+        Map<Integer, Employees> employeesById = buildEmployeesById();
+        Integer employeeId = employeesDao.resolveEmployeeIdentifier(employeeNumber);
         List<DeptMembersResponse> data = deptMembersDao.search(
                         effectiveDepartmentKeyword,
-                        employeeNumber,
+                        employeeId,
                         memberTypeId,
                         startDate,
                         endDate)
                 .stream()
-                .map(item -> toResponse(item, departmentsByCode, memberTypesById, employeesByCode))
+                .map(item -> toResponse(item, departmentsByCode, memberTypesById, employeesById))
                 .toList();
         return ResponseEntity.ok(data);
     }
 
     @PostMapping
+    @PreAuthorize("@etmsAuthorizationService.canAccessEmployeeInput(authentication, #request.employeeNumber)")
     public ResponseEntity<?> create(@Valid @RequestBody DeptMembersRequest request) {
         normalize(request);
 
         List<String> errors = validateRequest(request);
-        if (deptMembersDao.existsByDepartmentCodeAndEmployeeNumber(request.getDepartmentCode(), request.getEmployeeNumber())) {
+        Integer employeeId = employeesDao.resolveEmployeeIdentifier(request.getEmployeeNumber());
+        if (employeeId == null) {
+            errors.add("Employee number does not exist");
+        }
+        if (deptMembersDao.existsByDepartmentCodeAndEmployeeNumber(
+                request.getDepartmentCode(),
+                employeesDao.resolveEmployeeIdentifier(request.getEmployeeNumber()))) {
             errors.add("Department member already exists");
         }
         if (!errors.isEmpty()) {
@@ -148,10 +163,11 @@ public class DepartmentMemberRestController {
                         saved,
                         buildDepartmentsByCode(),
                         buildMemberTypesById(),
-                        buildEmployeesByCode()));
+                        buildEmployeesById()));
     }
 
     @PutMapping("/{deptMemberId}")
+    @PreAuthorize("@etmsAuthorizationService.canAccessEmployeeInput(authentication, #request.employeeNumber)")
     public ResponseEntity<?> update(@PathVariable Long deptMemberId, @Valid @RequestBody DeptMembersRequest request) {
         normalize(request);
 
@@ -161,6 +177,10 @@ public class DepartmentMemberRestController {
         }
 
         List<String> errors = validateRequest(request);
+        Integer employeeId = employeesDao.resolveEmployeeIdentifier(request.getEmployeeNumber());
+        if (employeeId == null) {
+            errors.add("Employee number does not exist");
+        }
         if (!errors.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("errors", errors));
         }
@@ -175,11 +195,12 @@ public class DepartmentMemberRestController {
                         item,
                         buildDepartmentsByCode(),
                         buildMemberTypesById(),
-                        buildEmployeesByCode())))
+                        buildEmployeesById())))
                 .orElseGet(() -> ResponseEntity.status(404).body(Map.of("message", "Department member not found")));
     }
 
     @PatchMapping("/{deptMemberId}/end-membership")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public ResponseEntity<?> endMembership(@PathVariable Long deptMemberId, @RequestBody Map<String, LocalDate> payload) {
         LocalDate memberEnd = payload.get("memberEnd");
 
@@ -201,7 +222,7 @@ public class DepartmentMemberRestController {
 
         DeptMembersRequest request = new DeptMembersRequest();
         request.setDepartmentCode(existing.getDepartmentCode());
-        request.setEmployeeNumber(existing.getEmployeeNumber());
+        request.setEmployeeNumber(String.valueOf(existing.getEmployeeNumber()));
         request.setMemberTypeId(existing.getMemberTypeId());
         request.setMemberStart(existing.getMemberStart());
         request.setMemberEnd(memberEnd);
@@ -215,11 +236,12 @@ public class DepartmentMemberRestController {
                         item,
                         buildDepartmentsByCode(),
                         buildMemberTypesById(),
-                        buildEmployeesByCode())))
+                        buildEmployeesById())))
                 .orElseGet(() -> ResponseEntity.status(404).body(Map.of("message", "Department member not found")));
     }
 
     @DeleteMapping("/{deptMemberId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> delete(@PathVariable Long deptMemberId) {
         boolean deleted = deptMembersDao.deleteById(deptMemberId);
         if (!deleted) {
@@ -235,7 +257,7 @@ public class DepartmentMemberRestController {
             errors.add("Department code does not exist");
         }
 
-        if (!employeesDao.existsByEmployeeCode(request.getEmployeeNumber())) {
+        if (employeesDao.resolveEmployeeIdentifier(request.getEmployeeNumber()) == null) {
             errors.add("Employee number does not exist");
         }
 
@@ -262,7 +284,8 @@ public class DepartmentMemberRestController {
     private DeptMembers toEntity(DeptMembersRequest request) {
         DeptMembers item = new DeptMembers();
         item.setDepartmentCode(request.getDepartmentCode());
-        item.setEmployeeNumber(request.getEmployeeNumber());
+        Integer employeeId = employeesDao.resolveEmployeeIdentifier(request.getEmployeeNumber());
+        item.setEmployeeNumber(employeeId);
         item.setMemberTypeId(request.getMemberTypeId());
         item.setMemberStart(request.getMemberStart());
         item.setMemberEnd(request.getMemberEnd());
@@ -273,11 +296,11 @@ public class DepartmentMemberRestController {
             DeptMembers item,
             Map<String, Department> departmentsByCode,
             Map<Long, MemberType> memberTypesById,
-            Map<String, Employees> employeesByCode) {
+            Map<Integer, Employees> employeesById) {
         DeptMembersResponse response = new DeptMembersResponse();
         response.setDeptMemberId(item.getDeptMemberId());
         response.setDepartmentCode(item.getDepartmentCode());
-        response.setEmployeeNumber(item.getEmployeeNumber());
+        response.setEmployeeNumber(item.getEmployeeNumber() == null ? null : String.valueOf(item.getEmployeeNumber()));
         response.setMemberTypeId(item.getMemberTypeId());
         response.setMemberStart(item.getMemberStart());
         response.setMemberEnd(item.getMemberEnd());
@@ -295,7 +318,7 @@ public class DepartmentMemberRestController {
             response.setMemberTypeName(memberType.getMemberTypeName());
         }
 
-        Employees employee = employeesByCode.get(item.getEmployeeNumber());
+        Employees employee = employeesById.get(item.getEmployeeNumber());
         if (employee != null) {
             response.setEmployeeName((employee.getFirstName() + " " + employee.getLastName()).trim());
         }
@@ -312,8 +335,8 @@ public class DepartmentMemberRestController {
                 .collect(Collectors.toMap(MemberType::getMemberTypeId, Function.identity(), (left, right) -> left));
     }
 
-    private Map<String, Employees> buildEmployeesByCode() {
+    private Map<Integer, Employees> buildEmployeesById() {
         return employeesDao.findAll().stream()
-                .collect(Collectors.toMap(Employees::getEmployeeCode, Function.identity(), (left, right) -> left));
+                .collect(Collectors.toMap(e -> e.getEmployeeId().intValue(), Function.identity(), (left, right) -> left));
     }
 }

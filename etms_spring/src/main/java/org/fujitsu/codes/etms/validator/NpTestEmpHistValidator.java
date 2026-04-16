@@ -1,7 +1,6 @@
 package org.fujitsu.codes.etms.validator;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,6 +8,7 @@ import org.fujitsu.codes.etms.model.dao.NpLvlInfoDao;
 import org.fujitsu.codes.etms.model.dao.NpTestEmpHistDao;
 import org.fujitsu.codes.etms.model.dao.NpTestHistDao;
 import org.fujitsu.codes.etms.model.dao.NpTypeDao;
+import org.fujitsu.codes.etms.model.data.NpLvlInfo;
 import org.fujitsu.codes.etms.model.data.NpTestEmpHist;
 import org.fujitsu.codes.etms.model.data.NpTestHist;
 import org.fujitsu.codes.etms.model.dto.NpTestEmpHistRequest;
@@ -48,10 +48,10 @@ public class NpTestEmpHistValidator {
         }
 
         NpTestHist currentTest = currentTestOpt.get();
+        Optional<NpLvlInfo> currentLevelOpt = npLvlInfoDao.findByCode(currentTest.getNpLvlInfoCode());
 
         // NpLvlInfo dependency check
-        if (currentTest.getNpLvlInfoCode() == null
-                || !npLvlInfoDao.existsByCode(currentTest.getNpLvlInfoCode())) {
+        if (currentLevelOpt.isEmpty()) {
             errors.add("NP level info for test does not exist");
         }
 
@@ -62,10 +62,15 @@ public class NpTestEmpHistValidator {
 
         List<NpTestEmpHist> employeeHistory = npTestEmpHistDao.findByEmployeeNumber(request.getEmployeeNumber());
 
-        String highestPassedLevel = resolveHighestPassedLevel(employeeHistory);
-        String requestedLevel = currentTest.getTestLevel();
+        Integer highestPassedRank = resolveHighestPassedRank(employeeHistory);
+        Integer requestedRank = currentLevelOpt
+                .map(level -> NihongoAllowanceUtil.extractPolicyGroupRank(
+                        level.getNpLvlInfoCode(),
+                        level.getNpLvlInfoName(),
+                        level.getNpTypeCode()))
+                .orElse(null);
 
-        if (NihongoAllowanceUtil.shouldDisallowLowerRankExamAfterHigherPass(highestPassedLevel, requestedLevel)) {
+        if (NihongoAllowanceUtil.shouldDisallowLowerRankExamAfterHigherPass(highestPassedRank, requestedRank)) {
             errors.add("Lower-rank exam is not allowed after passing a higher preferred level");
         }
 
@@ -87,7 +92,7 @@ public class NpTestEmpHistValidator {
         return npTypeDao.existsByCode(npTypeCode.trim());
     }
 
-    private String resolveHighestPassedLevel(List<NpTestEmpHist> employeeHistory) {
+    private Integer resolveHighestPassedRank(List<NpTestEmpHist> employeeHistory) {
         if (employeeHistory == null || employeeHistory.isEmpty()) {
             return null;
         }
@@ -97,9 +102,15 @@ public class NpTestEmpHistValidator {
                 .map(h -> npTestHistDao.findById(h.getNpTestHistId()))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .map(NpTestHist::getTestLevel)
-                .filter(level -> NihongoAllowanceUtil.extractJlptRank(level) != null)
-                .min(Comparator.comparingInt(NihongoAllowanceUtil::extractJlptRank)) // N1(1) is highest
+                .map(test -> npLvlInfoDao.findByCode(test.getNpLvlInfoCode()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(level -> NihongoAllowanceUtil.extractPolicyGroupRank(
+                        level.getNpLvlInfoCode(),
+                        level.getNpLvlInfoName(),
+                        level.getNpTypeCode()))
+                .filter(rank -> rank != null)
+                .min(Integer::compareTo)
                 .orElse(null);
     }
 }

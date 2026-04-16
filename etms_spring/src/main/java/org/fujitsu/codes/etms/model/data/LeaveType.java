@@ -27,6 +27,9 @@ public class LeaveType {
     @Column(name = "description", length = 255)
     private String description;
 
+    @Column(name = "annual_entitlement_days", nullable = false)
+    private Integer annualEntitlementDays = 0;
+
     @Column(name = "active", nullable = false)
     private Boolean active = Boolean.TRUE;
 
@@ -66,6 +69,14 @@ public class LeaveType {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Integer getAnnualEntitlementDays() {
+        return annualEntitlementDays;
+    }
+
+    public void setAnnualEntitlementDays(Integer annualEntitlementDays) {
+        this.annualEntitlementDays = annualEntitlementDays;
     }
 
     public Boolean getActive() {

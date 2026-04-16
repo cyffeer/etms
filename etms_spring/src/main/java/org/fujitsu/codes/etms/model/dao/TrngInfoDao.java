@@ -71,6 +71,7 @@ public class TrngInfoDao {
             target.setEndDate(source.getEndDate());
             target.setLocation(source.getLocation());
             target.setActive(source.getActive());
+            target.setCertificatePath(source.getCertificatePath());
             target.setUpdatedAt(source.getUpdatedAt());
 
             session.merge(target);

@@ -49,6 +49,9 @@ public class TrngInfo {
     @Column(name = "is_active")
     private Boolean active = Boolean.TRUE;
 
+    @Column(name = "certificate_path", length = 255)
+    private String certificatePath;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -141,6 +144,14 @@ public class TrngInfo {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public String getCertificatePath() {
+        return certificatePath;
+    }
+
+    public void setCertificatePath(String certificatePath) {
+        this.certificatePath = certificatePath;
     }
 
     public LocalDateTime getCreatedAt() {

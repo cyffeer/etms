@@ -2,6 +2,7 @@ package org.fujitsu.codes.etms.controller;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -14,6 +15,7 @@ import org.fujitsu.codes.etms.model.data.Skills;
 import org.fujitsu.codes.etms.model.dto.ApiResponse;
 import org.fujitsu.codes.etms.model.dto.SkillLvlRequest;
 import org.fujitsu.codes.etms.model.dto.SkillLvlResponse;
+import org.fujitsu.codes.etms.model.dto.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,12 +55,14 @@ public class SkillLvlRestController {
     public ResponseEntity<ApiResponse<?>> getAll(
             @RequestParam(name = "skillLvlId", required = false) Long skillLvlId,
             @RequestParam(name = "skillId", required = false) Long skillId,
-            @RequestParam(name = "keyword", required = false) String keyword) {
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "page", required = false) Integer page,
+            @RequestParam(name = "size", required = false) Integer size) {
         Map<Long, Skills> skillsById = buildSkillsById();
         var rows = skillLvlDao.search(skillLvlId, skillId, keyword).stream()
                 .map(item -> toResponse(item, skillsById))
                 .toList();
-        return ResponseEntity.ok(ApiResponse.success("Skill levels fetched", rows));
+        return paginate(rows, page, size);
     }
 
     @GetMapping("/by-skill/{skillId}")
@@ -183,5 +187,31 @@ public class SkillLvlRestController {
     private Map<Long, Skills> buildSkillsById() {
         return skillsDao.findAll().stream()
                 .collect(Collectors.toMap(Skills::getSkillId, Function.identity()));
+    }
+
+    private ResponseEntity<ApiResponse<?>> paginate(List<SkillLvlResponse> allItems, Integer page, Integer size) {
+        if (page == null && size == null) {
+            return ResponseEntity.ok(ApiResponse.success("Skill levels fetched", allItems));
+        }
+
+        if (page == null || size == null || page < 0 || size <= 0) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Invalid pagination values", List.of("page must be >= 0 and size must be > 0")));
+        }
+
+        int fromIndex = Math.min(page * size, allItems.size());
+        int toIndex = Math.min(fromIndex + size, allItems.size());
+        List<SkillLvlResponse> data = new ArrayList<>(allItems.subList(fromIndex, toIndex));
+        long totalElements = allItems.size();
+        long totalPages = (long) Math.ceil((double) totalElements / size);
+
+        return ResponseEntity.ok(ApiResponse.success("Skill levels fetched",
+                Map.of(
+                        "data", data,
+                        "page", page,
+                        "size", size,
+                        "totalElements", totalElements,
+                        "totalPages", totalPages
+                )));
     }
 }

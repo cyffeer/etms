@@ -111,10 +111,19 @@ public class VisaInfoDao {
                 return Optional.empty();
             }
 
+            session.createNativeMutationQuery(
+                            "update visa_info " +
+                            "set cancel_flag = case when :cancelFlag then 'YES' else 'NO' end, " +
+                            "updated_at = :updatedAt " +
+                            "where emp_no = cast(:employeeNumber as integer) and visa_type_id = :visaTypeId")
+                    .setParameter("cancelFlag", cancelFlag == null ? Boolean.FALSE : cancelFlag)
+                    .setParameter("updatedAt", updatedAt)
+                    .setParameter("employeeNumber", target.getEmployeeNumber())
+                    .setParameter("visaTypeId", target.getVisaTypeId())
+                    .executeUpdate();
+            tx.commit();
             target.setCancelFlag(cancelFlag == null ? Boolean.FALSE : cancelFlag);
             target.setUpdatedAt(updatedAt);
-            session.merge(target);
-            tx.commit();
             return Optional.of(target);
         } catch (RuntimeException ex) {
             rollback(tx);

@@ -37,6 +37,21 @@ public class NpLvlInfoDao {
         }
     }
 
+    public Optional<NpLvlInfo> findByCode(String npLvlInfoCode) {
+        if (npLvlInfoCode == null || npLvlInfoCode.isBlank()) {
+            return Optional.empty();
+        }
+        try (Session session = sessionFactory.openSession()) {
+            return session.createQuery(
+                            "from NpLvlInfo n where lower(n.npLvlInfoCode) = lower(:code)",
+                            NpLvlInfo.class
+                    )
+                    .setParameter("code", npLvlInfoCode.trim())
+                    .setMaxResults(1)
+                    .uniqueResultOptional();
+        }
+    }
+
     public List<NpLvlInfo> findAll() {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(

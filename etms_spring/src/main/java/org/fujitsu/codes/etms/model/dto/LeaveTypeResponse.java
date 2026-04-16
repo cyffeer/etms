@@ -8,6 +8,7 @@ public class LeaveTypeResponse {
     private String leaveTypeCode;
     private String leaveTypeName;
     private String description;
+    private Integer annualEntitlementDays;
     private Boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -42,6 +43,14 @@ public class LeaveTypeResponse {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Integer getAnnualEntitlementDays() {
+        return annualEntitlementDays;
+    }
+
+    public void setAnnualEntitlementDays(Integer annualEntitlementDays) {
+        this.annualEntitlementDays = annualEntitlementDays;
     }
 
     public Boolean getActive() {

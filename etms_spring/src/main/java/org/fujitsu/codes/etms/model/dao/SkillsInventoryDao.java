@@ -1,6 +1,7 @@
 package org.fujitsu.codes.etms.model.dao;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,12 +46,24 @@ public class SkillsInventoryDao {
         }
     }
 
-    public List<SkillsInventory> findByEmployeeNumber(String employeeNumber) {
+    public List<SkillsInventory> findByEmployeeNumber(Integer employeeNumber) {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
-                    "from SkillsInventory s where lower(s.employeeNumber) = lower(:employeeNumber) order by s.skillsInventoryId desc",
+                    "from SkillsInventory s where s.employeeNumber = :employeeNumber order by s.skillsInventoryId desc",
                     SkillsInventory.class
             ).setParameter("employeeNumber", employeeNumber).getResultList();
+        }
+    }
+
+    public List<SkillsInventory> findByEmployeeNumber(String employeeNumber) {
+        if (employeeNumber == null || employeeNumber.isBlank()) {
+            return findAll();
+        }
+        try (Session session = sessionFactory.openSession()) {
+            return session.createQuery(
+                    "from SkillsInventory s where lower(str(s.employeeNumber)) like :employeeNumber order by s.skillsInventoryId desc",
+                    SkillsInventory.class
+            ).setParameter("employeeNumber", "%" + employeeNumber.trim().toLowerCase() + "%").getResultList();
         }
     }
 
@@ -63,11 +76,11 @@ public class SkillsInventoryDao {
         }
     }
 
-    public boolean existsByEmployeeNumberAndSkillId(String employeeNumber, Long skillId) {
+    public boolean existsByEmployeeNumberAndSkillId(Integer employeeNumber, Long skillId) {
         try (Session session = sessionFactory.openSession()) {
             Long count = session.createQuery(
                     "select count(s) from SkillsInventory s " +
-                    "where lower(s.employeeNumber) = lower(:employeeNumber) and s.skillId = :skillId",
+                    "where s.employeeNumber = :employeeNumber and s.skillId = :skillId",
                     Long.class
             )
             .setParameter("employeeNumber", employeeNumber)
@@ -162,4 +175,5 @@ public class SkillsInventoryDao {
             tx.rollback();
         }
     }
+
 }

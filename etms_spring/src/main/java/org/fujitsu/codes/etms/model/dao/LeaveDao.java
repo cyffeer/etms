@@ -57,6 +57,18 @@ public class LeaveDao {
         }
     }
 
+    public List<LeaveRecord> findAll(int page, int size) {
+        try (Session session = sessionFactory.openSession()) {
+            Query<LeaveRecord> query = session.createQuery(
+                    "from LeaveRecord l order by l.leaveRecordId desc",
+                    LeaveRecord.class
+            );
+            query.setFirstResult(page * size);
+            query.setMaxResults(size);
+            return query.getResultList();
+        }
+    }
+
     public List<LeaveRecord> findByEmployeeNumber(String employeeNumber) {
         try (Session session = sessionFactory.openSession()) {
             return session.createQuery(
@@ -75,7 +87,7 @@ public class LeaveDao {
         }
     }
 
-    public List<LeaveRecord> search(String employeeNumber, String leaveType, String status) {
+    public List<LeaveRecord> search(String employeeNumber, String leaveType, String status, java.time.LocalDate startDate, java.time.LocalDate endDate) {
         try (Session session = sessionFactory.openSession()) {
             StringBuilder hql = new StringBuilder("from LeaveRecord l where 1=1");
 
@@ -87,6 +99,12 @@ public class LeaveDao {
             }
             if (status != null && !status.isBlank()) {
                 hql.append(" and lower(l.status) like :status");
+            }
+            if (startDate != null) {
+                hql.append(" and l.startDate >= :startDate");
+            }
+            if (endDate != null) {
+                hql.append(" and l.startDate <= :endDate");
             }
 
             hql.append(" order by l.leaveRecordId desc");
@@ -102,8 +120,28 @@ public class LeaveDao {
             if (status != null && !status.isBlank()) {
                 query.setParameter("status", "%" + status.trim().toLowerCase() + "%");
             }
+            if (startDate != null) {
+                query.setParameter("startDate", startDate);
+            }
+            if (endDate != null) {
+                query.setParameter("endDate", endDate);
+            }
 
             return query.getResultList();
+        }
+    }
+
+    public List<LeaveRecord> search(String employeeNumber, String leaveType, String status) {
+        return search(employeeNumber, leaveType, status, null, null);
+    }
+
+    public long countAll() {
+        try (Session session = sessionFactory.openSession()) {
+            Long count = session.createQuery(
+                    "select count(l) from LeaveRecord l",
+                    Long.class
+            ).uniqueResult();
+            return count == null ? 0L : count;
         }
     }
 

@@ -1,6 +1,7 @@
 package org.fujitsu.codes.etms.controller;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +94,15 @@ public class VisaInfoRestController {
             return ResponseEntity.status(404).body(Map.of("message", "Visa info not found"));
         }
 
-        return visaInfoDao.updateCancelFlag(current.get().getVisaInfoId(), cancelFlag, LocalDateTime.now())
+        VisaInfo visaInfo = current.get();
+        if (visaInfo.getExpiryDate() != null && visaInfo.getExpiryDate().isBefore(LocalDate.now())) {
+            return ResponseEntity.status(409).body(Map.of("message", "Expired visas cannot be updated"));
+        }
+        if (cancelFlag == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "cancelFlag is required"));
+        }
+
+        return visaInfoDao.updateCancelFlag(visaInfo.getVisaInfoId(), cancelFlag, LocalDateTime.now())
                 .<ResponseEntity<?>>map(v -> ResponseEntity.ok(toResponse(v)))
                 .orElseGet(() -> ResponseEntity.status(404).body(Map.of("message", "Visa info not found")));
     }

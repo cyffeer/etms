@@ -10,6 +10,7 @@ import org.fujitsu.codes.etms.model.data.NpType;
 import org.fujitsu.codes.etms.model.dto.NpTypeRequest;
 import org.fujitsu.codes.etms.model.dto.NpTypeResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +33,7 @@ public class NpTypeRestController {
     }
 
     @GetMapping("/{npTypeId}")
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
     public ResponseEntity<?> getById(@PathVariable Long npTypeId) {
         return npTypeDao.findById(npTypeId)
                 .<ResponseEntity<?>>map(item -> ResponseEntity.ok(toResponse(item)))
@@ -39,6 +41,7 @@ public class NpTypeRestController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
     public ResponseEntity<List<NpTypeResponse>> getAll() {
         List<NpTypeResponse> data = npTypeDao.findAll().stream()
                 .map(this::toResponse)
@@ -47,6 +50,7 @@ public class NpTypeRestController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public ResponseEntity<?> create(@Valid @RequestBody NpTypeRequest request) {
         normalize(request);
 
@@ -66,6 +70,7 @@ public class NpTypeRestController {
     }
 
     @PutMapping("/{npTypeId}")
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public ResponseEntity<?> update(@PathVariable Long npTypeId, @Valid @RequestBody NpTypeRequest request) {
         normalize(request);
 
@@ -86,6 +91,7 @@ public class NpTypeRestController {
     }
 
     @DeleteMapping("/{npTypeId}")
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public ResponseEntity<?> delete(@PathVariable Long npTypeId) {
         boolean deleted = npTypeDao.deleteById(npTypeId);
         if (!deleted) {

@@ -11,6 +11,7 @@ public class EmployeeResponse {
     private String lastName;
     private String email;
     private LocalDate hireDate;
+    private String photoUrl;
     private Boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -61,6 +62,14 @@ public class EmployeeResponse {
 
     public void setHireDate(LocalDate hireDate) {
         this.hireDate = hireDate;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 
     public Boolean getActive() {

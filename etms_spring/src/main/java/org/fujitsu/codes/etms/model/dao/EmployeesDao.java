@@ -43,6 +43,19 @@ public class EmployeesDao {
         }
     }
 
+    public Optional<Employees> findByEmployeeCode(String employeeCode) {
+        if (employeeCode == null || employeeCode.isBlank()) {
+            return Optional.empty();
+        }
+        try (Session session = sessionFactory.openSession()) {
+            return session.createQuery(
+                            "from Employees e where lower(e.employeeCode) = lower(:employeeCode)",
+                            Employees.class)
+                    .setParameter("employeeCode", employeeCode.trim())
+                    .uniqueResultOptional();
+        }
+    }
+
     public Employees getByIdOrThrow(Long employeeId) {
         if (employeeId == null) {
             throw new InvalidInputException("Employee id is required");
@@ -55,7 +68,7 @@ public class EmployeesDao {
         if (employeeNumber == null || employeeNumber.trim().isEmpty()) {
             throw new InvalidInputException("Employee number is required");
         }
-        if (!existsByEmployeeCode(employeeNumber.trim())) {
+        if (!existsByEmployeeCode(employeeNumber.trim()) && !existsByEmployeeIdentifier(employeeNumber.trim())) {
             throw new DataNotFoundException("Employee number does not exist: " + employeeNumber);
         }
     }
@@ -121,6 +134,31 @@ public class EmployeesDao {
         }
     }
 
+    public Optional<Employees> updatePhoto(Long employeeId, String photoPath, java.time.LocalDateTime updatedAt) {
+        Transaction tx = null;
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
+
+            Employees target = session.find(Employees.class, employeeId);
+            if (target == null) {
+                tx.commit();
+                return Optional.empty();
+            }
+
+            target.setPhotoPath(photoPath);
+            target.setUpdatedAt(updatedAt);
+
+            session.merge(target);
+            tx.commit();
+            return Optional.of(target);
+        } catch (RuntimeException ex) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            throw ex;
+        }
+    }
+
     public boolean deleteById(Long employeeId) {
         Transaction tx = null;
         try (Session session = sessionFactory.openSession()) {
@@ -150,6 +188,45 @@ public class EmployeesDao {
                     Long.class
             ).setParameter("employeeCode", employeeCode).uniqueResult();
             return count != null && count > 0;
+        }
+    }
+
+    public boolean existsByEmployeeIdentifier(String employeeIdentifier) {
+        if (employeeIdentifier == null || employeeIdentifier.trim().isEmpty()) {
+            return false;
+        }
+        String normalized = employeeIdentifier.trim();
+        if (existsByEmployeeCode(normalized)) {
+            return true;
+        }
+        try {
+            Long employeeId = Long.valueOf(normalized);
+            return findById(employeeId).isPresent();
+        } catch (NumberFormatException ex) {
+            return false;
+        }
+    }
+
+    public Integer resolveEmployeeIdentifier(String employeeIdentifier) {
+        if (employeeIdentifier == null || employeeIdentifier.trim().isEmpty()) {
+            return null;
+        }
+
+        String normalized = employeeIdentifier.trim();
+        Optional<Employees> byCode = findByEmployeeCode(normalized);
+        if (byCode.isPresent()) {
+            Long employeeId = byCode.get().getEmployeeId();
+            return employeeId == null ? null : employeeId.intValue();
+        }
+
+        try {
+            Long employeeId = Long.valueOf(normalized);
+            return findById(employeeId)
+                    .map(Employees::getEmployeeId)
+                    .map(Long::intValue)
+                    .orElse(null);
+        } catch (NumberFormatException ex) {
+            return null;
         }
     }
 
@@ -231,9 +308,14 @@ public class EmployeesDao {
 
         try (Session session = sessionFactory.openSession()) {
             StringBuilder hql = new StringBuilder("from Employees e where 1=1");
+            Integer employeeId = resolveSearchEmployeeId(employeeNumber);
 
             if (employeeNumber != null && !employeeNumber.isBlank()) {
-                hql.append(" and lower(e.employeeCode) like :employeeNumber");
+                hql.append(" and (lower(e.employeeCode) like :employeeNumber");
+                if (employeeId != null) {
+                    hql.append(" or e.employeeId = :employeeId");
+                }
+                hql.append(")");
             }
 
             if (nameKeyword != null && !nameKeyword.isBlank()) {
@@ -253,6 +335,9 @@ public class EmployeesDao {
 
             if (employeeNumber != null && !employeeNumber.isBlank()) {
                 query.setParameter("employeeNumber", "%" + employeeNumber.trim().toLowerCase() + "%");
+                if (employeeId != null) {
+                    query.setParameter("employeeId", employeeId.longValue());
+                }
             }
 
             if (nameKeyword != null && !nameKeyword.isBlank()) {
@@ -266,6 +351,28 @@ public class EmployeesDao {
             }
 
             return query.getResultList();
+        }
+    }
+
+    public Integer resolveSearchEmployeeId(String employeeNumber) {
+        if (employeeNumber == null || employeeNumber.isBlank()) {
+            return null;
+        }
+
+        String normalized = employeeNumber.trim();
+        String digits = normalized.replaceAll("\\D+", "");
+        if (!digits.isBlank()) {
+            try {
+                return Integer.valueOf(digits);
+            } catch (NumberFormatException ex) {
+                return null;
+            }
+        }
+
+        try {
+            return Integer.valueOf(normalized);
+        } catch (NumberFormatException ex) {
+            return null;
         }
     }
 

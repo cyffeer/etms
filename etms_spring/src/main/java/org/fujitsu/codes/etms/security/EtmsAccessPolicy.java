@@ -12,13 +12,23 @@ import org.springframework.stereotype.Component;
 public class EtmsAccessPolicy {
 
     private static final Set<UserRole> ALL_ROLES = EnumSet.allOf(UserRole.class);
+    private static final Set<UserRole> NO_ROLES = EnumSet.noneOf(UserRole.class);
     private static final Set<UserRole> MASTER_DATA_VIEW_ROLES = EnumSet.of(
             UserRole.ADMIN,
+            UserRole.HR,
+            UserRole.MANAGER);
+    private static final Set<UserRole> MASTER_DATA_WRITE_ROLES = EnumSet.of(UserRole.ADMIN);
+    private static final Set<UserRole> LEAVE_TYPE_VIEW_ROLES = EnumSet.of(
+            UserRole.ADMIN,
+            UserRole.HR,
             UserRole.MANAGER,
             UserRole.EMPLOYEE);
-    private static final Set<UserRole> MASTER_DATA_WRITE_ROLES = EnumSet.of(UserRole.ADMIN);
+    private static final Set<UserRole> NIHONGO_TRAVEL_MASTER_WRITE_ROLES = EnumSet.of(
+            UserRole.ADMIN,
+            UserRole.HR);
     private static final Set<UserRole> EMPLOYEE_VIEW_ROLES = EnumSet.of(
             UserRole.ADMIN,
+            UserRole.HR,
             UserRole.MANAGER,
             UserRole.EMPLOYEE);
     private static final Set<UserRole> EMPLOYEE_WRITE_ROLES = EnumSet.of(
@@ -52,6 +62,10 @@ public class EtmsAccessPolicy {
             UserRole.ADMIN,
             UserRole.HR,
             UserRole.MANAGER);
+    private static final Set<UserRole> SKILLS_READ_ROLES = EnumSet.of(
+            UserRole.ADMIN,
+            UserRole.HR,
+            UserRole.MANAGER);
 
     private static final List<String> MASTER_DATA_PREFIXES = List.of(
             "/api/departments",
@@ -78,11 +92,27 @@ public class EtmsAccessPolicy {
         }
 
         if (requestUri.startsWith("/api/dashboard")) {
-            return ALL_ROLES;
+            return EnumSet.of(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER);
+        }
+
+        if (requestUri.startsWith("/api/notifications")) {
+            return EnumSet.of(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER);
         }
 
         if (requestUri.startsWith("/api/audit-logs")) {
+            return EnumSet.of(UserRole.ADMIN);
+        }
+
+        if (requestUri.startsWith("/api/reports")) {
             return EnumSet.of(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER);
+        }
+
+        if (requestUri.startsWith("/api/np-types") || requestUri.startsWith("/api/visa-types")) {
+            return isReadMethod(method) ? MASTER_DATA_VIEW_ROLES : NIHONGO_TRAVEL_MASTER_WRITE_ROLES;
+        }
+
+        if (requestUri.startsWith("/api/leave-types")) {
+            return isReadMethod(method) ? LEAVE_TYPE_VIEW_ROLES : MASTER_DATA_WRITE_ROLES;
         }
 
         if (matchesAnyPrefix(requestUri, MASTER_DATA_PREFIXES)) {
@@ -90,6 +120,27 @@ public class EtmsAccessPolicy {
         }
 
         if (requestUri.startsWith("/api/employees")) {
+            if (requestUri.equals("/api/employees/me")) {
+                return switch (normalizeMethod(method)) {
+                    case "GET", "HEAD", "PUT", "PATCH" -> EnumSet.of(UserRole.EMPLOYEE);
+                    default -> NO_ROLES;
+                };
+            }
+            if (requestUri.matches("^/api/employees/\\d+(/photo)?$")) {
+                return switch (normalizeMethod(method)) {
+                    case "GET", "HEAD", "POST" -> EMPLOYEE_VIEW_ROLES;
+                    case "PUT", "PATCH", "DELETE" -> EnumSet.of(UserRole.ADMIN);
+                    default -> ALL_ROLES;
+                };
+            }
+            if (requestUri.endsWith("/search") || requestUri.equals("/api/employees")) {
+                return switch (normalizeMethod(method)) {
+                    case "GET", "HEAD" -> EnumSet.of(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER);
+                    case "POST" -> EMPLOYEE_WRITE_ROLES;
+                    case "PUT", "PATCH", "DELETE" -> EnumSet.of(UserRole.ADMIN);
+                    default -> ALL_ROLES;
+                };
+            }
             return switch (normalizeMethod(method)) {
                 case "GET", "HEAD" -> EMPLOYEE_VIEW_ROLES;
                 case "POST" -> EMPLOYEE_WRITE_ROLES;
@@ -99,8 +150,11 @@ public class EtmsAccessPolicy {
         }
 
         if (requestUri.startsWith("/api/dept-members")) {
+            if (requestUri.contains("/employee/")) {
+                return EMPLOYEE_VIEW_ROLES;
+            }
             return switch (normalizeMethod(method)) {
-                case "GET", "HEAD" -> EMPLOYEE_VIEW_ROLES;
+                case "GET", "HEAD" -> EnumSet.of(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER);
                 case "POST", "PUT", "PATCH" -> EnumSet.of(UserRole.ADMIN, UserRole.MANAGER);
                 case "DELETE" -> EnumSet.of(UserRole.ADMIN);
                 default -> ALL_ROLES;
@@ -128,11 +182,14 @@ public class EtmsAccessPolicy {
         }
 
         if (requestUri.startsWith("/api/skills-inventory")) {
-            return isReadMethod(method) ? ALL_ROLES : SKILLS_WRITE_ROLES;
+            if (requestUri.contains("/employee/")) {
+                return ALL_ROLES;
+            }
+            return isReadMethod(method) ? SKILLS_READ_ROLES : SKILLS_WRITE_ROLES;
         }
 
         if (requestUri.startsWith("/api/employee-events")) {
-            return isReadMethod(method) ? ALL_ROLES : EnumSet.of(UserRole.ADMIN, UserRole.HR, UserRole.MANAGER);
+            return isReadMethod(method) ? ALL_ROLES : EnumSet.of(UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE);
         }
 
         if (requestUri.startsWith("/api/passport-info") || requestUri.startsWith("/api/visa-info")) {
@@ -146,7 +203,7 @@ public class EtmsAccessPolicy {
             return isReadMethod(method) ? ALL_ROLES : TRAINING_WRITE_ROLES;
         }
 
-        return ALL_ROLES;
+        return NO_ROLES;
     }
 
     private boolean matchesAnyPrefix(String requestUri, List<String> prefixes) {

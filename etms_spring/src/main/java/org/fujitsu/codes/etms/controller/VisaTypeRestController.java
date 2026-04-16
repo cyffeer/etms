@@ -10,6 +10,7 @@ import org.fujitsu.codes.etms.model.data.VisaType;
 import org.fujitsu.codes.etms.model.dto.VisaTypeRequest;
 import org.fujitsu.codes.etms.model.dto.VisaTypeResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +33,7 @@ public class VisaTypeRestController {
     }
 
     @GetMapping("/{visaTypeId}")
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
     public ResponseEntity<?> getById(@PathVariable Long visaTypeId) {
         return visaTypeDao.findById(visaTypeId)
                 .<ResponseEntity<?>>map(item -> ResponseEntity.ok(toResponse(item)))
@@ -39,6 +41,7 @@ public class VisaTypeRestController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
     public ResponseEntity<List<VisaTypeResponse>> getAll() {
         List<VisaTypeResponse> data = visaTypeDao.findAll().stream()
                 .map(this::toResponse)
@@ -47,6 +50,7 @@ public class VisaTypeRestController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public ResponseEntity<?> create(@Valid @RequestBody VisaTypeRequest request) {
         normalize(request);
 
@@ -65,6 +69,7 @@ public class VisaTypeRestController {
     }
 
     @PutMapping("/{visaTypeId}")
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public ResponseEntity<?> update(@PathVariable Long visaTypeId, @Valid @RequestBody VisaTypeRequest request) {
         normalize(request);
 
@@ -85,6 +90,7 @@ public class VisaTypeRestController {
     }
 
     @DeleteMapping("/{visaTypeId}")
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public ResponseEntity<?> delete(@PathVariable Long visaTypeId) {
         boolean deleted = visaTypeDao.deleteById(visaTypeId);
         if (!deleted) {
