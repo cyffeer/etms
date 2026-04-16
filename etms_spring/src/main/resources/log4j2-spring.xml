@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="LOG_DIR">C:/Training/Projects/etms/etms_spring/logs</Property>
+        <Property name="LOG_FILE">${LOG_DIR}/etms-app.log</Property>
+
+        <!-- Short/clean console -->
+        <Property name="CONSOLE_PATTERN">%d{HH:mm:ss.SSS} %-5level %c{1} - %msg%n</Property>
+
+        <!-- Detailed file log -->
+        <Property name="FILE_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] [reqId=%X{requestId:-N/A}] %c{1} - %msg%n</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${CONSOLE_PATTERN}"/>
+        </Console>
+
+        <RollingFile name="RollingFile"
+                     fileName="${LOG_FILE}"
+                     filePattern="${LOG_DIR}/etms-app-%d{yyyy-MM-dd}-%i.log.gz"
+                     createOnDemand="true">
+            <PatternLayout pattern="${FILE_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <!-- Reduce framework noise -->
+        <Logger name="org.hibernate.SQL" level="off"/>
+        <Logger name="org.hibernate.orm.jdbc.bind" level="off"/>
+        <Logger name="org.springframework.web" level="info"/>
+
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
