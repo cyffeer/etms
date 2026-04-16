@@ -64,4 +64,20 @@ class TestDepartmentDao {
 
         assertEquals(3L, result);
     }
+
+    @Test
+    void searchShouldNormalizeDepartmentCodeFormats() {
+        Department department = org.mockito.Mockito.mock(Department.class);
+
+        when(sessionFactory.openSession()).thenReturn(session);
+        when(session.createQuery(anyString(), eq(Department.class))).thenReturn(query);
+        when(query.setParameter(eq("keyword"), anyString())).thenReturn(query);
+        when(query.setParameter(eq("departmentCode"), eq("d001"))).thenReturn(query);
+        when(query.getResultList()).thenReturn(List.of(department));
+
+        List<Department> result = departmentDao.search("D001");
+
+        assertEquals(1, result.size());
+        verify(query).setParameter("departmentCode", "d001");
+    }
 }

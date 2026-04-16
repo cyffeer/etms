@@ -4,11 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-
 import org.fujitsu.codes.etms.model.dao.EmployeesDao;
 import org.fujitsu.codes.etms.model.data.Employees;
 import org.hibernate.Session;
@@ -63,5 +63,32 @@ class TestEmployeesDao {
         long result = employeesDao.countAll();
 
         assertEquals(2L, result);
+    }
+
+    @Test
+    void resolveEmployeeIdentifierShouldAcceptFormattedCode() {
+        Employees employee = org.mockito.Mockito.mock(Employees.class);
+        when(employee.getEmployeeId()).thenReturn(7L);
+
+        when(sessionFactory.openSession()).thenReturn(session);
+        when(session.createQuery(anyString(), eq(Employees.class))).thenReturn(query);
+        when(query.setParameter(anyString(), anyString())).thenReturn(query);
+        when(query.uniqueResultOptional()).thenReturn(java.util.Optional.of(employee));
+
+        assertEquals(7, employeesDao.resolveEmployeeIdentifier("EMP_007"));
+    }
+
+    @Test
+    void resolveEmployeeIdentifierShouldAcceptRawId() {
+        Employees employee = org.mockito.Mockito.mock(Employees.class);
+        when(employee.getEmployeeId()).thenReturn(7L);
+
+        when(sessionFactory.openSession()).thenReturn(session);
+        lenient().when(session.createQuery(anyString(), eq(Employees.class))).thenReturn(query);
+        lenient().when(query.setParameter(anyString(), anyString())).thenReturn(query);
+        lenient().when(query.uniqueResultOptional()).thenReturn(java.util.Optional.empty());
+        when(session.find(Employees.class, 7L)).thenReturn(employee);
+
+        assertEquals(7, employeesDao.resolveEmployeeIdentifier("7"));
     }
 }
