@@ -25,21 +25,27 @@
     <div class="etms-ribbon__title">{{ currentPageTitle }}</div>
   </section>
 
+  <div *ngIf="accessDeniedMessage" class="alert alert-warning mx-3 mt-3 mb-0" role="alert">
+    {{ accessDeniedMessage }}
+  </div>
+
   <div class="etms-body">
     <aside class="etms-sidebar" [class.etms-sidebar--open]="mobileNavOpen">
-      <div class="etms-sidebar-heading">Modules</div>
 
-      <nav class="nav flex-column gap-2">
-        <a
-          *ngFor="let item of navItems"
-          [routerLink]="item.path"
-          routerLinkActive="active"
-          class="etms-nav-link"
-          (click)="closeMobileNav()"
-        >
-          <span class="etms-nav-label">{{ item.label }}</span>
-        </a>
-      </nav>
+      <div *ngFor="let section of navSections" class="mb-3">
+        <div class="etms-sidebar-heading">{{ section.title }}</div>
+        <nav class="nav flex-column gap-2">
+          <a
+            *ngFor="let item of section.items"
+            [routerLink]="item.path"
+            routerLinkActive="active"
+            class="etms-nav-link"
+            (click)="closeMobileNav()"
+          >
+            <span class="etms-nav-label">{{ item.label }}</span>
+          </a>
+        </nav>
+      </div>
     </aside>
 
     <button
