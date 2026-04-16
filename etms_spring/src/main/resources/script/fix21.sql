@@ -1,0 +1,2 @@
+ALTER TABLE IF EXISTS employees
+    ADD COLUMN IF NOT EXISTS photo_path VARCHAR(255);

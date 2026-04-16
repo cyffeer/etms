@@ -7,19 +7,20 @@ ALTER TABLE login
 UPDATE login
 SET role = CASE lower(user_id)
     WHEN 'admin' THEN 'ADMIN'
-    WHEN 'alice' THEN 'HR'
-    WHEN 'brian' THEN 'MANAGER'
+    WHEN 'hr' THEN 'HR'
+    WHEN 'manager1' THEN 'MANAGER'
+    WHEN 'manager2' THEN 'MANAGER'
     ELSE COALESCE(role, 'EMPLOYEE')
 END
 WHERE role IS NULL
    OR trim(role) = '';
 
 INSERT INTO login (user_id, password, role)
-SELECT 'employee', 'employee123', 'EMPLOYEE'
+SELECT '1005', 'emp123', 'EMPLOYEE'
 WHERE NOT EXISTS (
     SELECT 1
     FROM login
-    WHERE lower(user_id) = 'employee'
+    WHERE lower(user_id) = '1005'
 );
 
 ALTER TABLE login

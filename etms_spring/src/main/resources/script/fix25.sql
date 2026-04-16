@@ -1,0 +1,2 @@
+ALTER TABLE IF EXISTS trng_info
+    ADD COLUMN IF NOT EXISTS certificate_path VARCHAR(255);

@@ -66,54 +66,6 @@ UPDATE trng_hist
 SET created_at = COALESCE(created_at, CURRENT_TIMESTAMP),
     updated_at = COALESCE(updated_at, CURRENT_TIMESTAMP);
 
-ALTER TABLE IF EXISTS trng_info
-    ADD COLUMN IF NOT EXISTS trng_code VARCHAR(30),
-    ADD COLUMN IF NOT EXISTS trng_type_code VARCHAR(30),
-    ADD COLUMN IF NOT EXISTS vendor_code VARCHAR(30),
-    ADD COLUMN IF NOT EXISTS start_date DATE,
-    ADD COLUMN IF NOT EXISTS end_date DATE,
-    ADD COLUMN IF NOT EXISTS location VARCHAR(150),
-    ADD COLUMN IF NOT EXISTS is_active BOOLEAN,
-    ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITHOUT TIME ZONE,
-    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITHOUT TIME ZONE;
-
-UPDATE trng_info ti
-SET trng_code = COALESCE(ti.trng_code, 'TRNG-' || ti.trng_id),
-    trng_type_code = COALESCE(
-        ti.trng_type_code,
-        (SELECT tt.trng_type_nm FROM trng_type tt WHERE tt.trng_type_id = ti.trng_type_id)
-    ),
-    vendor_code = COALESCE(
-        ti.vendor_code,
-        (SELECT COALESCE(vi.vendor_code, vi.vendor_nm) FROM vendor_info vi WHERE vi.vendor_id = ti.vendor_id)
-    ),
-    is_active = COALESCE(ti.is_active, TRUE),
-    created_at = COALESCE(ti.created_at, CURRENT_TIMESTAMP),
-    updated_at = COALESCE(ti.updated_at, CURRENT_TIMESTAMP);
-
-ALTER TABLE IF EXISTS np_test_hist
-    ADD COLUMN IF NOT EXISTS np_lvl_info_code VARCHAR(30),
-    ADD COLUMN IF NOT EXISTS test_center VARCHAR(150),
-    ADD COLUMN IF NOT EXISTS test_level VARCHAR(50),
-    ADD COLUMN IF NOT EXISTS score INTEGER,
-    ADD COLUMN IF NOT EXISTS passed BOOLEAN,
-    ADD COLUMN IF NOT EXISTS remarks VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITHOUT TIME ZONE,
-    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITHOUT TIME ZONE;
-
-UPDATE np_test_hist nth
-SET np_lvl_info_code = COALESCE(
-        nth.np_lvl_info_code,
-        (SELECT nli.np_lvl_info_code FROM np_lvl_info nli WHERE nli.np_lvl_id = nth.np_lvl_id)
-    ),
-    test_level = COALESCE(
-        nth.test_level,
-        (SELECT nli.np_lvl_info_name FROM np_lvl_info nli WHERE nli.np_lvl_id = nth.np_lvl_id)
-    ),
-    passed = COALESCE(nth.passed, FALSE),
-    created_at = COALESCE(nth.created_at, CURRENT_TIMESTAMP),
-    updated_at = COALESCE(nth.updated_at, CURRENT_TIMESTAMP);
-
 ALTER TABLE IF EXISTS vendor_type
     ADD COLUMN IF NOT EXISTS vendor_type_code VARCHAR(30),
     ADD COLUMN IF NOT EXISTS is_active BOOLEAN,
@@ -144,6 +96,31 @@ SET vendor_code = COALESCE(vendor_code, vendor_nm),
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_vendor_info_code ON vendor_info (vendor_code);
 
+ALTER TABLE IF EXISTS trng_info
+    ADD COLUMN IF NOT EXISTS trng_code VARCHAR(30),
+    ADD COLUMN IF NOT EXISTS trng_type_code VARCHAR(30),
+    ADD COLUMN IF NOT EXISTS vendor_code VARCHAR(30),
+    ADD COLUMN IF NOT EXISTS start_date DATE,
+    ADD COLUMN IF NOT EXISTS end_date DATE,
+    ADD COLUMN IF NOT EXISTS location VARCHAR(150),
+    ADD COLUMN IF NOT EXISTS is_active BOOLEAN,
+    ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITHOUT TIME ZONE,
+    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITHOUT TIME ZONE;
+
+UPDATE trng_info ti
+SET trng_code = COALESCE(ti.trng_code, 'TRNG-' || ti.trng_id),
+    trng_type_code = COALESCE(
+        ti.trng_type_code,
+        (SELECT tt.trng_type_nm FROM trng_type tt WHERE tt.trng_type_id = ti.trng_type_id)
+    ),
+    vendor_code = COALESCE(
+        ti.vendor_code,
+        (SELECT COALESCE(vi.vendor_code, vi.vendor_nm) FROM vendor_info vi WHERE vi.vendor_id = ti.vendor_id)
+    ),
+    is_active = COALESCE(ti.is_active, TRUE),
+    created_at = COALESCE(ti.created_at, CURRENT_TIMESTAMP),
+    updated_at = COALESCE(ti.updated_at, CURRENT_TIMESTAMP);
+
 ALTER TABLE IF EXISTS np_type
     ADD COLUMN IF NOT EXISTS np_type_code VARCHAR(30),
     ADD COLUMN IF NOT EXISTS is_active BOOLEAN,
@@ -157,6 +134,29 @@ SET np_type_code = COALESCE(np_type_code, np_type_nm),
     updated_at = COALESCE(updated_at, CURRENT_TIMESTAMP);
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_np_type_code ON np_type (np_type_code);
+
+ALTER TABLE IF EXISTS np_test_hist
+    ADD COLUMN IF NOT EXISTS np_lvl_info_code VARCHAR(30),
+    ADD COLUMN IF NOT EXISTS test_center VARCHAR(150),
+    ADD COLUMN IF NOT EXISTS test_level VARCHAR(50),
+    ADD COLUMN IF NOT EXISTS score INTEGER,
+    ADD COLUMN IF NOT EXISTS passed BOOLEAN,
+    ADD COLUMN IF NOT EXISTS remarks VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITHOUT TIME ZONE,
+    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITHOUT TIME ZONE;
+
+UPDATE np_test_hist nth
+SET np_lvl_info_code = COALESCE(
+        nth.np_lvl_info_code,
+        (SELECT nli.np_lvl_info_code FROM np_lvl_info nli WHERE nli.np_lvl_id = nth.np_lvl_id)
+    ),
+    test_level = COALESCE(
+        nth.test_level,
+        (SELECT nli.np_lvl_info_name FROM np_lvl_info nli WHERE nli.np_lvl_id = nth.np_lvl_id)
+    ),
+    passed = COALESCE(nth.passed, FALSE),
+    created_at = COALESCE(nth.created_at, CURRENT_TIMESTAMP),
+    updated_at = COALESCE(nth.updated_at, CURRENT_TIMESTAMP);
 
 ALTER TABLE IF EXISTS visa_type
     ADD COLUMN IF NOT EXISTS visa_type_code VARCHAR(30),
